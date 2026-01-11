@@ -27,7 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($check->rowCount() == 0) {
             $current_time = date('H:i:s');
             // Determine Status (Late if after 10:00 AM)
-            $status = (strtotime($current_time) > strtotime('10:00:00')) ? 'Late' : 'Present';
+            // Fetch employee specific shift if available, else default
+            $emp_q = $conn->prepare("SELECT shift_start_time FROM employees WHERE id = :uid");
+            $emp_q->execute(['uid' => $user_id]);
+            $shift_start = $emp_q->fetchColumn() ?: '10:00:00';
+
+            $status = (strtotime($current_time) > strtotime($shift_start)) ? 'Late' : 'Present';
 
             $sql = "INSERT INTO attendance (employee_id, date, clock_in, status, clock_in_lat, clock_in_lng, clock_in_address) 
                     VALUES (:uid, :date, :time, :status, :lat, :lng, :addr)";
@@ -95,9 +100,6 @@ if ($today_record) {
     }
 }
 
-<?php
-// ... (Previous Code for Check In/Out Logic is fine, just updating History Fetching part) ...
-
 // 3. Filter History
 $filter_month = $_GET['month'] ?? date('m');
 $filter_year = $_GET['year'] ?? date('Y');
@@ -122,9 +124,130 @@ foreach ($history as $h) {
 }
 ?>
 
-    <!-- ... (Hero Section Remains) ... -->
-    <!-- Insert Filter Form before Table -->
+<style>
+    .attendance-hero {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        text-align: center;
+        margin-bottom: 2rem;
+    }
     
+    .clock-display {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-family: monospace;
+    }
+    
+    .date-display {
+        color: #64748b;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .action-btn {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: none;
+        font-size: 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin: 0 auto;
+        color: white;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+    }
+    
+    .btn-check-in {
+        background: linear-gradient(135deg, hsl(150, 60%, 50%), hsl(160, 60%, 40%));
+        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-check-out {
+        background: linear-gradient(135deg, hsl(340, 70%, 50%), hsl(350, 70%, 40%));
+        box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);
+    }
+    
+    .btn-completed {
+        background: #94a3b8;
+        cursor: not-allowed;
+    }
+    
+    .action-btn:active {
+        transform: scale(0.95);
+    }
+    
+    .location-info {
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #64748b;
+        min-height: 20px;
+    }
+    
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(360deg);}
+    }
+</style>
+
+<div class="page-content">
+    <?= $message ?>
+
+    <div class="attendance-hero">
+        <div class="clock-display" id="liveClock">00:00:00</div>
+        <div class="date-display"><?= date('l, d F Y') ?></div>
+        
+        <form method="POST" id="attendanceForm">
+            <input type="hidden" name="action" id="actionInput">
+            <input type="hidden" name="latitude" id="latInput">
+            <input type="hidden" name="longitude" id="lngInput">
+            <input type="hidden" name="address" id="addrInput">
+            
+            <?php if (!$has_checked_in): ?>
+                <button type="button" class="action-btn btn-check-in" onclick="getLocationAndSubmit('clock_in')">
+                    <i data-lucide="fingerprint" style="width:48px; height:48px;"></i>
+                    Check In
+                </button>
+            <?php elseif (!$has_checked_out): ?>
+                 <button type="button" class="action-btn btn-check-out" onclick="getLocationAndSubmit('clock_out')">
+                    <i data-lucide="log-out" style="width:48px; height:48px;"></i>
+                    Check Out
+                </button>
+                <p style="margin-top:1rem; color:#10b981; font-weight:500;">
+                    Clocked In at: <?= date('h:i A', strtotime($today_record['clock_in'])) ?>
+                </p>
+            <?php else: ?>
+                <button type="button" class="action-btn btn-completed" disabled>
+                    <i data-lucide="check-circle" style="width:48px; height:48px;"></i>
+                    Done
+                </button>
+                <div style="margin-top:1rem; color:#64748b;">
+                    <p>In: <?= date('h:i A', strtotime($today_record['clock_in'])) ?></p>
+                    <p>Out: <?= date('h:i A', strtotime($today_record['clock_out'])) ?></p>
+                    <p>Total: <?= $today_record['total_hours'] ?> Hrs</p>
+                </div>
+            <?php endif; ?>
+        </form>
+        
+        <div class="location-info" id="locationStatus">
+            <i data-lucide="map-pin" style="width:14px; vertical-align:middle;"></i> Ready to capture location
+        </div>
+    </div>
+
+    <!-- Stats & Filters -->
     <div class="card" style="margin-top: 2rem;">
         <div class="card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <h3>My Attendance History</h3>
