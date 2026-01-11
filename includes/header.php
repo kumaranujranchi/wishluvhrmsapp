@@ -34,25 +34,21 @@ if (!isset($_SESSION['user_id'])) {
         <div class="main-content">
             <!-- Header Included Here -->
             <header class="header glass-panel">
-                <div class="search-bar">
-                    <i data-lucide="search" class="icon" style="margin-right:0.75rem; color: #9ca3af;"></i>
-                    <input type="text" placeholder="Search in HRMS...">
-                    <span
-                        style="font-size:0.75rem; background:#f3f4f6; padding:0.2rem 0.5rem; border-radius:4px; color:#6b7280;">CTRL
-                        + K</span>
+                <div style="flex: 1;">
+                    <h2 style="margin:0; font-size:1.25rem; color:#1e293b;">Welcome,
+                        <?= htmlspecialchars($_SESSION['first_name'] ?? 'User') ?></h2>
+                    <p style="margin:0; font-size:0.85rem; color:#64748b;"><?= date('l, d F Y') ?></p>
                 </div>
 
                 <div class="header-actions">
-                    <button class="action-btn" title="Full Screen">
-                        <i data-lucide="maximize" class="icon"></i>
-                    </button>
-                    <button class="action-btn" title="Messages">
-                        <i data-lucide="message-square" class="icon"></i>
-                        <span class="badge">3</span>
-                    </button>
                     <button class="action-btn" title="Notifications">
                         <i data-lucide="bell" class="icon"></i>
-                        <span class="badge warning">5</span>
                     </button>
+                    <div class="user-mini-profile">
+                        <div
+                            style="width:35px; height:35px; background:linear-gradient(135deg, #6366f1, #a855f7); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.9rem;">
+                            <?= strtoupper(substr($_SESSION['first_name'] ?? 'U', 0, 1)) ?>
+                        </div>
+                    </div>
                 </div>
             </header>
