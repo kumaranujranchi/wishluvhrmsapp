@@ -1,6 +1,7 @@
 <?php
 // Database Configuration
-$host = 'hrms.wishluvbuildcon.com'; // Using the domain as host for remote connection
+// When running on the same server (Hostinger shared hosting), use 'localhost'
+$host = 'localhost';
 $db_name = 'u743570205_wishluvhrmsapp';
 $username = 'u743570205_wishluvhrmsapp';
 $password = 'Anuj@2025@2026';
@@ -14,8 +15,6 @@ try {
     // Optional: Set default fetch mode to associative array
     $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-    // Uncomment for debugging connection
-    // echo "Connected successfully"; 
 } catch (PDOException $e) {
     // In production, log this instead of displaying
     die("Connection failed: " . $e->getMessage());
