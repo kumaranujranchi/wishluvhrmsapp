@@ -12,12 +12,13 @@ $employees = $conn->query($sql)->fetchAll();
 ?>
 
 <div class="page-content">
-    <div class="page-header">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h2 class="page-title">Employees</h2>
             <p class="page-subtitle">Manage all your employees here.</p>
         </div>
-        <a href="add_employee.php" class="btn-primary">
+        <a href="add_employee.php" class="btn-primary"
+            style="display: flex; align-items: center; text-decoration: none;">
             <i data-lucide="plus" style="width:18px; margin-right:8px;"></i> Add Employee
         </a>
     </div>
