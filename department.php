@@ -83,12 +83,13 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
                     </div>
 
                     <div class="floating-card-icon">
-                        <i data-lucide="building-2" style="width:32px; height:32px;"></i>
+                        <?= strtoupper(substr($dept['name'], 0, 1)) ?>
                     </div>
 
                     <h3 class="floating-card-title"><?= htmlspecialchars($dept['name']) ?></h3>
                     <p class="floating-card-desc">
-                        <?= htmlspecialchars($dept['description'] ?? 'No description provided.') ?></p>
+                        <?= htmlspecialchars($dept['description'] ?? 'No description provided.') ?>
+                    </p>
                 </div>
             <?php endforeach; ?>
         </div>
