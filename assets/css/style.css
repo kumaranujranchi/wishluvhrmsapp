@@ -552,17 +552,23 @@ body {
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: var(--radius-md);
-    border: 1px solid #e5e7eb;
-    background-color: white;
+    border: 1.5px solid #cbd5e1; /* Darker border */
+    background-color: #f8fafc; /* Slight off-white background */
     font-family: inherit;
     font-size: 0.95rem;
+    color: hsl(var(--color-text-main)); /* Ensure text is dark */
     transition: all 0.2s;
+}
+
+.form-control:hover {
+    border-color: #94a3b8; /* Even darker on hover */
 }
 
 .form-control:focus {
     outline: none;
     border-color: hsl(var(--color-primary));
-    box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.1);
+    background-color: white;
+    box-shadow: 0 0 0 4px hsl(var(--color-primary) / 0.1);
 }
 
 /* Tables */

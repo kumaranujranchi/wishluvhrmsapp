@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HRMS Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRMS Admin</title>
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+?>
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+<!-- Main CSS -->
+<link rel="stylesheet" href="assets/css/style.css">
 
-    <!-- Lucide Icons (Script for development/demo purposes) -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+<!-- Lucide Icons (Script for development/demo purposes) -->
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
