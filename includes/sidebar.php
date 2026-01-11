@@ -94,11 +94,21 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Leaving Us</span>
             </a>
 
+            <a href="leave_manager_approval.php" class="nav-item <?php echo isActive('leave_manager_approval'); ?>">
+                    <i data-lucide="users" class="icon"></i>
+                    <span>Team Requests</span>
+                </a>
+
         <?php else: ?>
             <!-- ADMIN MENU (Existing) -->
             <a href="index.php" class="nav-item <?php echo isActive('index'); ?>">
                 <i data-lucide="layout-dashboard" class="icon"></i>
                 <span>Dashboard</span>
+                </a>
+
+                <a href="leave_admin.php" class="nav-item <?php echo isActive('leave_admin'); ?>">
+                    <i data-lucide="shield-check" class="icon"></i>
+                    <span>Leave Approvals</span>
             </a>
 
             <!-- Employee Onboarding Group -->
