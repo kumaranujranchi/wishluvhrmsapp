@@ -56,11 +56,11 @@ body {
 
 .main-content {
     flex: 1;
-    margin-left: 260px;
+    margin-left: 280px; /* Match new Sidebar Width */
     display: flex;
     flex-direction: column;
     position: relative;
-    width: calc(100% - 260px);
+    width: calc(100% - 280px); /* Adjust width calc as well */
 }
 
 .page-content {
