@@ -3,6 +3,12 @@
 require_once 'config/db.php';
 include 'includes/header.php';
 
+// Redirect if Employee
+if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Employee') {
+    header("Location: employee_dashboard.php");
+    exit;
+}
+
 // --- STATS CALCULATION ---
 
 // 1. Total Employees

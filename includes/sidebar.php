@@ -32,60 +32,125 @@ $userInitials = strtoupper(substr($userName, 0, 2));
     </div>
 
     <nav class="sidebar-nav">
-        <a href="index.php" class="nav-item <?php echo isActive('index'); ?>">
-            <i data-lucide="layout-dashboard" class="icon"></i>
-            <span>Dashboard</span>
-        </a>
+        <?php if ($userRole === 'Employee'): ?>
+            <!-- EMPLOYEE MENU -->
+            <a href="employee_dashboard.php" class="nav-item <?php echo isActive('employee_dashboard'); ?>">
+                <i data-lucide="layout-dashboard" class="icon"></i>
+                <span>Dashboard</span>
+            </a>
 
-        <!-- Employee Onboarding Group -->
-        <div class="nav-group">
-            <?php
-            $onboardingPages = ['designation', 'department', 'add_employee'];
-            $isOpen = isGroupOpen($onboardingPages);
-            ?>
-            <button class="nav-item dropdown-btn" onclick="toggleSubNav('employeeSubNav', this)">
-                <div style="display:flex; align-items:center; gap:0.85rem;">
-                    <i data-lucide="users" class="icon"></i>
-                    <span>Onboarding</span>
+            <a href="attendance_view.php" class="nav-item <?php echo isActive('attendance_view'); ?>">
+                <i data-lucide="calendar-check" class="icon"></i>
+                <span>Attendance</span>
+            </a>
+
+            <a href="leave.php" class="nav-item <?php echo isActive('leave'); ?>">
+                <i data-lucide="coffee" class="icon"></i>
+                <span>Leave</span>
+            </a>
+
+            <a href="holiday.php" class="nav-item <?php echo isActive('holiday'); ?>">
+                <i data-lucide="palmtree" class="icon"></i>
+                <span>Holiday</span>
+            </a>
+
+            <a href="notice.php" class="nav-item <?php echo isActive('notice'); ?>">
+                <i data-lucide="bell" class="icon"></i>
+                <span>Notice</span>
+            </a>
+
+            <!-- Policy Dropdown -->
+            <div class="nav-group">
+                <?php
+                $policyPages = ['policy_hr', 'policy_leave', 'policy_dress'];
+                $isPolicyOpen = isGroupOpen($policyPages);
+                ?>
+                <button class="nav-item dropdown-btn" onclick="toggleSubNav('policySubNav', this)">
+                    <div style="display:flex; align-items:center; gap:0.85rem;">
+                        <i data-lucide="book-open" class="icon"></i>
+                        <span>Policy</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="icon chevron-icon"
+                        style="transition: transform 0.2s; transform: <?= $isPolicyOpen ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                </button>
+                <div id="policySubNav" class="sub-nav <?= $isPolicyOpen ?>">
+                    <a href="policy_hr.php" class="sub-nav-item <?php echo isActive('policy_hr'); ?>">
+                        <i data-lucide="file-text" class="icon" style="width:16px;height:16px;"></i>
+                        <span>HR Policy</span>
+                    </a>
+                    <a href="policy_leave.php" class="sub-nav-item <?php echo isActive('policy_leave'); ?>">
+                        <i data-lucide="file-text" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Leave Policy</span>
+                    </a>
+                    <a href="policy_dress.php" class="sub-nav-item <?php echo isActive('policy_dress'); ?>">
+                        <i data-lucide="shirt" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Dress Code</span>
+                    </a>
                 </div>
-                <i data-lucide="chevron-right" class="icon chevron-icon"
-                    style="transition: transform 0.2s; transform: <?= $isOpen ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
-            </button>
-            <div id="employeeSubNav" class="sub-nav <?= $isOpen ?>">
-                <a href="designation.php" class="sub-nav-item <?php echo isActive('designation'); ?>">
-                    <i data-lucide="briefcase" class="icon" style="width:16px;height:16px;"></i>
-                    <span>Designation</span>
-                </a>
-                <a href="department.php" class="sub-nav-item <?php echo isActive('department'); ?>">
-                    <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
-                    <span>Department</span>
-                </a>
-                <a href="add_employee.php" class="sub-nav-item <?php echo isActive('add_employee'); ?>">
-                    <i data-lucide="user-plus" class="icon" style="width:16px;height:16px;"></i>
-                    <span>Add Employee</span>
-                </a>
             </div>
-        </div>
 
-        <a href="attendance.php" class="nav-item <?php echo isActive('attendance'); ?>">
-            <i data-lucide="calendar-check" class="icon"></i>
-            <span>Attendance</span>
-        </a>
+            <a href="resignation.php" class="nav-item <?php echo isActive('resignation'); ?>">
+                <i data-lucide="log-out" class="icon"></i>
+                <span>Leaving Us</span>
+            </a>
 
-        <a href="#" class="nav-item">
-            <i data-lucide="coffee" class="icon"></i>
-            <span>Leaves</span>
-        </a>
+        <?php else: ?>
+            <!-- ADMIN MENU (Existing) -->
+            <a href="index.php" class="nav-item <?php echo isActive('index'); ?>">
+                <i data-lucide="layout-dashboard" class="icon"></i>
+                <span>Dashboard</span>
+            </a>
 
-        <a href="#" class="nav-item">
-            <i data-lucide="palmtree" class="icon"></i>
-            <span>Holidays</span>
-        </a>
+            <!-- Employee Onboarding Group -->
+            <div class="nav-group">
+                <?php
+                $onboardingPages = ['designation', 'department', 'add_employee'];
+                $isOpen = isGroupOpen($onboardingPages);
+                ?>
+                <button class="nav-item dropdown-btn" onclick="toggleSubNav('employeeSubNav', this)">
+                    <div style="display:flex; align-items:center; gap:0.85rem;">
+                        <i data-lucide="users" class="icon"></i>
+                        <span>Onboarding</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="icon chevron-icon"
+                        style="transition: transform 0.2s; transform: <?= $isOpen ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                </button>
+                <div id="employeeSubNav" class="sub-nav <?= $isOpen ?>">
+                    <a href="designation.php" class="sub-nav-item <?php echo isActive('designation'); ?>">
+                        <i data-lucide="briefcase" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Designation</span>
+                    </a>
+                    <a href="department.php" class="sub-nav-item <?php echo isActive('department'); ?>">
+                        <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Department</span>
+                    </a>
+                    <a href="add_employee.php" class="sub-nav-item <?php echo isActive('add_employee'); ?>">
+                        <i data-lucide="user-plus" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Add Employee</span>
+                    </a>
+                </div>
+            </div>
 
-        <a href="#" class="nav-item">
-            <i data-lucide="banknote" class="icon"></i>
-            <span>Payroll</span>
-        </a>
+            <a href="attendance.php" class="nav-item <?php echo isActive('attendance'); ?>">
+                <i data-lucide="calendar-check" class="icon"></i>
+                <span>Attendance</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i data-lucide="coffee" class="icon"></i>
+                <span>Leaves</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i data-lucide="palmtree" class="icon"></i>
+                <span>Holidays</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <i data-lucide="banknote" class="icon"></i>
+                <span>Payroll</span>
+            </a>
+        <?php endif; ?>
     </nav>
 
     <div class="sidebar-footer">
