@@ -124,9 +124,10 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                         <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
                         <span>Department</span>
                     </a>
-                    <a href="add_employee.php" class="sub-nav-item <?php echo isActive('add_employee'); ?>">
-                        <i data-lucide="user-plus" class="icon" style="width:16px;height:16px;"></i>
-                        <span>Add Employee</span>
+                    <a href="employees.php"
+                        class="sub-nav-item <?php echo isActive('employees') || isActive('add_employee'); ?>">
+                        <i data-lucide="users" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Employees</span>
                     </a>
                 </div>
             </div>
