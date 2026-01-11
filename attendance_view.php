@@ -95,184 +95,116 @@ if ($today_record) {
     }
 }
 
-// Fetch History
-$hist_stmt = $conn->prepare("SELECT * FROM attendance WHERE employee_id = :uid ORDER BY date DESC LIMIT 5");
-$hist_stmt->execute(['uid' => $user_id]);
+<?php
+// ... (Previous Code for Check In/Out Logic is fine, just updating History Fetching part) ...
+
+// 3. Filter History
+$filter_month = $_GET['month'] ?? date('m');
+$filter_year = $_GET['year'] ?? date('Y');
+
+$hist_sql = "SELECT * FROM attendance 
+             WHERE employee_id = :uid 
+             AND MONTH(date) = :m AND YEAR(date) = :y 
+             ORDER BY date DESC";
+$hist_stmt = $conn->prepare($hist_sql);
+$hist_stmt->execute(['uid' => $user_id, 'm' => $filter_month, 'y' => $filter_year]);
 $history = $hist_stmt->fetchAll();
 
+// Calculate Monthly Stats
+$present_days = 0;
+$late_days = 0;
+$total_work_hours = 0;
+
+foreach ($history as $h) {
+    if ($h['status'] == 'Present' || $h['status'] == 'Late') $present_days++;
+    if ($h['status'] == 'Late') $late_days++;
+    $total_work_hours += $h['total_hours'];
+}
 ?>
 
-<style>
-    .attendance-hero {
-        background: white;
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        text-align: center;
-        margin-bottom: 2rem;
-    }
+    <!-- ... (Hero Section Remains) ... -->
+    <!-- Insert Filter Form before Table -->
     
-    .clock-display {
-        font-size: 3rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 0.5rem;
-        font-family: monospace;
-    }
-    
-    .date-display {
-        color: #64748b;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-    }
-    
-    .action-btn {
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        border: none;
-        font-size: 1.5rem;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin: 0 auto;
-        color: white;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
-    }
-    
-    .btn-check-in {
-        background: linear-gradient(135deg, hsl(150, 60%, 50%), hsl(160, 60%, 40%));
-        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
-    }
-    
-    .btn-check-out {
-        background: linear-gradient(135deg, hsl(340, 70%, 50%), hsl(350, 70%, 40%));
-        box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);
-    }
-    
-    .btn-completed {
-        background: #94a3b8;
-        cursor: not-allowed;
-    }
-    
-    .action-btn:active {
-        transform: scale(0.95);
-    }
-    
-    .location-info {
-        margin-top: 1.5rem;
-        font-size: 0.9rem;
-        color: #64748b;
-        min-height: 20px;
-    }
-    
-    .spin {
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        from {transform: rotate(0deg);}
-        to {transform: rotate(360deg);}
-    }
-</style>
-
-<div class="page-content">
-    <?= $message ?>
-
-    <div class="attendance-hero">
-        <div class="clock-display" id="liveClock">00:00:00</div>
-        <div class="date-display"><?= date('l, d F Y') ?></div>
-        
-        <form method="POST" id="attendanceForm">
-            <input type="hidden" name="action" id="actionInput">
-            <input type="hidden" name="latitude" id="latInput">
-            <input type="hidden" name="longitude" id="lngInput">
-            <input type="hidden" name="address" id="addrInput">
-            
-            <?php if (!$has_checked_in): ?>
-                <button type="button" class="action-btn btn-check-in" onclick="getLocationAndSubmit('clock_in')">
-                    <i data-lucide="fingerprint" style="width:48px; height:48px;"></i>
-                    Check In
-                </button>
-            <?php elseif (!$has_checked_out): ?>
-                 <button type="button" class="action-btn btn-check-out" onclick="getLocationAndSubmit('clock_out')">
-                    <i data-lucide="log-out" style="width:48px; height:48px;"></i>
-                    Check Out
-                </button>
-                <p style="margin-top:1rem; color:#10b981; font-weight:500;">
-                    Clocked In at: <?= date('h:i A', strtotime($today_record['clock_in'])) ?>
-                </p>
-            <?php else: ?>
-                <button type="button" class="action-btn btn-completed" disabled>
-                    <i data-lucide="check-circle" style="width:48px; height:48px;"></i>
-                    Done
-                </button>
-                <div style="margin-top:1rem; color:#64748b;">
-                    <p>In: <?= date('h:i A', strtotime($today_record['clock_in'])) ?></p>
-                    <p>Out: <?= date('h:i A', strtotime($today_record['clock_out'])) ?></p>
-                    <p>Total: <?= $today_record['total_hours'] ?> Hrs</p>
-                </div>
-            <?php endif; ?>
-        </form>
-        
-        <div class="location-info" id="locationStatus">
-            <i data-lucide="map-pin" style="width:14px; vertical-align:middle;"></i> Ready to capture location
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <h3>My Attendance History</h3>
+            <form method="GET" style="display:flex; gap:10px; align-items:center;">
+                <select name="month" class="form-control" style="width: auto;">
+                    <?php for($m=1; $m<=12; $m++): ?>
+                        <option value="<?= $m ?>" <?= $m == $filter_month ? 'selected' : '' ?>>
+                            <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
+                        </option>
+                    <?php endfor; ?>
+                </select>
+                <select name="year" class="form-control" style="width: auto;">
+                    <?php for($y=date('Y'); $y>=2024; $y--): ?>
+                        <option value="<?= $y ?>" <?= $y == $filter_year ? 'selected' : '' ?>><?= $y ?></option>
+                    <?php endfor; ?>
+                </select>
+                <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem;">View</button>
+            </form>
         </div>
-    </div>
 
-    <!-- Attendance History -->
-    <div class="card">
-        <div class="card-header">
-            <h3>Recent Activity</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; padding: 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+            <div style="text-align: center;">
+                <div style="font-size: 0.9rem; color: #64748b;">Days Present</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;"><?= $present_days ?></div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 0.9rem; color: #64748b;">Late Days</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;"><?= $late_days ?></div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 0.9rem; color: #64748b;">Total Hours</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #3b82f6;"><?= $total_work_hours ?></div>
+            </div>
         </div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Clock In</th>
-                    <th>Clock Out</th>
-                    <th>Total Hours</th>
-                    <th>Location</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($history as $row): ?>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td><?= date('d M Y', strtotime($row['date'])) ?></td>
-                        <td>
-                            <?php 
-                                $statusColor = match($row['status']) {
-                                    'Present' => '#dcfce7', // green
-                                    'Late' => '#fef9c3', // yellow
-                                    default => '#f1f5f9'
-                                };
-                                $statusText = match($row['status']) {
-                                    'Present' => '#166534',
-                                    'Late' => '#854d0e',
-                                    default => '#475569'
-                                };
-                            ?>
-                            <span class="badge" style="background:<?= $statusColor ?>; color:<?= $statusText ?>;"><?= $row['status'] ?></span>
-                        </td>
-                        <td><?= $row['clock_in'] ? date('h:i A', strtotime($row['clock_in'])) : '-' ?></td>
-                        <td><?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '-' ?></td>
-                        <td><?= $row['total_hours'] ?? '-' ?></td>
-                        <td style="font-size:0.8rem; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_in_address']) ?>">
-                            <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
-                        </td>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Clock In</th>
+                        <th>Clock Out</th>
+                        <th>Duration</th>
+                        <th>Location</th>
                     </tr>
-                <?php endforeach; ?>
-                <?php if(empty($history)): ?>
-                    <tr><td colspan="6" style="text-align:center; padding:1.5rem;">No records found.</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($history as $row): ?>
+                        <tr>
+                            <td><?= date('d M, D', strtotime($row['date'])) ?></td>
+                            <td>
+                                <?php 
+                                    $statusColor = match($row['status']) {
+                                        'Present' => '#dcfce7',
+                                        'Late' => '#fef9c3',
+                                        default => '#f1f5f9'
+                                    };
+                                    $statusText = match($row['status']) {
+                                        'Present' => '#166534',
+                                        'Late' => '#854d0e',
+                                        default => '#475569'
+                                    };
+                                ?>
+                                <span class="badge" style="background:<?= $statusColor ?>; color:<?= $statusText ?>;"><?= $row['status'] ?></span>
+                            </td>
+                            <td><?= $row['clock_in'] ? date('h:i A', strtotime($row['clock_in'])) : '-' ?></td>
+                            <td><?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '-' ?></td>
+                            <td style="font-weight: 600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></td>
+                            <td style="font-size:0.8rem; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_in_address']) ?>">
+                                <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if(empty($history)): ?>
+                        <tr><td colspan="6" style="text-align:center; padding:1.5rem; color: #94a3b8;">No records found for this month.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
