@@ -1,3 +1,4 @@
+<?php include 'includes/confirm_modal.php'; ?>
 </div> <!-- End Main Content -->
 </div> <!-- End App Container -->
 

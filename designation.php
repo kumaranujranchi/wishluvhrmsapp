@@ -93,8 +93,8 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
                                         onclick="openModal('edit', '<?= $row['id'] ?>', '<?= htmlspecialchars($row['name']) ?>')">
                                         <i data-lucide="edit-2" style="width:16px;"></i>
                                     </button>
-                                    <a href="designation.php?delete_id=<?= $row['id'] ?>" class="btn-icon delete"
-                                        onclick="return confirm('Are you sure you want to delete this designation?')">
+                                    <a href="#" class="btn-icon delete"
+                                        onclick="confirmDelete('designation.php?delete_id=<?= $row['id'] ?>')">
                                         <i data-lucide="trash-2" style="width:16px;"></i>
                                     </a>
                                 </div>

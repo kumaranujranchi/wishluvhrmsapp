@@ -96,8 +96,8 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
                                         onclick="openModal('edit', '<?= $dept['id'] ?>', '<?= htmlspecialchars($dept['name']) ?>', '<?= htmlspecialchars($dept['description'] ?? '') ?>')">
                                         <i data-lucide="edit-2" style="width:16px;"></i>
                                     </button>
-                                    <a href="department.php?delete_id=<?= $dept['id'] ?>" class="btn-icon delete"
-                                        onclick="return confirm('Are you sure you want to delete this department?')">
+                                    <a href="#" class="btn-icon delete"
+                                        onclick="confirmDelete('department.php?delete_id=<?= $dept['id'] ?>')">
                                         <i data-lucide="trash-2" style="width:16px;"></i>
                                     </a>
                                 </div>
