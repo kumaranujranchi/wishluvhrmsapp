@@ -23,17 +23,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_POST['action'];
     $id = $_POST['id'] ?? null;
 
+    // File Upload Logic
+    $logoPath = null;
+    if (isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
+        $uploadDir = 'uploads/designations/';
+        if (!is_dir($uploadDir))
+            mkdir($uploadDir, 0777, true);
+
+        $fileName = time() . '_' . basename($_FILES['logo']['name']);
+        $targetPath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['logo']['tmp_name'], $targetPath)) {
+            $logoPath = $targetPath;
+        }
+    }
+
     if (!empty($name)) {
         try {
             if ($action == 'edit' && $id) {
                 // Update
-                $stmt = $conn->prepare("UPDATE designations SET name = :name WHERE id = :id");
-                $stmt->execute(['name' => $name, 'id' => $id]);
+                $sql = "UPDATE designations SET name = :name";
+                $params = ['name' => $name, 'id' => $id];
+
+                if ($logoPath) {
+                    $sql .= ", logo = :logo";
+                    $params['logo'] = $logoPath;
+                }
+
+                $sql .= " WHERE id = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($params);
                 $message = "<div class='alert success'>Designation updated successfully!</div>";
             } else {
                 // Insert
-                $stmt = $conn->prepare("INSERT INTO designations (name) VALUES (:name)");
-                $stmt->execute(['name' => $name]);
+                $stmt = $conn->prepare("INSERT INTO designations (name, logo) VALUES (:name, :logo)");
+                $stmt->execute(['name' => $name, 'logo' => $logoPath]);
                 $message = "<div class='alert success'>Designation added successfully!</div>";
             }
         } catch (PDOException $e) {
@@ -81,8 +105,14 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
                         </a>
                     </div>
 
-                    <div class="floating-card-icon">
-                        <?= strtoupper(substr($row['name'], 0, 1)) ?>
+                    <div class="floating-card-icon"
+                        style="background: <?= !empty($row['logo']) ? 'transparent' : '' ?>; box-shadow: <?= !empty($row['logo']) ? 'none' : '' ?>">
+                        <?php if (!empty($row['logo'])): ?>
+                            <img src="<?= $row['logo'] ?>" alt="Logo"
+                                style="width:100%; height:100%; object-fit:cover; border-radius:16px;">
+                        <?php else: ?>
+                            <?= strtoupper(substr($row['name'], 0, 1)) ?>
+                        <?php endif; ?>
                     </div>
 
                     <h3 class="floating-card-title"><?= htmlspecialchars($row['name']) ?></h3>
@@ -103,7 +133,7 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
                 <i data-lucide="x" style="width:20px;"></i>
             </button>
         </div>
-        <form method="POST" action="">
+        <form method="POST" action="" enctype="multipart/form-data">
             <div class="modal-body">
                 <input type="hidden" name="action" id="formAction" value="add">
                 <input type="hidden" name="id" id="desigId">
@@ -112,6 +142,12 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
                     <label>Designation Name <span class="text-danger">*</span></label>
                     <input type="text" name="designation_name" id="desigName" class="form-control"
                         placeholder="e.g. Senior Developer" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Designation Logo</label>
+                    <input type="file" name="logo" class="form-control" accept="image/*">
+                    <small style="color:#64748b;">Optional. Recommended square size (e.g. 100x100px).</small>
                 </div>
             </div>
             <div class="modal-footer">

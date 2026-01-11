@@ -24,17 +24,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_POST['action'];
     $id = $_POST['id'] ?? null;
 
+    // File Upload Logic
+    $logoPath = null;
+    if (isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
+        $uploadDir = 'uploads/departments/';
+        if (!is_dir($uploadDir))
+            mkdir($uploadDir, 0777, true);
+
+        $fileName = time() . '_' . basename($_FILES['logo']['name']);
+        $targetPath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['logo']['tmp_name'], $targetPath)) {
+            $logoPath = $targetPath;
+        }
+    }
+
     if (!empty($dept_name)) {
         try {
             if ($action == 'edit' && $id) {
                 // Update
-                $stmt = $conn->prepare("UPDATE departments SET name = :name, description = :desc WHERE id = :id");
-                $stmt->execute(['name' => $dept_name, 'desc' => $description, 'id' => $id]);
+                $sql = "UPDATE departments SET name = :name, description = :desc";
+                $params = ['name' => $dept_name, 'desc' => $description, 'id' => $id];
+
+                if ($logoPath) {
+                    $sql .= ", logo = :logo";
+                    $params['logo'] = $logoPath;
+                }
+
+                $sql .= " WHERE id = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($params);
                 $message = "<div class='alert success'>Department updated successfully!</div>";
             } else {
                 // Insert
-                $stmt = $conn->prepare("INSERT INTO departments (name, description) VALUES (:name, :desc)");
-                $stmt->execute(['name' => $dept_name, 'desc' => $description]);
+                $stmt = $conn->prepare("INSERT INTO departments (name, description, logo) VALUES (:name, :desc, :logo)");
+                $stmt->execute(['name' => $dept_name, 'desc' => $description, 'logo' => $logoPath]);
                 $message = "<div class='alert success'>Department added successfully!</div>";
             }
         } catch (PDOException $e) {
@@ -82,8 +106,14 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
                         </a>
                     </div>
 
-                    <div class="floating-card-icon">
-                        <?= strtoupper(substr($dept['name'], 0, 1)) ?>
+                    <div class="floating-card-icon"
+                        style="background: <?= !empty($dept['logo']) ? 'transparent' : '' ?>; box-shadow: <?= !empty($dept['logo']) ? 'none' : '' ?>">
+                        <?php if (!empty($dept['logo'])): ?>
+                            <img src="<?= $dept['logo'] ?>" alt="Logo"
+                                style="width:100%; height:100%; object-fit:cover; border-radius:16px;">
+                        <?php else: ?>
+                            <?= strtoupper(substr($dept['name'], 0, 1)) ?>
+                        <?php endif; ?>
                     </div>
 
                     <h3 class="floating-card-title"><?= htmlspecialchars($dept['name']) ?></h3>
@@ -105,7 +135,7 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
                 <i data-lucide="x" style="width:20px;"></i>
             </button>
         </div>
-        <form method="POST" action="">
+        <form method="POST" action="" enctype="multipart/form-data">
             <div class="modal-body">
                 <input type="hidden" name="action" id="formAction" value="add">
                 <input type="hidden" name="id" id="deptId">
@@ -115,6 +145,13 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
                     <input type="text" name="department_name" id="deptName" class="form-control"
                         placeholder="e.g. Engineering" required>
                 </div>
+
+                <div class="form-group">
+                    <label>Department Logo</label>
+                    <input type="file" name="logo" class="form-control" accept="image/*">
+                    <small style="color:#64748b;">Optional. Recommended square size (e.g. 100x100px).</small>
+                </div>
+
                 <div class="form-group">
                     <label>Description</label>
                     <textarea name="description" id="deptDesc" class="form-control" rows="3"
