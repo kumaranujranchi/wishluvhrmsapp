@@ -20,9 +20,15 @@ $userInitials = strtoupper(substr($userName, 0, 2));
 ?>
 <aside class="sidebar">
     <div class="sidebar-header">
-        <!-- <div class="logo-icon">HR</div> -->
-        <img src="assets/logo.png" alt="Myworld Logo" style="width: 40px; height: 40px; object-fit: contain;">
-        <h1 class="logo-text">Myworld</h1>
+        <!-- Logo with rounded corners -->
+        <img src="assets/logo.png" alt="Myworld Logo"
+            style="width: 45px; height: 45px; object-fit: contain; border-radius: 12px;">
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+            <h1 class="logo-text" style="line-height: 1;">Myworld</h1>
+            <span
+                style="font-size: 0.65rem; color: #64748b; font-weight: 500; letter-spacing: 0.5px; margin-top: 2px;">By
+                Wishluv Buildcon</span>
+        </div>
     </div>
 
     <nav class="sidebar-nav">

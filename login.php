@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="login-header">
             <!-- <div class="app-logo">HR</div> -->
             <img src="assets/logo.png" alt="Myworld Logo"
-                style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 1rem;">
+                style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 1rem; border-radius: 16px;">
             <h1 class="login-title">Welcome Back</h1>
             <p class="login-subtitle">Sign in to access your dashboard</p>
         </div>
