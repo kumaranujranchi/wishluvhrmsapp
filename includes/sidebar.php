@@ -93,10 +93,20 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <i data-lucide="log-out" style="width: 20px;"></i>
         </a>
     </div>
+    <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+        <i data-lucide="chevron-left" style="width: 14px; height: 14px;" id="sidebarToggleIcon"></i>
+    </button>
 </aside>
 
 <script>
     function toggleSubNav(id, btn) {
+        // If sidebar is collapsed, expand it first when clicking a dropdown
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar.classList.contains('collapsed')) {
+            toggleSidebar(); // Expand
+            return; // Let user click again to open sub-nav, or auto-open (optional)
+        }
+
         const subNav = document.getElementById(id);
         const icon = btn.querySelector('.chevron-icon');
 
@@ -107,5 +117,24 @@ $userInitials = strtoupper(substr($userName, 0, 2));
         } else {
             icon.style.transform = "rotate(0deg)";
         }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const toggleIcon = document.getElementById('sidebarToggleIcon');
+
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+
+        // Rotate/Change Toggle Icon
+        if (sidebar.classList.contains('collapsed')) {
+             toggleIcon.style.transform = "rotate(180deg)";
+        } else {
+             toggleIcon.style.transform = "rotate(0deg)";
+        }
+
+        // Optional: Save preference
+        // localStorage.setItem('sidebarState', sidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
     }
 </script>

@@ -831,3 +831,82 @@ select.form-control {
 .btn-secondary:hover {
     background-color: #f8fafc;
 }
+
+/* Sidebar Toggle */
+.sidebar-toggle-btn {
+    position: absolute;
+    right: -12px;
+    top: 50px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 60;
+    color: #475569;
+    transition: transform 0.3s ease;
+}
+.sidebar-toggle-btn:hover {
+    background-color: #f1f5f9;
+}
+
+/* Collapsed Sidebar Styles */
+.sidebar.collapsed {
+    width: 80px;
+}
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .nav-item span,
+.sidebar.collapsed .user-details,
+.sidebar.collapsed .chevron-icon,
+.sidebar.collapsed .sub-nav,
+.sidebar.collapsed .user-name,
+.sidebar.collapsed .user-role {
+    display: none !important;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 2rem 0;
+}
+.sidebar.collapsed .logo-icon {
+    margin: 0;
+}
+
+.sidebar.collapsed .sidebar-nav {
+    padding: 0 0.75rem;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 0.85rem 0;
+}
+.sidebar.collapsed .nav-item i.icon {
+    margin: 0;
+}
+
+.sidebar.collapsed .dropdown-btn div {
+    justify-content: center;
+}
+/* Ensure icon centers in dropdown button div when collapsed */
+.sidebar.collapsed .dropdown-btn div span {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    justify-content: center;
+    padding: 1rem 0;
+}
+.sidebar.collapsed .user-info {
+    gap: 0;
+}
+
+/* Expanded Main Content */
+.main-content.expanded {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+}
