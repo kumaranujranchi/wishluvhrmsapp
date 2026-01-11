@@ -125,28 +125,55 @@ $leaves = $stmt->fetchAll();
         align-items: center;
     }
 
+    .table-modern {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
     .table-modern th {
         background: #f8fafc;
-        color: #64748b;
+        color: #475569;
         font-weight: 600;
         text-transform: uppercase;
         font-size: 0.75rem;
-        padding: 1rem;
+        letter-spacing: 0.05em;
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
     }
     .table-modern td {
-        padding: 1rem;
+        padding: 1.25rem 1.5rem;
         vertical-align: middle;
         border-bottom: 1px solid #f1f5f9;
+        color: #334155;
     }
     .table-modern tr:last-child td { border-bottom: none; }
     
-    .status-dot {
-        height: 8px;
-        width: 8px;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 6px;
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.25rem;
     }
+    
+    .approval-block {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.8rem;
+    }
+    .approval-row {
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        width: 140px;
+    }
+    .approval-label { color: #94a3b8; }
+    .approval-val { font-weight: 600; }
 </style>
 
 <div class="page-content">
@@ -214,11 +241,11 @@ $leaves = $stmt->fetchAll();
                 <table class="table table-modern">
                     <thead>
                         <tr>
-                            <th>Applied On</th>
-                            <th>Type</th>
-                            <th>Dates</th>
-                            <th>Approvals</th>
-                            <th>Status</th>
+                            <th width="15%">Applied On</th>
+                            <th width="15%">Type</th>
+                            <th width="25%">Dates</th>
+                            <th width="25%">Approvals</th>
+                            <th width="20%" style="text-align:right;">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -228,50 +255,53 @@ $leaves = $stmt->fetchAll();
                                     <?= date('d M Y', strtotime($leave['created_at'])) ?>
                                 </td>
                                 <td>
-                                    <span style="font-weight: 600; color: #334155;"><?= $leave['leave_type'] ?></span>
+                                    <span style="font-weight: 600; color: #1e293b;"><?= $leave['leave_type'] ?></span>
                                 </td>
                                 <td>
-                                    <div style="font-weight: 500; font-size: 0.9rem;"><?= date('d M', strtotime($leave['start_date'])) ?> - <?= date('d M', strtotime($leave['end_date'])) ?></div>
+                                    <div style="font-weight: 500; font-size: 0.95rem; color:#0f172a;">
+                                        <?= date('d M', strtotime($leave['start_date'])) ?> - <?= date('d M', strtotime($leave['end_date'])) ?>
+                                    </div>
                                     <?php
                                         $d1 = new DateTime($leave['start_date']);
                                         $d2 = new DateTime($leave['end_date']);
                                         $diff = $d2->diff($d1)->format("%a") + 1;
                                     ?>
-                                    <div style="font-size: 0.75rem; color: #64748b;"><?= $diff ?> Days</div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top:2px;"><?= $diff ?> Days</div>
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 0.5rem; flex-direction: column;">
-                                        <div style="font-size: 0.75rem;">
-                                            <span style="color: #94a3b8;">Manager:</span>
+                                    <div class="approval-block">
+                                        <div class="approval-row">
+                                            <span class="approval-label">Manager</span>
                                             <?php
                                                 $mColor = match($leave['manager_status']) {
                                                     'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
                                                 };
                                             ?>
-                                            <span style="font-weight: 600; color: <?= $mColor ?>;"><?= $leave['manager_status'] ?></span>
+                                            <span class="approval-val" style="color: <?= $mColor ?>;"><?= $leave['manager_status'] ?></span>
                                         </div>
-                                        <div style="font-size: 0.75rem;">
-                                            <span style="color: #94a3b8;">Admin:</span> 
+                                        <div class="approval-row">
+                                            <span class="approval-label">Admin</span>
                                              <?php
                                                 $aColor = match($leave['admin_status']) {
                                                     'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
                                                 };
                                             ?>
-                                            <span style="font-weight: 600; color: <?= $aColor ?>;"><?= $leave['admin_status'] ?></span>
+                                            <span class="approval-val" style="color: <?= $aColor ?>;"><?= $leave['admin_status'] ?></span>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td style="text-align:right;">
                                     <?php 
                                         $badgeBg = match($leave['status']) {
-                                            'Approved' => '#dcfce7', 'Rejected' => '#fee2e2', default => '#fef9c3'
+                                            'Approved' => '#dcfce7', 'Rejected' => '#fee2e2', 'Pending' => '#fef9c3', default => '#f1f5f9'
                                         };
                                         $badgeColor = match($leave['status']) {
-                                            'Approved' => '#166534', 'Rejected' => '#991b1b', default => '#854d0e'
+                                            'Approved' => '#166534', 'Rejected' => '#991b1b', 'Pending' => '#854d0e', default => '#64748b'
                                         };
+                                        // If final status is distinct from others
                                     ?>
-                                    <span class="badge" style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border-radius: 6px;">
-                                        <?= $leave['status'] ?>
+                                    <span class="badge" style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border-radius: 6px; padding: 0.35rem 0.75rem; font-size:0.8rem;">
+                                        <?= $leave['status'] ?: 'Pending' ?>
                                     </span>
                                 </td>
                             </tr>
