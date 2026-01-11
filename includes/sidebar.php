@@ -157,10 +157,10 @@ $userInitials = strtoupper(substr($userName, 0, 2));
     <div class="sidebar-footer">
         <div class="user-info">
             <div class="user-avatar"><?= $userInitials ?></div>
-            <div class="user-details">
-                <span class="user-name"><?= htmlspecialchars($userName) ?></span>
+            <a href="profile.php" class="user-details" style="text-decoration: none; color: inherit;">
+                <span class="user-name" title="View Profile"><?= htmlspecialchars($userName) ?></span>
                 <span class="user-role"><?= htmlspecialchars($userRole) ?></span>
-            </div>
+            </a>
         </div>
         <a href="logout.php" title="Logout" style="color: #94a3b8; margin-left: auto;">
             <i data-lucide="log-out" style="width: 20px;"></i>
