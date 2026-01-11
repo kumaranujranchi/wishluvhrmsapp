@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Unity HR</title>
+    <title>Login - Myworld</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,7 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <div class="login-card">
         <div class="login-header">
-            <div class="app-logo">HR</div>
+            <!-- <div class="app-logo">HR</div> -->
+            <img src="assets/logo.png" alt="Myworld Logo"
+                style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 1rem;">
             <h1 class="login-title">Welcome Back</h1>
             <p class="login-subtitle">Sign in to access your dashboard</p>
         </div>
@@ -155,8 +157,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="input-group">
                 <label class="form-label">Password</label>
                 <div style="position: relative;">
-                    <input type="password" name="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
-                    <button type="button" onclick="togglePasswordLogin()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center;">
+                    <input type="password" name="password" id="loginPassword" class="form-control"
+                        placeholder="••••••••" required>
+                    <button type="button" onclick="togglePasswordLogin()"
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center;">
                         <i data-lucide="eye" id="eyeShow"></i>
                         <i data-lucide="eye-off" id="eyeHide" style="display: none;"></i>
                     </button>
@@ -164,10 +168,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #64748b; cursor: pointer;">
+                <label
+                    style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #64748b; cursor: pointer;">
                     <input type="checkbox" style="accent-color: var(--color-primary);"> Remember me
                 </label>
-                <a href="#" style="font-size: 0.9rem; color: hsl(250, 84%, 60%); text-decoration: none; font-weight: 500;">Forgot password?</a>
+                <a href="#"
+                    style="font-size: 0.9rem; color: hsl(250, 84%, 60%); text-decoration: none; font-weight: 500;">Forgot
+                    password?</a>
             </div>
 
             <button type="submit" class="btn-primary login-btn">Sign In</button>
@@ -179,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             const passwordInput = document.getElementById('loginPassword');
             const showIcon = document.getElementById('eyeShow');
             const hideIcon = document.getElementById('eyeHide');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 showIcon.style.display = 'none';

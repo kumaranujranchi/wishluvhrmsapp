@@ -3,7 +3,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HRMS Admin</title>
+<title>Myworld Admin</title>
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

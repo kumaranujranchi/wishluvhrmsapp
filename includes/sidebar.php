@@ -20,8 +20,9 @@ $userInitials = strtoupper(substr($userName, 0, 2));
 ?>
 <aside class="sidebar">
     <div class="sidebar-header">
-        <div class="logo-icon">HR</div>
-        <h1 class="logo-text">Unity HR</h1>
+        <!-- <div class="logo-icon">HR</div> -->
+        <img src="assets/logo.png" alt="Myworld Logo" style="width: 40px; height: 40px; object-fit: contain;">
+        <h1 class="logo-text">Myworld</h1>
     </div>
 
     <nav class="sidebar-nav">
@@ -129,9 +130,9 @@ $userInitials = strtoupper(substr($userName, 0, 2));
 
         // Rotate/Change Toggle Icon
         if (sidebar.classList.contains('collapsed')) {
-             toggleIcon.style.transform = "rotate(180deg)";
+            toggleIcon.style.transform = "rotate(180deg)";
         } else {
-             toggleIcon.style.transform = "rotate(0deg)";
+            toggleIcon.style.transform = "rotate(0deg)";
         }
 
         // Optional: Save preference
