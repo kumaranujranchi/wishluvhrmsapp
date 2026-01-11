@@ -154,17 +154,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div class="input-group">
                 <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                <div style="position: relative;">
+                    <input type="password" name="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                    <button type="button" onclick="togglePasswordLogin()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center;">
+                        <i data-lucide="eye" id="eyeShow"></i>
+                        <i data-lucide="eye-off" id="eyeHide" style="display: none;"></i>
+                    </button>
+                </div>
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <label
-                    style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #64748b; cursor: pointer;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #64748b; cursor: pointer;">
                     <input type="checkbox" style="accent-color: var(--color-primary);"> Remember me
                 </label>
-                <a href="#"
-                    style="font-size: 0.9rem; color: hsl(250, 84%, 60%); text-decoration: none; font-weight: 500;">Forgot
-                    password?</a>
+                <a href="#" style="font-size: 0.9rem; color: hsl(250, 84%, 60%); text-decoration: none; font-weight: 500;">Forgot password?</a>
             </div>
 
             <button type="submit" class="btn-primary login-btn">Sign In</button>
@@ -172,6 +175,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <script>
+        function togglePasswordLogin() {
+            const passwordInput = document.getElementById('loginPassword');
+            const showIcon = document.getElementById('eyeShow');
+            const hideIcon = document.getElementById('eyeHide');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                showIcon.style.display = 'none';
+                hideIcon.style.display = 'block';
+            } else {
+                passwordInput.type = 'password';
+                showIcon.style.display = 'block';
+                hideIcon.style.display = 'none';
+            }
+        }
         lucide.createIcons();
     </script>
 </body>

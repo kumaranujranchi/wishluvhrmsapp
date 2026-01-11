@@ -134,7 +134,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- Login Credentials -->
                 <div class="form-group">
                     <label>Set Login Password <span class="text-danger">*</span></label>
-                    <input type="password" name="password" class="form-control" required>
+                    <div style="position: relative;">
+                        <input type="password" name="password" id="empPassword" class="form-control" required>
+                        <button type="button" onclick="togglePasswordEmp()"
+                            style="position: absolute; right: 12px; top: 12px; background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center;">
+                            <i data-lucide="eye" id="eyeShowEmp"></i>
+                            <i data-lucide="eye-off" id="eyeHideEmp" style="display: none;"></i>
+                        </button>
+                    </div>
                     <small style="color:hsl(220, 10%, 45%); font-size: 0.8rem;">Employee will use email & this password
                         to login.</small>
                 </div>
@@ -150,5 +157,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </form>
     </div>
 </div>
+
+<script>
+    function togglePasswordEmp() {
+        const passwordInput = document.getElementById('empPassword');
+        const showIcon = document.getElementById('eyeShowEmp');
+        const hideIcon = document.getElementById('eyeHideEmp');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            showIcon.style.display = 'none';
+            hideIcon.style.display = 'block';
+        } else {
+            passwordInput.type = 'password';
+            showIcon.style.display = 'block';
+            hideIcon.style.display = 'none';
+        }
+    }
+</script>
 
 <?php include 'includes/footer.php'; ?>
