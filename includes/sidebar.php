@@ -5,6 +5,18 @@ function isActive($page)
     $current_page = basename($_SERVER['PHP_SELF'], ".php");
     return ($current_page == $page) ? 'active' : '';
 }
+
+// Function to check if a group should be open
+function isGroupOpen($pages)
+{
+    $current_page = basename($_SERVER['PHP_SELF'], ".php");
+    return in_array($current_page, $pages) ? 'open' : '';
+}
+
+// Get User Info from Session
+$userName = $_SESSION['user_name'] ?? 'Admin User';
+$userRole = $_SESSION['user_role'] ?? 'Super Admin';
+$userInitials = strtoupper(substr($userName, 0, 2));
 ?>
 <aside class="sidebar">
     <div class="sidebar-header">
@@ -20,25 +32,30 @@ function isActive($page)
 
         <!-- Employee Onboarding Group -->
         <div class="nav-group">
+            <?php
+            $onboardingPages = ['designation', 'department', 'add_employee'];
+            $isOpen = isGroupOpen($onboardingPages);
+            ?>
             <button class="nav-item dropdown-btn" onclick="toggleSubNav('employeeSubNav', this)">
-                <div class="nav-item-content">
+                <div style="display:flex; align-items:center; gap:0.85rem;">
                     <i data-lucide="users" class="icon"></i>
-                    <span>Employee Onboarding</span>
+                    <span>Onboarding</span>
                 </div>
-                <i data-lucide="chevron-right" class="icon chevron-icon"></i>
+                <i data-lucide="chevron-right" class="icon chevron-icon"
+                    style="transition: transform 0.2s; transform: <?= $isOpen ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
             </button>
-            <div id="employeeSubNav" class="sub-nav">
-                <a href="designation.php" class="sub-nav-item">
+            <div id="employeeSubNav" class="sub-nav <?= $isOpen ?>">
+                <a href="designation.php" class="sub-nav-item <?php echo isActive('designation'); ?>">
                     <i data-lucide="briefcase" class="icon" style="width:16px;height:16px;"></i>
                     <span>Designation</span>
                 </a>
-                <a href="department.php" class="sub-nav-item">
+                <a href="department.php" class="sub-nav-item <?php echo isActive('department'); ?>">
                     <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
                     <span>Department</span>
                 </a>
-                <a href="add_employee.php" class="sub-nav-item">
+                <a href="add_employee.php" class="sub-nav-item <?php echo isActive('add_employee'); ?>">
                     <i data-lucide="user-plus" class="icon" style="width:16px;height:16px;"></i>
-                    <span>Onboard Employee</span>
+                    <span>Add Employee</span>
                 </a>
             </div>
         </div>
@@ -66,12 +83,15 @@ function isActive($page)
 
     <div class="sidebar-footer">
         <div class="user-info">
-            <div class="user-avatar">AD</div>
+            <div class="user-avatar"><?= $userInitials ?></div>
             <div class="user-details">
-                <span class="user-name">Admin User</span>
-                <span class="user-role">Super Admin</span>
+                <span class="user-name"><?= htmlspecialchars($userName) ?></span>
+                <span class="user-role"><?= htmlspecialchars($userRole) ?></span>
             </div>
         </div>
+        <a href="logout.php" title="Logout" style="color: #94a3b8; margin-left: auto;">
+            <i data-lucide="log-out" style="width: 20px;"></i>
+        </a>
     </div>
 </aside>
 
@@ -82,11 +102,7 @@ function isActive($page)
 
         subNav.classList.toggle('open');
 
-        // Simple icon rotation logic (assuming we want to simulate state change visually)
         if (subNav.classList.contains('open')) {
-            // In a real scenario we might swap the icon or rotate it via CSS class
-            // For now, let's keep it simple as the original design.
-            // You can add a class to rotate the chevron if you like.
             icon.style.transform = "rotate(90deg)";
         } else {
             icon.style.transform = "rotate(0deg)";
