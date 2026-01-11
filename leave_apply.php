@@ -44,11 +44,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch My Leaves
-$stmt = $conn->prepare("SELECT * FROM leave_requests WHERE employee_id = :uid ORDER BY created_at DESC");
-$stmt->execute(['uid' => $user_id]);
-$leaves = $stmt->fetchAll();
+// 1. Calculate Leave Stats (Annual)
+$current_year = date('Y');
+$total_leaves_annual = 24;
 
+$stats_sql = "SELECT start_date, end_date FROM leave_requests 
+              WHERE employee_id = :uid AND status = 'Approved' AND YEAR(start_date) = :year";
+$stats_stmt = $conn->prepare($stats_sql);
+$stats_stmt->execute(['uid' => $user_id, 'year' => $current_year]);
+$approved_leaves = $stats_stmt->fetchAll();
+
+$leaves_taken = 0;
+foreach ($approved_leaves as $l) {
+    $d1 = new DateTime($l['start_date']);
+    $d2 = new DateTime($l['end_date']);
+    $diff = $d2->diff($d1)->format("%a") + 1;
+    $leaves_taken += $diff;
+}
+$leave_balance = $total_leaves_annual - $leaves_taken;
+
+
+// 2. Fetch My Leaves (History with Filter)
+$filter_month = $_GET['month'] ?? '';
+$filter_year = $_GET['year'] ?? '';
+
+$sql = "SELECT * FROM leave_requests WHERE employee_id = :uid";
+$params = ['uid' => $user_id];
+
+if ($filter_month) {
+    $sql .= " AND MONTH(start_date) = :m";
+    $params['m'] = $filter_month;
+}
+if ($filter_year) {
+    $sql .= " AND YEAR(start_date) = :y";
+    $params['y'] = $filter_year;
+}
+
+$sql .= " ORDER BY created_at DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+$leaves = $stmt->fetchAll();
 ?>
 
 <style>
@@ -179,9 +215,41 @@ $leaves = $stmt->fetchAll();
 <div class="page-content">
     <?= $message ?>
     
+    <!-- Leave Statistics Cards -->
+    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card stats-card">
+            <div class="stats-icon-wrapper" style="background: #e0e7ff; color: #4f46e5;">
+                <i data-lucide="calendar" style="width:24px; height:24px;"></i>
+            </div>
+            <div class="stats-info">
+                <span class="stats-title">Total Annual Leaves</span>
+                <span class="stats-value"><?= $total_leaves_annual ?></span>
+            </div>
+        </div>
+        <div class="card stats-card">
+            <div class="stats-icon-wrapper" style="background: #dcfce7; color: #166534;">
+                <i data-lucide="check-circle" style="width:24px; height:24px;"></i>
+            </div>
+            <div class="stats-info">
+                <span class="stats-title">Leaves Consumed</span>
+                <span class="stats-value"><?= $leaves_taken ?></span>
+            </div>
+        </div>
+        <div class="card stats-card">
+            <div class="stats-icon-wrapper" style="background: #ffedd5; color: #9a3412;">
+                <i data-lucide="pie-chart" style="width:24px; height:24px;"></i>
+            </div>
+            <div class="stats-info">
+                <span class="stats-title">Leave Balance</span>
+                <span class="stats-value"><?= $leave_balance ?></span>
+            </div>
+        </div>
+    </div>
+
     <div class="leave-dashboard">
         <!-- Application Form -->
         <div class="leave-form-card">
+             <!-- ... form content (untouched) ... -->
             <h3 style="margin: 0 0 1.5rem 0; color: #1e293b; display: flex; align-items: center; gap: 10px;">
                 <span style="width: 32px; height: 32px; background: #e0e7ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #4f46e5;">
                     <i data-lucide="send" style="width: 18px;"></i>
@@ -190,6 +258,7 @@ $leaves = $stmt->fetchAll();
             </h3>
 
             <form method="POST">
+                <!-- ... inputs ... -->
                 <div class="form-group">
                     <label>Leave Type</label>
                     <div style="position: relative;">
@@ -234,8 +303,28 @@ $leaves = $stmt->fetchAll();
         <!-- Leave History -->
         <div class="history-card">
             <div class="history-header">
-                <h3 style="margin: 0;">Leave History</h3>
-                 <span style="font-size: 0.85rem; color: #64748b;">Past Requests</span>
+                <div>
+                     <h3 style="margin: 0;">Leave History</h3>
+                     <span style="font-size: 0.85rem; color: #64748b;">Track your requests</span>
+                </div>
+                <!-- Filter Form -->
+                <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+                    <select name="month" class="form-control" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem; font-size: 0.85rem;">
+                        <option value="">All Months</option>
+                        <?php for ($m=1; $m<=12; $m++): ?>
+                            <option value="<?= $m ?>" <?= ($filter_month == $m) ? 'selected' : '' ?>>
+                                <?= date('M', mktime(0, 0, 0, $m, 1)) ?>
+                            </option>
+                        <?php endfor; ?>
+                    </select>
+                    <select name="year" class="form-control" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem; font-size: 0.85rem;">
+                        <option value="">All Years</option>
+                        <?php for ($y=date('Y'); $y>=2024; $y--): ?>
+                            <option value="<?= $y ?>" <?= ($filter_year == $y) ? 'selected' : '' ?>><?= $y ?></option>
+                        <?php endfor; ?>
+                    </select>
+                    <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Filter</button>
+                </form>
             </div>
             <div class="table-responsive">
                 <table class="table table-modern">

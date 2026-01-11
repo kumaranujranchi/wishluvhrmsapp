@@ -34,19 +34,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// 2. Fetch Requests for Admin
-// Logic: Fetch all requests where Manager Status is 'Approved' OR where employee has no manager (orphan requests)
-// For simplicity: Fetch all where manager_status = 'Approved' AND admin_status = 'Pending'
+// 2. Fetch Employees for Filter
+$emp_sql = "SELECT id, first_name, last_name, employee_code FROM employees ORDER BY first_name ASC";
+$employees = $conn->query($emp_sql)->fetchAll();
+
+// 3. Handle Filters
+$filter_emp = $_GET['emp_id'] ?? '';
+$filter_month = $_GET['month'] ?? '';
+$filter_year = $_GET['year'] ?? '';
+
+// Calculate Stats if Employee Selected
+$emp_stats = null;
+if ($filter_emp) {
+    $total_leaves_annual = 24;
+    $current_year = date('Y');
+
+    $stats_sql = "SELECT start_date, end_date FROM leave_requests 
+                  WHERE employee_id = :uid AND status = 'Approved' AND YEAR(start_date) = :year";
+    $stats_stmt = $conn->prepare($stats_sql);
+    $stats_stmt->execute(['uid' => $filter_emp, 'year' => $current_year ?: date('Y')]);
+    $approved_leaves = $stats_stmt->fetchAll();
+
+    $leaves_taken = 0;
+    foreach ($approved_leaves as $l) {
+        $d1 = new DateTime($l['start_date']);
+        $d2 = new DateTime($l['end_date']);
+        $diff = $d2->diff($d1)->format("%a") + 1;
+        $leaves_taken += $diff;
+    }
+
+    $emp_stats = [
+        'total' => $total_leaves_annual,
+        'taken' => $leaves_taken,
+        'balance' => $total_leaves_annual - $leaves_taken
+    ];
+}
+
+// 4. Fetch Requests based on Filter OR Default (Pending)
 $sql = "SELECT lr.*, e.first_name, e.last_name, e.employee_code, e.avatar, m.first_name as mgr_name, m.last_name as mgr_last 
         FROM leave_requests lr
         JOIN employees e ON lr.employee_id = e.id
         LEFT JOIN employees m ON e.reporting_manager_id = m.id
-        WHERE lr.manager_status = 'Approved' 
-        AND lr.admin_status = 'Pending'
-        ORDER BY lr.created_at ASC";
+        WHERE 1=1";
+
+$params = [];
+
+if ($filter_emp) {
+    $sql .= " AND lr.employee_id = :eid";
+    $params['eid'] = $filter_emp;
+}
+if ($filter_month) {
+    $sql .= " AND MONTH(lr.start_date) = :m";
+    $params['m'] = $filter_month;
+}
+if ($filter_year) {
+    $sql .= " AND YEAR(lr.start_date) = :y";
+    $params['y'] = $filter_year;
+}
+
+// Default Behavior: If NO filters are applied, show only ACTIONABLE items (Manager Approved + Admin Pending)
+if (!$filter_emp && !$filter_month && !$filter_year) {
+    $sql .= " AND lr.manager_status = 'Approved' AND lr.admin_status = 'Pending'";
+}
+
+$sql .= " ORDER BY lr.created_at DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->execute();
+$stmt->execute($params);
 $requests = $stmt->fetchAll();
 
 ?>
@@ -55,9 +109,63 @@ $requests = $stmt->fetchAll();
     <?= $message ?>
 
     <div class="card">
-        <div class="card-header">
-            <h3>Admin Leave Approval (Manager Approved)</h3>
+        <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Admin Leave Approval</h3>
+            </div>
+
+            <!-- Filters -->
+            <form method="GET"
+                style="display: flex; gap: 1rem; flex-wrap: wrap; background: #f8fafc; padding: 1rem; border-radius: 1rem;">
+                <select name="emp_id" class="form-control" style="flex: 1; min-width: 200px;">
+                    <option value="">Select Employee</option>
+                    <?php foreach ($employees as $emp): ?>
+                        <option value="<?= $emp['id'] ?>" <?= ($filter_emp == $emp['id']) ? 'selected' : '' ?>>
+                            <?= $emp['first_name'] . ' ' . $emp['last_name'] ?> (<?= $emp['employee_code'] ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+
+                <select name="month" class="form-control" style="width: auto; min-width: 150px;">
+                    <option value="">All Months</option>
+                    <?php for ($m = 1; $m <= 12; $m++): ?>
+                        <option value="<?= $m ?>" <?= ($filter_month == $m) ? 'selected' : '' ?>>
+                            <?= date('M', mktime(0, 0, 0, $m, 1)) ?>
+                        </option>
+                    <?php endfor; ?>
+                </select>
+
+                <select name="year" class="form-control" style="width: auto; min-width: 120px;">
+                    <option value="">All Years</option>
+                    <?php for ($y = date('Y'); $y >= 2024; $y--): ?>
+                        <option value="<?= $y ?>" <?= ($filter_year == $y) ? 'selected' : '' ?>><?= $y ?></option>
+                    <?php endfor; ?>
+                </select>
+
+                <button type="submit" class="btn-primary">Search</button>
+                <a href="leave_admin.php" class="btn-secondary"
+                    style="text-decoration:none; display:flex; align-items:center;">Reset</a>
+            </form>
         </div>
+
+        <?php if ($emp_stats): ?>
+            <div style="padding: 0 1.5rem 1.5rem 1.5rem;">
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div style="background:#e0e7ff; padding:1rem; border-radius:1rem; text-align:center;">
+                        <span style="display:block; font-size:0.8rem; color:#4f46e5;">Total Assigned</span>
+                        <span style="font-size:1.5rem; font-weight:700; color:#312e81;"><?= $emp_stats['total'] ?></span>
+                    </div>
+                    <div style="background:#dcfce7; padding:1rem; border-radius:1rem; text-align:center;">
+                        <span style="display:block; font-size:0.8rem; color:#166534;">Total Consumed</span>
+                        <span style="font-size:1.5rem; font-weight:700; color:#14532d;"><?= $emp_stats['taken'] ?></span>
+                    </div>
+                    <div style="background:#ffedd5; padding:1rem; border-radius:1rem; text-align:center;">
+                        <span style="display:block; font-size:0.8rem; color:#9a3412;">Balance</span>
+                        <span style="font-size:1.5rem; font-weight:700; color:#7c2d12;"><?= $emp_stats['balance'] ?></span>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <?php if (empty($requests)): ?>
             <div style="padding: 2rem; text-align: center; color: #64748b;">
