@@ -28,13 +28,17 @@ function isActive($page)
                 <i data-lucide="chevron-right" class="icon chevron-icon"></i>
             </button>
             <div id="employeeSubNav" class="sub-nav">
-                <a href="#" class="sub-nav-item">
+                <a href="designation.php" class="sub-nav-item">
                     <i data-lucide="briefcase" class="icon" style="width:16px;height:16px;"></i>
                     <span>Designation</span>
                 </a>
-                <a href="#" class="sub-nav-item">
+                <a href="department.php" class="sub-nav-item">
                     <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
                     <span>Department</span>
+                </a>
+                <a href="add_employee.php" class="sub-nav-item">
+                    <i data-lucide="user-plus" class="icon" style="width:16px;height:16px;"></i>
+                    <span>Onboard Employee</span>
                 </a>
             </div>
         </div>
