@@ -317,7 +317,8 @@ body {
     color: hsl(var(--color-primary));
 }
 
-.badge {
+/* Renamed from .badge to avoid conflict */
+.notification-dot {
     position: absolute;
     top: -2px;
     right: -2px;
@@ -331,6 +332,18 @@ body {
     align-items: center;
     justify-content: center;
     border: 2px solid white;
+}
+
+/* Generic Badge for Tables/Status */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: normal;
 }
 
 .badge.warning {
