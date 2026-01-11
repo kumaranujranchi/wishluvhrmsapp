@@ -2,6 +2,57 @@
 // Include necessary files
 require_once 'config/db.php';
 include 'includes/header.php';
+
+// --- STATS CALCULATION ---
+
+// 1. Total Employees
+$stmt = $conn->query("SELECT COUNT(*) FROM employees");
+$total_employees = $stmt->fetchColumn();
+
+// 2. Present Today
+$today = date('Y-m-d');
+$stmt = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :date AND status IN ('Present', 'Late', 'Half Day')");
+$stmt->execute(['date' => $today]);
+$present_today = $stmt->fetchColumn();
+
+// 3. Late Today (for On Time Calc)
+$stmt = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :date AND status = 'Late'");
+$stmt->execute(['date' => $today]);
+$late_today = $stmt->fetchColumn();
+
+// Note: On Time = (Present - Late) / Present * 100 which might be weird if 0 present.
+// Alternative: On Time % of Total Employees or just % of Present who are on time.
+// Let's go with: Present On Time = (Present - Late). % = (Present On Time / Present) * 100
+$on_time_percentage = 0;
+if ($present_today > 0) {
+    $on_time_percentage = round((($present_today - $late_today) / $present_today) * 100);
+}
+
+// --- CHART DATA (Last 7 Days) ---
+// We will generate the bar heights dynamically.
+$chart_data = [];
+$chart_days = [];
+for ($i = 6; $i >= 0; $i--) {
+    $d = date('Y-m-d', strtotime("-$i days"));
+    $chart_days[] = date('D', strtotime($d)); // Mon, Tue...
+
+    $s = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND status IN ('Present', 'Late', 'Half Day')");
+    $s->execute(['d' => $d]);
+    $count = $s->fetchColumn();
+    // Normalize height for CSS (max 100%) - assuming max employees is total_employees
+    $height = ($total_employees > 0) ? round(($count / $total_employees) * 100) : 0;
+    $chart_data[] = $height;
+}
+
+
+// --- DEPARTMENT DATA ---
+$sql_dept = "SELECT d.name, COUNT(e.id) as emp_count 
+             FROM departments d 
+             LEFT JOIN employees e ON d.id = e.department_id 
+             GROUP BY d.id 
+             ORDER BY emp_count DESC LIMIT 5";
+$dept_stats = $conn->query($sql_dept)->fetchAll();
+
 ?>
 
 <div class="page-content dashboard">
@@ -11,13 +62,14 @@ include 'includes/header.php';
             <p class="page-subtitle">Welcome back, Admin! Here's what's happening today.</p>
         </div>
         <div class="dashboard-actions">
-            <button class="btn-primary">+ Add Schedule</button>
+            <!-- <button class="btn-primary">+ Add Schedule</button> -->
+            <span style="color:#64748b; font-size:0.9rem;"><?= date('l, d F Y') ?></span>
         </div>
     </div>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
-        <!-- Card 1 -->
+        <!-- Card 1: Total Employees -->
         <div class="card stats-card" style="border-left: 4px solid #3b82f6;">
             <div class="stats-icon-wrapper">
                 <i data-lucide="users" class="icon" style="color: hsl(220, 70%, 50%); width:24px; height:24px;"></i>
@@ -25,60 +77,54 @@ include 'includes/header.php';
             <div class="stats-info">
                 <span class="stats-title">Total Employees</span>
                 <div class="stats-value-row">
-                    <h3 class="stats-value">154</h3>
-                    <span class="stats-trend positive">
-                        <i data-lucide="trending-up" style="width:14px; height:14px;"></i> +5%
-                    </span>
+                    <h3 class="stats-value"><?= $total_employees ?></h3>
                 </div>
             </div>
         </div>
 
-        <!-- Card 2 -->
-        <div class="card stats-card" style="border-left: 4px solid #ec4899;">
-            <div class="stats-icon-wrapper">
-                <i data-lucide="briefcase" class="icon" style="color: hsl(340, 70%, 50%); width:24px; height:24px;"></i>
-            </div>
-            <div class="stats-info">
-                <span class="stats-title">Total Projects</span>
-                <div class="stats-value-row">
-                    <h3 class="stats-value">42</h3>
-                    <span class="stats-trend positive">
-                        <i data-lucide="trending-up" style="width:14px; height:14px;"></i> +12%
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 3 -->
+        <!-- Card 2: Present Today (Replaced Projects) -->
         <div class="card stats-card" style="border-left: 4px solid #10b981;">
             <div class="stats-icon-wrapper">
-                <i data-lucide="check-circle" class="icon"
+                <i data-lucide="user-check" class="icon"
                     style="color: hsl(150, 70%, 40%); width:24px; height:24px;"></i>
             </div>
             <div class="stats-info">
-                <span class="stats-title">On Time</span>
+                <span class="stats-title">Present Today</span>
                 <div class="stats-value-row">
-                    <h3 class="stats-value">98%</h3>
-                    <span class="stats-trend positive">
-                        <i data-lucide="trending-up" style="width:14px; height:14px;"></i> +2%
+                    <h3 class="stats-value"><?= $present_today ?></h3>
+                    <span class="stats-trend positive" style="font-size: 0.8rem; color: #64748b;">
+                        / <?= $total_employees ?>
                     </span>
                 </div>
             </div>
         </div>
 
-        <!-- Card 4 -->
+        <!-- Card 3: On Time % -->
+        <div class="card stats-card" style="border-left: 4px solid #8b5cf6;">
+            <div class="stats-icon-wrapper">
+                <i data-lucide="clock" class="icon" style="color: hsl(260, 70%, 60%); width:24px; height:24px;"></i>
+            </div>
+            <div class="stats-info">
+                <span class="stats-title">On Time Strength</span>
+                <div class="stats-value-row">
+                    <h3 class="stats-value"><?= $on_time_percentage ?>%</h3>
+                    <span class="stats-trend" style="font-size:0.8rem; color:#64748b;">
+                        of present
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Late Today (Replaced Revenue) -->
         <div class="card stats-card" style="border-left: 4px solid #f59e0b;">
             <div class="stats-icon-wrapper">
-                <i data-lucide="dollar-sign" class="icon"
+                <i data-lucide="alert-circle" class="icon"
                     style="color: hsl(40, 90%, 50%); width:24px; height:24px;"></i>
             </div>
             <div class="stats-info">
-                <span class="stats-title">Revenue (Mo)</span>
+                <span class="stats-title">Late Arrivals</span>
                 <div class="stats-value-row">
-                    <h3 class="stats-value">$54,230</h3>
-                    <span class="stats-trend positive">
-                        <i data-lucide="trending-up" style="width:14px; height:14px;"></i> +8%
-                    </span>
+                    <h3 class="stats-value"><?= $late_today ?></h3>
                 </div>
             </div>
         </div>
@@ -88,24 +134,17 @@ include 'includes/header.php';
         <!-- Chart Section -->
         <div class="card left-panel">
             <div class="card-header">
-                <h3>Attendance Overview</h3>
-                <button class="icon-btn" style="border:none; background:none; cursor:pointer;">
-                    <i data-lucide="more-horizontal" class="icon"></i>
-                </button>
+                <h3>Attendance Overview (Last 7 Days)</h3>
             </div>
             <div class="chart-placeholder">
-                <!-- Simulated Chart -->
+                <!-- Dynamic Bar Chart -->
                 <div class="bar-chart">
-                    <?php
-                    $data = [60, 80, 45, 90, 75, 50, 85];
-                    $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                    foreach ($data as $key => $h) {
-                        echo '<div class="bar-wrapper">
-                                <div class="bar" style="height: ' . $h . '%;"></div>
-                                <span class="label">' . $days[$key] . '</span>
-                              </div>';
-                    }
-                    ?>
+                    <?php foreach ($chart_data as $key => $height): ?>
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: <?= $height ?>%;"></div>
+                            <span class="label"><?= $chart_days[$key] ?></span>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -114,68 +153,32 @@ include 'includes/header.php';
         <div class="card right-panel">
             <div class="card-header">
                 <h3>Employees by Department</h3>
-                <button class="icon-btn" style="border:none; background:none; cursor:pointer;">
-                    <i data-lucide="more-horizontal" class="icon"></i>
-                </button>
             </div>
             <div class="department-list">
-                <!-- Item 1 -->
-                <div class="dept-item">
-                    <div class="dept-info">
-                        <span>Engineering</span>
-                        <span class="dept-count">45 Employees</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 80%; background-color: var(--color-primary);">
+                <?php
+                $colors = ['var(--color-primary)', 'var(--color-secondary)', 'orange', 'teal', 'dodgerblue'];
+                $i = 0;
+                foreach ($dept_stats as $dept):
+                    $color = $colors[$i % count($colors)];
+                    // Calculate width % relative to total employees
+                    $width = ($total_employees > 0) ? round(($dept['emp_count'] / $total_employees) * 100) : 0;
+                    $i++;
+                    ?>
+                    <div class="dept-item">
+                        <div class="dept-info">
+                            <span><?= htmlspecialchars($dept['name']) ?></span>
+                            <span class="dept-count"><?= $dept['emp_count'] ?> Employees</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: <?= $width ?>%; background-color: <?= $color ?>;">
+                            </div>
                         </div>
                     </div>
-                </div>
+                <?php endforeach; ?>
 
-                <!-- Item 2 -->
-                <div class="dept-item">
-                    <div class="dept-info">
-                        <span>Design</span>
-                        <span class="dept-count">24 Employees</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 60%; background-color: var(--color-secondary);">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Item 3 -->
-                <div class="dept-item">
-                    <div class="dept-info">
-                        <span>Marketing</span>
-                        <span class="dept-count">18 Employees</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 40%; background-color: orange;"></div>
-                    </div>
-                </div>
-
-                <!-- Item 4 -->
-                <div class="dept-item">
-                    <div class="dept-info">
-                        <span>HR</span>
-                        <span class="dept-count">8 Employees</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 20%; background-color: teal;"></div>
-                    </div>
-                </div>
-
-                <!-- Item 5 -->
-                <div class="dept-item">
-                    <div class="dept-info">
-                        <span>Sales</span>
-                        <span class="dept-count">32 Employees</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 55%; background-color: dodgerblue;"></div>
-                    </div>
-                </div>
-
+                <?php if (empty($dept_stats)): ?>
+                    <p style="padding:1rem; color:#64748b; text-align:center;">No departments found.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
