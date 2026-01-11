@@ -2,42 +2,25 @@
 require_once 'config/db.php';
 include 'includes/header.php';
 
-// Filter Date (Default Today)
-$filter_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+// Date Filter
+$filter_date = $_GET['date'] ?? date('Y-m-d');
 
 // --- STATS CALCULATION ---
-// 1. Total Employees
-$stmt = $conn->query("SELECT COUNT(*) FROM employees");
-$total_employees = $stmt->fetchColumn();
+$total_employees = $conn->query("SELECT COUNT(*) FROM employees")->fetchColumn();
+$present_count = $conn->prepare("SELECT COUNT(DISTINCT employee_id) FROM attendance WHERE date = :date");
+$present_count->execute(['date' => $filter_date]);
+$present_count = $present_count->fetchColumn();
 
-// 2. Present Today
-$stmt = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :date AND status IN ('Present', 'Late', 'Half Day')");
-$stmt->execute(['date' => $filter_date]);
-$present_count = $stmt->fetchColumn();
+$late_count = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :date AND status = 'Late'");
+$late_count->execute(['date' => $filter_date]);
+$late_count = $late_count->fetchColumn();
 
-// 3. Late Today
-$stmt = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :date AND status = 'Late'");
-$stmt->execute(['date' => $filter_date]);
-$late_count = $stmt->fetchColumn();
+// Avg Hours
+$avg_hours = $conn->prepare("SELECT AVG(total_hours) FROM attendance WHERE date = :date AND total_hours > 0");
+$avg_hours->execute(['date' => $filter_date]);
+$avg = round($avg_hours->fetchColumn(), 1);
 
-// 4. Avg Work Hours (Today)
-$stmt = $conn->prepare("SELECT AVG(total_hours) FROM attendance WHERE date = :date AND total_hours > 0");
-$stmt->execute(['date' => $filter_date]);
-$avg_hours = round($stmt->fetchColumn(), 1);
-
-// --- FETCH ATTENDANCE LIST ---
-// Join with employees to get names and departments
-$sql = "SELECT e.id, e.first_name, e.last_name, e.employee_code, e.avatar, d.name as dept_name, a.clock_in, a.clock_out, a.status, a.total_hours 
-        FROM employees e 
-        LEFT JOIN departments d ON e.department_id = d.id 
-        LEFT JOIN attendance a ON e.id = a.employee_id AND a.date = :date 
-        ORDER BY e.first_name ASC";
-
-$stmt = $conn->prepare($sql);
-$stmt->execute(['date' => $filter_date]);
-$attendance_list = $stmt->fetchAll();
-
-// --- CHART DATA (Last 7 Days Trend) ---
+// --- CHART DATA (Last 7 Days) ---
 $chart_labels = [];
 $chart_present = [];
 $chart_late = [];
@@ -45,276 +28,226 @@ $chart_late = [];
 for ($i = 6; $i >= 0; $i--) {
     $d = date('Y-m-d', strtotime("-$i days"));
     $chart_labels[] = date('d M', strtotime($d));
-
-    // Count Present
-    $s1 = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND status IN ('Present', 'Late', 'Half Day')");
-    $s1->execute(['d' => $d]);
-    $chart_present[] = $s1->fetchColumn();
-
-    // Count Late
-    $s2 = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND status = 'Late'");
-    $s2->execute(['d' => $d]);
-    $chart_late[] = $s2->fetchColumn();
+    
+    // Present
+    $p = $conn->prepare("SELECT COUNT(DISTINCT employee_id) FROM attendance WHERE date = :d");
+    $p->execute(['d' => $d]);
+    $chart_present[] = $p->fetchColumn();
+    
+    // Late
+    $l = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND status = 'Late'");
+    $l->execute(['d' => $d]);
+    $chart_late[] = $l->fetchColumn();
 }
 
+
+// --- ATTENDANCE LIST ---
+// Fetch attendance combined with employee details
+$sql = "SELECT a.*, e.first_name, e.last_name, e.employee_code, e.avatar, d.name as dept_name 
+        FROM attendance a 
+        JOIN employees e ON a.employee_id = e.id 
+        LEFT JOIN departments d ON e.department_id = d.id 
+        WHERE a.date = :date 
+        ORDER BY a.clock_in DESC";
+$stmt = $conn->prepare($sql);
+$stmt->execute(['date' => $filter_date]);
+$attendance_records = $stmt->fetchAll();
+
+// CSV Export Logic
+if (isset($_POST['export_csv'])) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="attendance_' . $filter_date . '.csv"');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Employee', 'Code', 'Department', 'Date', 'Status', 'Clock In', 'Location In', 'Clock Out', 'Location Out', 'Total Hours']);
+    
+    foreach ($attendance_records as $row) {
+        fputcsv($output, [
+            $row['first_name'] . ' ' . $row['last_name'],
+            $row['employee_code'],
+            $row['dept_name'],
+            $row['date'],
+            $row['status'],
+            $row['clock_in'],
+            $row['clock_in_address'],
+            $row['clock_out'],
+            $row['clock_out_address'],
+            $row['total_hours']
+        ]);
+    }
+    fclose($output);
+    exit;
+}
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <div class="page-content">
-    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <h2 class="page-title">Attendance Overview</h2>
-            <p class="page-subtitle">Track daily attendance and employee performance.</p>
-        </div>
-
-        <div style="display:flex; gap: 1rem;">
-            <!-- Date Filter -->
-            <form method="GET"
-                style="display:flex; align-items:center; gap:0.5rem; background:white; padding:0.5rem; border-radius:8px; border:1px solid #e2e8f0;">
-                <i data-lucide="calendar" style="width:16px; color:#64748b;"></i>
-                <input type="date" name="date" value="<?= $filter_date ?>" onchange="this.form.submit()"
-                    style="border:none; outline:none; color:#475569; font-family:inherit;">
-            </form>
-
-            <button class="btn-primary" onclick="exportCSV()">
-                <i data-lucide="download" style="width:18px; margin-right:8px;"></i> Download Report
-            </button>
-        </div>
-    </div>
-
+    
     <!-- Stats Cards -->
-    <div class="stats-grid"
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-
-        <!-- Total Employees -->
-        <div class="card" style="padding: 1.5rem; display:flex; align-items:center; gap:1rem;">
-            <div
-                style="width:50px; height:50px; border-radius:12px; background:hsl(220, 90%, 96%); color:hsl(220, 90%, 56%); display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="users" style="width:24px; height:24px;"></i>
-            </div>
-            <div>
-                <div style="font-size: 0.9rem; color: #64748b; font-weight:500;">Total Employees</div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">
-                    <?= $total_employees ?>
-                </div>
-            </div>
+    <div class="stats-grid">
+        <div class="card stats-card" style="border-left: 4px solid #3b82f6;">
+           <div class="stats-info">
+               <span class="stats-title">Total Employees</span>
+               <h3 class="stats-value"><?= $total_employees ?></h3>
+           </div>
+           <div class="stats-icon-wrapper"><i data-lucide="users" class="icon" style="color:#3b82f6;"></i></div>
         </div>
-
-        <!-- Present Today -->
-        <div class="card" style="padding: 1.5rem; display:flex; align-items:center; gap:1rem;">
-            <div
-                style="width:50px; height:50px; border-radius:12px; background:hsl(142, 76%, 96%); color:hsl(142, 76%, 36%); display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="check-circle-2" style="width:24px; height:24px;"></i>
-            </div>
-            <div>
-                <div style="font-size: 0.9rem; color: #64748b; font-weight:500;">Present Today</div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">
-                    <?= $present_count ?> <span style="font-size:0.9rem; color:#64748b; font-weight:400;">/
-                        <?= $total_employees ?>
-                    </span>
-                </div>
-            </div>
+        <div class="card stats-card" style="border-left: 4px solid #10b981;">
+           <div class="stats-info">
+               <span class="stats-title">Present Today</span>
+               <h3 class="stats-value"><?= $present_count ?></h3>
+           </div>
+           <div class="stats-icon-wrapper"><i data-lucide="user-check" class="icon" style="color:#10b981;"></i></div>
         </div>
-
-        <!-- Late Today -->
-        <div class="card" style="padding: 1.5rem; display:flex; align-items:center; gap:1rem;">
-            <div
-                style="width:50px; height:50px; border-radius:12px; background:hsl(0, 84%, 96%); color:hsl(0, 84%, 60%); display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="clock" style="width:24px; height:24px;"></i>
-            </div>
-            <div>
-                <div style="font-size: 0.9rem; color: #64748b; font-weight:500;">Late Today</div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">
-                    <?= $late_count ?>
-                </div>
-            </div>
+        <div class="card stats-card" style="border-left: 4px solid #f59e0b;">
+           <div class="stats-info">
+               <span class="stats-title">Late Today</span>
+               <h3 class="stats-value"><?= $late_count ?></h3>
+           </div>
+           <div class="stats-icon-wrapper"><i data-lucide="clock" class="icon" style="color:#f59e0b;"></i></div>
         </div>
-
-        <!-- Avg Hours -->
-        <div class="card" style="padding: 1.5rem; display:flex; align-items:center; gap:1rem;">
-            <div
-                style="width:50px; height:50px; border-radius:12px; background:hsl(250, 90%, 96%); color:hsl(250, 90%, 60%); display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="timer" style="width:24px; height:24px;"></i>
-            </div>
-            <div>
-                <div style="font-size: 0.9rem; color: #64748b; font-weight:500;">Avg. Work Hours</div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">
-                    <?= $avg_hours ?>h
-                </div>
-            </div>
+        <div class="card stats-card" style="border-left: 4px solid #8b5cf6;">
+           <div class="stats-info">
+               <span class="stats-title">Avg. Hours</span>
+               <h3 class="stats-value"><?= $avg ?> hr</h3>
+           </div>
+           <div class="stats-icon-wrapper"><i data-lucide="timer" class="icon" style="color:#8b5cf6;"></i></div>
         </div>
     </div>
 
     <!-- Chart Section -->
-    <div class="card" style="padding: 1.5rem; margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; color: #334155;">Attendance Flow (Last 7 Days)</h3>
-        <div style="height: 300px;">
-            <canvas id="attendanceChart"></canvas>
+    <div class="content-grid" style="grid-template-columns: 1fr; margin-bottom: 2rem;">
+        <div class="card">
+            <div class="card-header">
+                <h3>Attendance Trends (Last 7 Days)</h3>
+            </div>
+            <div style="height: 300px; padding: 1rem;">
+                <canvas id="attendanceChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <!-- Attendance List -->
+    <!-- Filters & List -->
     <div class="card">
-        <div class="card-header">
-            <h3>Daily Report -
-                <?= date('d M Y', strtotime($filter_date)) ?>
-            </h3>
+        <div class="card-header" style="justify-content: space-between;">
+            <h3>Daily Attendance</h3>
+            <form method="GET" class="filter-form" style="display:flex; gap:10px;">
+                <input type="date" name="date" class="form-control" value="<?= $filter_date ?>" onchange="this.form.submit()">
+                <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem;">Filter</button>
+            </form>
+             <form method="POST">
+                <button type="submit" name="export_csv" class="btn-primary" style="background:var(--color-success); border-color:var(--color-success);">
+                    <i data-lucide="download" style="width:16px; margin-right:5px;"></i> Export CSV
+                </button>
+            </form>
         </div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Employee</th>
-                    <th>Department</th>
-                    <th>Status</th>
-                    <th>Clock In</th>
-                    <th>Clock Out</th>
-                    <th>Hours</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($attendance_list as $row):
-                    $status_color = 'gray';
-                    if ($row['status'] == 'Present')
-                        $status_color = 'green';
-                    if ($row['status'] == 'Absent')
-                        $status_color = 'red';
-                    if ($row['status'] == 'Late')
-                        $status_color = 'orange';
-                    if ($row['status'] == 'Half Day')
-                        $status_color = 'yellow';
-
-                    // Fallback Status if no record
-                    $display_status = $row['status'] ?? 'Absent';
-                    if ($row['status'] == null)
-                        $status_color = 'red';
-                    ?>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>
-                            <div style="display:flex; align-items:center; gap:0.75rem;">
-                                <!-- Avatar or Initials -->
-                                <div
-                                    style="width:36px; height:36px; border-radius:50%; background: #f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:bold; color:#64748b; flex-shrink:0;">
-                                    <?php if (!empty($row['avatar'])): ?>
-                                        <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
+                        <th>Employee</th>
+                        <th>Status</th>
+                        <th>Check In</th>
+                        <th>Location In</th>
+                        <th>Check Out</th>
+                        <th>Location Out</th>
+                        <th>Total Hrs</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($attendance_records as $row): ?>
+                        <tr>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div style="width:35px; height:35px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:bold; color:#64748b;">
+                                        <?php if ($row['avatar']): ?>
+                                            <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
+                                        <?php else: ?>
+                                            <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:500;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
+                                        <div style="font-size:0.75rem; color:#64748b;"><?= htmlspecialchars($row['dept_name']) ?></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <?php 
+                                    $sColor = match($row['status']) {
+                                        'Present' => 'background:#dcfce7; color:#166534;',
+                                        'Late' => 'background:#fef9c3; color:#854d0e;',
+                                        'Half Day' => 'background:#ffedd5; color:#9a3412;',
+                                        'Absent' => 'background:#fee2e2; color:#991b1b;',
+                                        default => 'background:#f1f5f9; color:#475569;'
+                                    };
+                                ?>
+                                <span class="badge" style="<?= $sColor ?>"><?= $row['status'] ?></span>
+                            </td>
+                            <td style="font-weight:500;"><?= date('h:i A', strtotime($row['clock_in'])) ?></td>
+                            <td>
+                                <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_in_address']) ?>">
+                                    <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                    <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                                </div>
+                            </td>
+                            <td style="font-weight:500;"><?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '<span style="color:#cbd5e1;">--:--</span>' ?></td>
+                            <td>
+                                <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_out_address']) ?>">
+                                    <?php if($row['clock_out_address']): ?>
+                                        <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                        <?= htmlspecialchars($row['clock_out_address']) ?>
                                     <?php else: ?>
-                                        <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
+                                        <span style="color:#cbd5e1;">-</span>
                                     <?php endif; ?>
                                 </div>
-                                <div>
-                                    <div style="font-weight:500; color:#1e293b;">
-                                        <?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?>
-                                    </div>
-                                    <div style="font-size:0.8rem; color:#64748b;">
-                                        <?= htmlspecialchars($row['employee_code']) ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge" style="background:#f8fafc; color:#475569; border:1px solid #e2e8f0;">
-                                <?= htmlspecialchars($row['dept_name'] ?? '-') ?>
-                            </span></td>
-                        <td>
-                            <span class="badge" style="
-                            <?php
-                            if ($display_status == 'Present')
-                                echo 'background:#dcfce7; color:#166534;';
-                            elseif ($display_status == 'Absent')
-                                echo 'background:#fee2e2; color:#991b1b;';
-                            elseif ($display_status == 'Late')
-                                echo 'background:#ffedd5; color:#9a3412;';
-                            else
-                                echo 'background:#f1f5f9; color:#475569;';
-                            ?>
-                        ">
-                                <?= $display_status ?>
-                            </span>
-                        </td>
-                        <td style="font-family:monospace;">
-                            <?= $row['clock_in'] ? date('h:i A', strtotime($row['clock_in'])) : '--:--' ?>
-                        </td>
-                        <td style="font-family:monospace;">
-                            <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '--:--' ?>
-                        </td>
-                        <td>
-                            <?= $row['total_hours'] ? $row['total_hours'] . 'h' : '-' ?>
-                        </td>
-                        <td>
-                            <button class="btn-icon" title="Edit Attendance (Not Implemented)">
-                                <i data-lucide="more-horizontal" style="width:16px;"></i>
-                            </button>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                            </td>
+                            <td style="font-weight:600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></td>
+                            <td style="text-align:right;">
+                                <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>" target="_blank" class="btn-icon" title="View Map" style="display:inline-flex; align-items:center; justify-content:center;">
+                                    <i data-lucide="map" style="width:16px;"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($attendance_records)): ?>
+                        <tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No attendance records for this date.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Initialize Chart
+    // Chart Config
     const ctx = document.getElementById('attendanceChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
         data: {
             labels: <?= json_encode($chart_labels) ?>,
-            datasets: [
-                {
-                    label: 'Present',
-                    data: <?= json_encode($chart_present) ?>,
-                    backgroundColor: '#10b981',
-                    borderRadius: 4,
-                },
-                {
-                    label: 'Late',
-                    data: <?= json_encode($chart_late) ?>,
-                    backgroundColor: '#f59e0b',
-                    borderRadius: 4,
-                }
-            ]
+            datasets: [{
+                label: 'Present',
+                data: <?= json_encode($chart_present) ?>,
+                backgroundColor: '#10b981',
+                borderRadius: 4
+            }, {
+                label: 'Late',
+                data: <?= json_encode($chart_late) ?>,
+                backgroundColor: '#f59e0b',
+                borderRadius: 4
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            },
             scales: {
-                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                x: { grid: { display: false } }
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
             }
         }
     });
-
-    // CSV Export Function
-    function exportCSV() {
-        const rows = [
-            ['Employee Code', 'Name', 'Department', 'Date', 'Status', 'Clock In', 'Clock Out', 'Hours'],
-            <?php foreach ($attendance_list as $row): ?>
-                [
-                    "<?= $row['employee_code'] ?>",
-                    "<?= $row['first_name'] . ' ' . $row['last_name'] ?>",
-                    "<?= $row['dept_name'] ?>",
-                    "<?= $filter_date ?>",
-                    "<?= $row['status'] ?? 'Absent' ?>",
-                    "<?= $row['clock_in'] ?? '' ?>",
-                    "<?= $row['clock_out'] ?? '' ?>",
-                    "<?= $row['total_hours'] ?? '0' ?>"
-                ],
-            <?php endforeach; ?>
-        ];
-
-        let csvContent = "data:text/csv;charset=utf-8,"
-            + rows.map(e => e.join(",")).join("\n");
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "attendance_report_<?= $filter_date ?>.csv");
-        document.body.appendChild(link);
-        link.click();
-    }
 </script>
 
 <?php include 'includes/footer.php'; ?>
