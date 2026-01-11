@@ -43,14 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 return $targetPath;
             }
         }
-        return null; // Return null if update not needed/failed
+        return null;
     }
 
     $pan_doc = uploadDoc('pan_doc');
     $aadhar_doc = uploadDoc('aadhar_doc');
     $bank_doc = uploadDoc('bank_doc');
 
-    // Build Update Query dynamically
+    // Build Update Query
     $sql = "UPDATE employees SET 
             fathers_name = :fname,
             dob = :dob,
@@ -105,9 +105,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
         $stmt = $conn->prepare($sql);
         $stmt->execute($params);
-        $message = "<div class='alert success'>Profile updated successfully!</div>";
+        $message = "<div class='alert success' style='background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #bbf7d0;'>
+                        <div style='display: flex; align-items: center; gap: 10px;'>
+                            <i data-lucide='check-circle'></i>
+                            <span>Profile updated successfully!</span>
+                        </div>
+                    </div>";
     } catch (PDOException $e) {
-        $message = "<div class='alert error'>Error updating profile: " . $e->getMessage() . "</div>";
+        $message = "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>Error: " . $e->getMessage() . "</div>";
     }
 }
 
@@ -119,206 +124,526 @@ $stmt = $conn->prepare("SELECT e.*, d.name as dept_name, deg.name as desig_name 
 $stmt->execute(['id' => $user_id]);
 $user = $stmt->fetch();
 
+// Calculate Completion Percentage
+$total_fields = 18; // approx key fields
+$filled = 0;
+if (!empty($user['fathers_name']))
+    $filled++;
+if (!empty($user['dob']))
+    $filled++;
+if (!empty($user['marriage_anniversary']))
+    $filled++;
+if (!empty($user['personal_email']))
+    $filled++;
+if (!empty($user['personal_phone']))
+    $filled++;
+if (!empty($user['official_phone']))
+    $filled++;
+if (!empty($user['emergency_contact_name']))
+    $filled++;
+if (!empty($user['emergency_contact_phone']))
+    $filled++;
+if (!empty($user['pan_number']))
+    $filled++;
+if (!empty($user['pan_doc']))
+    $filled++;
+if (!empty($user['aadhar_number']))
+    $filled++;
+if (!empty($user['aadhar_doc']))
+    $filled++;
+if (!empty($user['bank_account_number']))
+    $filled++;
+if (!empty($user['bank_ifsc']))
+    $filled++;
+if (!empty($user['bank_doc']))
+    $filled++;
+if (!empty($user['uan_number']))
+    $filled++;
+if (!empty($user['pf_number']))
+    $filled++;
+
+// Base percentage (official info always there)
+$percentage = min(100, round(($filled / $total_fields) * 100));
 ?>
 
-<div class="page-content">
-    <div class="page-header">
-        <h2 class="page-title">My Profile</h2>
-        <p class="page-subtitle">Update your personal and professional details.</p>
-    </div>
+<style>
+    /* Premium Page Styling */
+    .profile-hero {
+        background: linear-gradient(135deg, hsl(250, 84%, 54%), hsl(280, 84%, 54%));
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.5);
+    }
 
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .user-big-avatar {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .completion-bar-container {
+        width: 200px;
+        text-align: right;
+    }
+
+    .progress-track {
+        background: rgba(255, 255, 255, 0.3);
+        height: 8px;
+        border-radius: 4px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        background: #fff;
+        height: 100%;
+        border-radius: 4px;
+        width:
+            <?= $percentage ?>
+            %;
+        transition: width 1s ease-in-out;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        border: 1px solid #f1f5f9;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f8fafc;
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        background: #f0f9ff;
+        color: var(--color-primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .modern-form-group label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .modern-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.2s;
+        background: #f8fafc;
+    }
+
+    .modern-input:focus {
+        border-color: var(--color-primary);
+        background: white;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .modern-input:disabled {
+        background: #f1f5f9;
+        color: #94a3b8;
+        cursor: not-allowed;
+    }
+
+    /* File Upload Styling */
+    .file-upload-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        background: #f8fafc;
+    }
+
+    .file-upload-box:hover {
+        border-color: var(--color-primary);
+        background: #eef2ff;
+    }
+
+    .file-input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .update-btn {
+        background: linear-gradient(135deg, hsl(250, 84%, 60%), hsl(280, 84%, 60%));
+        color: white;
+        padding: 1rem 3rem;
+        border-radius: 50px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.3);
+        transition: transform 0.2s;
+    }
+
+    .update-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.4);
+    }
+
+    .current-doc {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #dbeafe;
+        color: #1e40af;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    /* Layout Grids */
+    .content-grid.three-column {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+        .content-grid.three-column {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .content-grid.two-column,
+        .content-grid.three-column {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+
+        .completion-bar-container {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="page-content">
     <?= $message ?>
+
+    <div class="profile-hero">
+        <div class="hero-content">
+            <div style="display:flex; align-items:center; gap: 1.5rem;">
+                <div class="user-big-avatar">
+                    <?php if (!empty($user['avatar'])): ?>
+                        <img src="<?= $user['avatar'] ?>"
+                            style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    <?php else: ?>
+                        <?= strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)) ?>
+                    <?php endif; ?>
+                </div>
+                <div>
+                    <h1 style="margin:0; font-size:2rem;">
+                        <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h1>
+                    <p style="margin:5px 0 0; opacity:0.9;"><?= htmlspecialchars($user['desig_name'] ?? 'Employee') ?>
+                        &bull; <?= htmlspecialchars($user['dept_name'] ?? '-') ?></p>
+                </div>
+            </div>
+
+            <div class="completion-bar-container">
+                <span style="font-weight:600; font-size: 0.9rem;">Profile Completion: <?= $percentage ?>%</span>
+                <div class="progress-track">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <form method="POST" action="" enctype="multipart/form-data">
 
-        <!-- Section: Basic Info (Read Only mainly) -->
-        <div class="card" style="margin-bottom:2rem;">
-            <div class="card-header">
-                <h3>Official Info (Read Only)</h3>
+        <!-- Official Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon"><i data-lucide="briefcase"></i></div>
+                <h3 class="section-title">Official Details</h3>
             </div>
-            <div class="content-grid two-column" style="padding: 1.5rem;">
-                <div class="form-group">
+            <div class="content-grid three-column">
+                <div class="modern-form-group">
                     <label>Employee Code</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($user['employee_code']) ?>"
-                        readonly disabled>
-                </div>
-                <div class="form-group">
-                    <label>Joining Date</label>
-                    <input type="text" class="form-control"
-                        value="<?= date('d M Y', strtotime($user['joining_date'])) ?>" readonly disabled>
-                </div>
-                <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($user['dept_name'] ?? 'N/A') ?>"
-                        readonly disabled>
-                </div>
-                <div class="form-group">
-                    <label>Designation</label>
-                    <input type="text" class="form-control"
-                        value="<?= htmlspecialchars($user['desig_name'] ?? 'N/A') ?>" readonly disabled>
-                </div>
-                <div class="form-group">
-                    <label>Official Email (Login)</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" readonly
+                    <input type="text" class="modern-input" value="<?= htmlspecialchars($user['employee_code']) ?>"
                         disabled>
+                </div>
+                <div class="modern-form-group">
+                    <label>Official Email</label>
+                    <input type="text" class="modern-input" value="<?= htmlspecialchars($user['email']) ?>" disabled>
+                </div>
+                <div class="modern-form-group">
+                    <label>Date of Joining</label>
+                    <input type="text" class="modern-input"
+                        value="<?= date('d M Y', strtotime($user['joining_date'])) ?>" disabled>
                 </div>
             </div>
         </div>
 
-        <!-- Section: Personal Info -->
-        <div class="card" style="margin-bottom:2rem;">
-            <div class="card-header">
-                <h3>Personal Information</h3>
+        <!-- Personal Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon" style="background: #fdf2f8; color: #db2777;"><i data-lucide="user"></i></div>
+                <h3 class="section-title">Personal Information</h3>
             </div>
-            <div class="content-grid two-column" style="padding: 1.5rem;">
-                <div class="form-group">
-                    <label>First Name</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($user['first_name']) ?>"
-                        readonly disabled>
-                </div>
-                <div class="form-group">
-                    <label>Last Name</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($user['last_name']) ?>" readonly
-                        disabled>
-                </div>
-                <div class="form-group">
+            <div class="content-grid three-column">
+                <div class="modern-form-group">
                     <label>Father's Name</label>
-                    <input type="text" name="fathers_name" class="form-control"
+                    <input type="text" name="fathers_name" class="modern-input" placeholder="Enter Full Name"
                         value="<?= htmlspecialchars($user['fathers_name'] ?? '') ?>">
                 </div>
-                <div class="form-group">
+                <div class="modern-form-group">
                     <label>Date of Birth</label>
-                    <input type="date" name="dob" class="form-control" value="<?= $user['dob'] ?? '' ?>">
+                    <input type="date" name="dob" class="modern-input" value="<?= $user['dob'] ?? '' ?>">
                 </div>
-                <div class="form-group">
+                <div class="modern-form-group">
                     <label>Marriage Anniversary</label>
-                    <input type="date" name="marriage_anniversary" class="form-control"
+                    <input type="date" name="marriage_anniversary" class="modern-input"
                         value="<?= $user['marriage_anniversary'] ?? '' ?>">
                 </div>
-                <div class="form-group">
+                <div class="modern-form-group">
                     <label>Personal Email</label>
-                    <input type="email" name="personal_email" class="form-control"
+                    <input type="email" name="personal_email" class="modern-input" placeholder="email@example.com"
                         value="<?= htmlspecialchars($user['personal_email'] ?? '') ?>">
                 </div>
             </div>
         </div>
 
-        <!-- Section: Contact Info -->
-        <div class="card" style="margin-bottom:2rem;">
-            <div class="card-header">
-                <h3>Contact Details</h3>
+        <!-- Contact Info -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon" style="background: #ecfdf5; color: #059669;"><i data-lucide="phone"></i></div>
+                <h3 class="section-title">Contact Information</h3>
             </div>
-            <div class="content-grid two-column" style="padding: 1.5rem;">
-                <div class="form-group">
-                    <label>Primary Mobile (Registered)</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>" readonly
-                        disabled>
-                </div>
-                <div class="form-group">
-                    <label>Personal Mobile Number</label>
-                    <input type="text" name="personal_phone" class="form-control"
+            <div class="content-grid three-column">
+                <div class="modern-form-group">
+                    <label>Personal Mobile</label>
+                    <input type="text" name="personal_phone" class="modern-input" placeholder="+91..."
                         value="<?= htmlspecialchars($user['personal_phone'] ?? '') ?>">
                 </div>
-                <div class="form-group">
-                    <label>Official Mobile Number</label>
-                    <input type="text" name="official_phone" class="form-control"
+                <div class="modern-form-group">
+                    <label>Official Mobile</label>
+                    <input type="text" name="official_phone" class="modern-input" placeholder="+91..."
                         value="<?= htmlspecialchars($user['official_phone'] ?? '') ?>">
+                </div>
+                <div class="modern-form-group">
+                    <label>Registered Primary</label>
+                    <input type="text" class="modern-input" value="<?= htmlspecialchars($user['phone']) ?>" disabled>
                 </div>
             </div>
 
-            <h4 style="padding: 0 1.5rem; margin-bottom: 1rem; color: #475569;">Emergency Contact</h4>
-            <div class="content-grid two-column" style="padding: 0 1.5rem 1.5rem 1.5rem;">
-                <div class="form-group">
-                    <label>Contact Name</label>
-                    <input type="text" name="emergency_contact_name" class="form-control"
-                        value="<?= htmlspecialchars($user['emergency_contact_name'] ?? '') ?>">
-                </div>
-                <div class="form-group">
-                    <label>Contact Number</label>
-                    <input type="text" name="emergency_contact_phone" class="form-control"
-                        value="<?= htmlspecialchars($user['emergency_contact_phone'] ?? '') ?>">
-                </div>
-                <div class="form-group">
-                    <label>Relation</label>
-                    <input type="text" name="emergency_contact_relation" class="form-control"
-                        value="<?= htmlspecialchars($user['emergency_contact_relation'] ?? '') ?>">
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed #e2e8f0;">
+                <h4 style="margin-bottom:1rem; color:#475569; font-size:1rem;">Emergency Contact</h4>
+                <div class="content-grid three-column">
+                    <div class="modern-form-group">
+                        <label>Name</label>
+                        <input type="text" name="emergency_contact_name" class="modern-input"
+                            placeholder="Relative Name"
+                            value="<?= htmlspecialchars($user['emergency_contact_name'] ?? '') ?>">
+                    </div>
+                    <div class="modern-form-group">
+                        <label>Number</label>
+                        <input type="text" name="emergency_contact_phone" class="modern-input"
+                            placeholder="Contact Number"
+                            value="<?= htmlspecialchars($user['emergency_contact_phone'] ?? '') ?>">
+                    </div>
+                    <div class="modern-form-group">
+                        <label>Relation</label>
+                        <input type="text" name="emergency_contact_relation" class="modern-input"
+                            placeholder="e.g. Father, Spouse"
+                            value="<?= htmlspecialchars($user['emergency_contact_relation'] ?? '') ?>">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Section: Documents & Bank -->
-        <div class="card" style="margin-bottom:2rem;">
-            <div class="card-header">
-                <h3>Documents & Banking</h3>
-            </div>
-            <div class="content-grid two-column" style="padding: 1.5rem;">
-                <!-- PAN -->
-                <div class="form-group">
-                    <label>PAN Number</label>
-                    <input type="text" name="pan_number" class="form-control"
-                        value="<?= htmlspecialchars($user['pan_number'] ?? '') ?>">
+        <!-- Documents -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon" style="background: #fff7ed; color: #ea580c;"><i data-lucide="file-text"></i>
                 </div>
-                <div class="form-group">
-                    <label>Upload PAN Card</label>
-                    <input type="file" name="pan_doc" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+                <h3 class="section-title">Documents & Identifiers</h3>
+            </div>
+            <div class="content-grid two-column">
+                <!-- PAN -->
+                <div style="background: #fff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                        <i data-lucide="credit-card" style="width:18px; color:#64748b;"></i>
+                        <span style="font-weight:600; color:#334155;">PAN Card Details</span>
+                    </div>
+                    <div class="modern-form-group" style="margin-bottom:1rem;">
+                        <label>PAN Number</label>
+                        <input type="text" name="pan_number" class="modern-input" placeholder="ABCDE1234F"
+                            value="<?= htmlspecialchars($user['pan_number'] ?? '') ?>">
+                    </div>
+                    <div class="file-upload-box">
+                        <input type="file" name="pan_doc" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
+                        <i data-lucide="upload-cloud"
+                            style="width:32px; height:32px; color:#94a3b8; margin-bottom:0.5rem;"></i>
+                        <p style="margin:0; font-size:0.9rem; color:#64748b;">Click to upload PAN Doc</p>
+                    </div>
                     <?php if (!empty($user['pan_doc'])): ?>
-                        <small><a href="<?= $user['pan_doc'] ?>" target="_blank" style="color:var(--color-primary);">View
-                                Current PAN</a></small>
+                        <div style="margin-top:0.5rem;"><a href="<?= $user['pan_doc'] ?>" target="_blank"
+                                class="current-doc"><i data-lucide="check" style="width:14px;"></i> Uploaded</a></div>
                     <?php endif; ?>
                 </div>
 
                 <!-- Aadhar -->
-                <div class="form-group">
-                    <label>Aadhar Number</label>
-                    <input type="text" name="aadhar_number" class="form-control"
-                        value="<?= htmlspecialchars($user['aadhar_number'] ?? '') ?>">
-                </div>
-                <div class="form-group">
-                    <label>Upload Aadhar Card</label>
-                    <input type="file" name="aadhar_doc" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+                <div style="background: #fff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                        <i data-lucide="fingerprint" style="width:18px; color:#64748b;"></i>
+                        <span style="font-weight:600; color:#334155;">Aadhar Card Details</span>
+                    </div>
+                    <div class="modern-form-group" style="margin-bottom:1rem;">
+                        <label>Aadhar Number</label>
+                        <input type="text" name="aadhar_number" class="modern-input" placeholder="0000 0000 0000"
+                            value="<?= htmlspecialchars($user['aadhar_number'] ?? '') ?>">
+                    </div>
+                    <div class="file-upload-box">
+                        <input type="file" name="aadhar_doc" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
+                        <i data-lucide="upload-cloud"
+                            style="width:32px; height:32px; color:#94a3b8; margin-bottom:0.5rem;"></i>
+                        <p style="margin:0; font-size:0.9rem; color:#64748b;">Click to upload Aadhar Doc</p>
+                    </div>
                     <?php if (!empty($user['aadhar_doc'])): ?>
-                        <small><a href="<?= $user['aadhar_doc'] ?>" target="_blank" style="color:var(--color-primary);">View
-                                Current Aadhar</a></small>
+                        <div style="margin-top:0.5rem;"><a href="<?= $user['aadhar_doc'] ?>" target="_blank"
+                                class="current-doc"><i data-lucide="check" style="width:14px;"></i> Uploaded</a></div>
                     <?php endif; ?>
                 </div>
+            </div>
+        </div>
 
-                <!-- Bank -->
-                <div class="form-group">
+        <!-- Banking -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon" style="background: #eff6ff; color: #2563eb;"><i data-lucide="landmark"></i>
+                </div>
+                <h3 class="section-title">Banking & PF Details</h3>
+            </div>
+
+            <div class="content-grid three-column">
+                <div class="modern-form-group">
                     <label>Bank Account Number</label>
-                    <input type="text" name="bank_account_number" class="form-control"
+                    <input type="text" name="bank_account_number" class="modern-input" placeholder="Account No."
                         value="<?= htmlspecialchars($user['bank_account_number'] ?? '') ?>">
                 </div>
-                <div class="form-group">
+                <div class="modern-form-group">
                     <label>IFSC Code</label>
-                    <input type="text" name="bank_ifsc" class="form-control"
+                    <input type="text" name="bank_ifsc" class="modern-input" placeholder="IFSC"
                         value="<?= htmlspecialchars($user['bank_ifsc'] ?? '') ?>">
                 </div>
-                <div class="form-group">
-                    <label>Upload Bank Proof (Passbook/Cheque)</label>
-                    <input type="file" name="bank_doc" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
+                <div class="modern-form-group">
+                    <label>Bank Proof</label>
+                    <div class="file-upload-box" style="padding: 0.5rem; height: auto;">
+                        <input type="file" name="bank_doc" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
+                        <div style="display:flex; align-items:center; gap:0.5rem; justify-content:center;">
+                            <i data-lucide="upload" style="width:16px;"></i>
+                            <span style="font-size:0.85rem; color:#64748b;">Upload Passbook</span>
+                        </div>
+                    </div>
                     <?php if (!empty($user['bank_doc'])): ?>
-                        <small><a href="<?= $user['bank_doc'] ?>" target="_blank" style="color:var(--color-primary);">View
-                                Current Bank Proof</a></small>
+                        <div style="text-align:center; margin-top:0.5rem;"><a href="<?= $user['bank_doc'] ?>"
+                                target="_blank" class="current-doc"><i data-lucide="check" style="width:14px;"></i>
+                                Viewed</a></div>
                     <?php endif; ?>
                 </div>
+            </div>
 
-                <!-- PF / UAN -->
-                <div class="form-group">
+            <div class="content-grid two-column" style="margin-top:1.5rem;">
+                <div class="modern-form-group">
                     <label>UAN Number</label>
-                    <input type="text" name="uan_number" class="form-control"
+                    <input type="text" name="uan_number" class="modern-input" placeholder="Universal Account Number"
                         value="<?= htmlspecialchars($user['uan_number'] ?? '') ?>">
                 </div>
-                <div class="form-group">
+                <div class="modern-form-group">
                     <label>PF Number</label>
-                    <input type="text" name="pf_number" class="form-control"
+                    <input type="text" name="pf_number" class="modern-input" placeholder="Provident Fund No."
                         value="<?= htmlspecialchars($user['pf_number'] ?? '') ?>">
                 </div>
             </div>
         </div>
 
-        <div style="text-align: right; margin-bottom: 3rem;">
-            <button type="submit" class="btn-primary" style="padding: 1rem 2rem; font-size: 1rem;">Update
-                Profile</button>
+        <!-- Action -->
+        <div style="text-align: center; margin-bottom: 4rem;">
+            <button type="submit" class="update-btn">
+                Save & Update Profile <i data-lucide="arrow-right"
+                    style="width:18px; margin-left:8px; vertical-align:middle;"></i>
+            </button>
         </div>
 
     </form>
