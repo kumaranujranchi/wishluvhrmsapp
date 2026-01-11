@@ -36,7 +36,11 @@ if (!isset($_SESSION['user_id'])) {
             <header class="header glass-panel">
                 <div style="flex: 1;">
                     <h2 style="margin:0; font-size:1.25rem; color:#1e293b;">Welcome,
-                        <?= htmlspecialchars($_SESSION['first_name'] ?? 'User') ?></h2>
+                        <?php
+                           $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
+                           echo htmlspecialchars($display_name);
+                        ?>
+                    </h2>
                     <p style="margin:0; font-size:0.85rem; color:#64748b;"><?= date('l, d F Y') ?></p>
                 </div>
 
@@ -44,11 +48,6 @@ if (!isset($_SESSION['user_id'])) {
                     <button class="action-btn" title="Notifications">
                         <i data-lucide="bell" class="icon"></i>
                     </button>
-                    <div class="user-mini-profile">
-                        <div
-                            style="width:35px; height:35px; background:linear-gradient(135deg, #6366f1, #a855f7); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.9rem;">
-                            <?= strtoupper(substr($_SESSION['first_name'] ?? 'U', 0, 1)) ?>
-                        </div>
-                    </div>
+                    <!-- User Icon Removed as per request -->
                 </div>
             </header>
