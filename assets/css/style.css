@@ -375,13 +375,15 @@ body {
 .card {
     background: hsl(var(--color-bg-card));
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); /* Softer shadow */
+    border: 1px solid #e2e8f0; /* Definitive border */
     padding: 1.5rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08); /* Stronger lift */
+    border-color: #cbd5e1;
 }
 
 .stats-card {
@@ -574,32 +576,39 @@ body {
 /* Tables */
 .table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
+    border-collapse: separate; /* Changed for border-radius support if needed */
+    border-spacing: 0;
+    font-size: 0.95rem;
 }
 
 .table th {
     text-align: left;
-    padding: 1rem;
-    border-bottom: 2px solid #f3f4f6;
-    color: hsl(var(--color-text-muted));
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid #cbd5e1; /* Darker border */
+    background-color: #f8fafc;
+    color: #475569;
     font-weight: 600;
 }
 
 .table td {
-    padding: 1rem;
-    border-bottom: 1px solid #f3f4f6;
-    color: hsl(var(--color-text-main));
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0; /* Darker than before */
+    color: #1e293b;
+    vertical-align: middle;
 }
 
 .table tr:last-child td {
     border-bottom: none;
 }
 
+.table tr:hover td {
+    background-color: #f8fafc; /* Hover effect */
+}
+
 /* Utilities */
 .content-grid {
     display: grid;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
 .two-column {
