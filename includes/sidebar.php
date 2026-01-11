@@ -67,7 +67,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             </div>
         </div>
 
-        <a href="#" class="nav-item">
+        <a href="attendance.php" class="nav-item <?php echo isActive('attendance'); ?>">
             <i data-lucide="calendar-check" class="icon"></i>
             <span>Attendance</span>
         </a>
