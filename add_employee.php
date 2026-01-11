@@ -5,6 +5,7 @@ include 'includes/header.php';
 // Fetch Dropdown Data
 $departments = $conn->query("SELECT * FROM departments ORDER BY name")->fetchAll();
 $designations = $conn->query("SELECT * FROM designations ORDER BY name")->fetchAll();
+$employees = $conn->query("SELECT id, first_name, last_name, employee_code FROM employees ORDER BY first_name")->fetchAll();
 
 // Handle Form Submission
 $message = "";
@@ -20,6 +21,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $salary = $_POST['salary'];
     $password = $_POST['password'];
 
+    // New Fields
+    $dob = $_POST['dob'] ?: null;
+    $anniversary = $_POST['marriage_anniversary'] ?: null;
+    $reporting_manager_id = $_POST['reporting_manager_id'] ?: null;
+
+    // File Upload Logic
+    $avatarPath = null;
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
+        $uploadDir = 'uploads/employees/';
+        if (!is_dir($uploadDir))
+            mkdir($uploadDir, 0777, true);
+
+        $fileName = time() . '_' . basename($_FILES['avatar']['name']);
+        $targetPath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['avatar']['tmp_name'], $targetPath)) {
+            $avatarPath = $targetPath;
+        }
+    }
+
     // Basic Validation
     if (!empty($first_name) && !empty($email) && !empty($password)) {
         // Hash Password
@@ -27,9 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         try {
             $stmt = $conn->prepare("INSERT INTO employees 
-                (employee_code, first_name, last_name, email, phone, department_id, designation_id, joining_date, salary, password, role) 
+                (employee_code, first_name, last_name, email, phone, department_id, designation_id, joining_date, salary, password, role, dob, marriage_anniversary, reporting_manager_id, avatar) 
                 VALUES 
-                (:code, :fname, :lname, :email, :phone, :dept, :desig, :jdate, :salary, :pass, 'Employee')");
+                (:code, :fname, :lname, :email, :phone, :dept, :desig, :jdate, :salary, :pass, 'Employee', :dob, :anniv, :manager, :avatar)");
 
             $stmt->execute([
                 'code' => $emp_code,
@@ -41,7 +62,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'desig' => $desig_id ?: null,
                 'jdate' => $joining_date,
                 'salary' => $salary,
-                'pass' => $hashed_password
+                'pass' => $hashed_password,
+                'dob' => $dob,
+                'anniv' => $anniversary,
+                'manager' => $reporting_manager_id,
+                'avatar' => $avatarPath
             ]);
 
             $message = "<div class='alert success'>Employee <strong>$first_name $last_name</strong> onboarded successfully!</div>";
@@ -71,10 +96,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <h3>Employee Details</h3>
         </div>
 
-        <form method="POST" action="">
+        <form method="POST" action="" enctype="multipart/form-data">
             <div class="content-grid two-column">
 
                 <!-- Personal Info -->
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Profile Picture</label>
+                    <input type="file" name="avatar" class="form-control" accept="image/*">
+                </div>
+
                 <div class="form-group">
                     <label>First Name <span class="text-danger">*</span></label>
                     <input type="text" name="first_name" class="form-control" required>
@@ -93,13 +123,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="text" name="phone" class="form-control">
                 </div>
 
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="dob" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Marriage Anniversary</label>
+                    <input type="date" name="marriage_anniversary" class="form-control">
+                </div>
+
                 <!-- Job Info -->
                 <div class="form-group">
                     <label>Employee Code <span class="text-danger">*</span></label>
                     <input type="text" name="employee_code" class="form-control" placeholder="e.g. EMP001" required>
                 </div>
                 <div class="form-group">
-                    <label>Joining Date</label>
+                    <label>Joining Date <span class="text-danger">*</span></label>
                     <input type="date" name="joining_date" class="form-control" required>
                 </div>
 
@@ -127,12 +166,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="form-group">
+                    <label>Reporting Manager</label>
+                    <select name="reporting_manager_id" class="form-control">
+                        <option value="">Select Manager</option>
+                        <?php foreach ($employees as $emp): ?>
+                            <option value="<?= $emp['id'] ?>">
+                                <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>
+                                (<?= $emp['employee_code'] ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>Salary (Monthly)</label>
                     <input type="number" step="0.01" name="salary" class="form-control">
                 </div>
 
                 <!-- Login Credentials -->
-                <div class="form-group">
+                <div class="form-group" style="grid-column: span 2;">
                     <label>Set Login Password <span class="text-danger">*</span></label>
                     <div style="position: relative;">
                         <input type="password" name="password" id="empPassword" class="form-control" required>
