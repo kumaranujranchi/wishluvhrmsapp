@@ -64,45 +64,32 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
             </button>
         </div>
 
-        <!-- List Designations -->
-        <div class="card">
-            <div class="card-header">
-                <h3>All Designations</h3>
-            </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Created At</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($designations as $row): ?>
-                        <tr>
-                            <td>#<?= $row['id'] ?></td>
-                            <td>
-                                <span
-                                    style="font-weight: 500; color: var(--color-primary);"><?= htmlspecialchars($row['name']) ?></span>
-                            </td>
-                            <td><?= date('d M Y', strtotime($row['created_at'])) ?></td>
-                            <td>
-                                <div style="display:flex; gap: 0.5rem;">
-                                    <button class="btn-icon edit"
-                                        onclick="openModal('edit', '<?= $row['id'] ?>', '<?= htmlspecialchars($row['name']) ?>')">
-                                        <i data-lucide="edit-2" style="width:16px;"></i>
-                                    </button>
-                                    <a href="#" class="btn-icon delete"
-                                        onclick="confirmDelete('designation.php?delete_id=<?= $row['id'] ?>')">
-                                        <i data-lucide="trash-2" style="width:16px;"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <!-- List Designations (Cards) -->
+        <div class="card-grid">
+            <?php foreach ($designations as $row): ?>
+                <div class="floating-card">
+                    <div class="card-decoration"></div>
+
+                    <div class="card-actions-floating">
+                        <button class="action-icon-btn edit"
+                            onclick="openModal('edit', '<?= $row['id'] ?>', '<?= htmlspecialchars($row['name']) ?>')">
+                            <i data-lucide="edit-2" style="width:16px;"></i>
+                        </button>
+                        <a href="#" class="action-icon-btn delete"
+                            onclick="confirmDelete('designation.php?delete_id=<?= $row['id'] ?>')">
+                            <i data-lucide="trash-2" style="width:16px;"></i>
+                        </a>
+                    </div>
+
+                    <div class="floating-card-icon">
+                        <?= strtoupper(substr($row['name'], 0, 1)) ?>
+                    </div>
+
+                    <h3 class="floating-card-title"><?= htmlspecialchars($row['name']) ?></h3>
+                    <p class="floating-card-desc" style="min-height: auto; margin-bottom: 0.5rem;">Created on
+                        <?= date('d M Y', strtotime($row['created_at'])) ?></p>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>

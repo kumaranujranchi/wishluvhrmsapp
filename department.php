@@ -65,47 +65,32 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
             </button>
         </div>
 
-        <!-- List Departments -->
-        <div class="card">
-            <div class="card-header">
-                <h3>All Departments</h3>
-            </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Created At</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($departments as $dept): ?>
-                        <tr>
-                            <td>#<?= $dept['id'] ?></td>
-                            <td>
-                                <span
-                                    style="font-weight: 500; color: var(--color-primary);"><?= htmlspecialchars($dept['name']) ?></span>
-                            </td>
-                            <td><?= htmlspecialchars($dept['description'] ?? 'No description') ?></td>
-                            <td><?= date('d M Y', strtotime($dept['created_at'])) ?></td>
-                            <td>
-                                <div style="display:flex; gap: 0.5rem;">
-                                    <button class="btn-icon edit"
-                                        onclick="openModal('edit', '<?= $dept['id'] ?>', '<?= htmlspecialchars($dept['name']) ?>', '<?= htmlspecialchars($dept['description'] ?? '') ?>')">
-                                        <i data-lucide="edit-2" style="width:16px;"></i>
-                                    </button>
-                                    <a href="#" class="btn-icon delete"
-                                        onclick="confirmDelete('department.php?delete_id=<?= $dept['id'] ?>')">
-                                        <i data-lucide="trash-2" style="width:16px;"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <!-- List Departments (Cards) -->
+        <div class="card-grid">
+            <?php foreach ($departments as $dept): ?>
+                <div class="floating-card">
+                    <div class="card-decoration"></div>
+
+                    <div class="card-actions-floating">
+                        <button class="action-icon-btn edit"
+                            onclick="openModal('edit', '<?= $dept['id'] ?>', '<?= htmlspecialchars($dept['name']) ?>', '<?= htmlspecialchars($dept['description'] ?? '') ?>')">
+                            <i data-lucide="edit-2" style="width:16px;"></i>
+                        </button>
+                        <a href="#" class="action-icon-btn delete"
+                            onclick="confirmDelete('department.php?delete_id=<?= $dept['id'] ?>')">
+                            <i data-lucide="trash-2" style="width:16px;"></i>
+                        </a>
+                    </div>
+
+                    <div class="floating-card-icon">
+                        <i data-lucide="building-2" style="width:32px; height:32px;"></i>
+                    </div>
+
+                    <h3 class="floating-card-title"><?= htmlspecialchars($dept['name']) ?></h3>
+                    <p class="floating-card-desc">
+                        <?= htmlspecialchars($dept['description'] ?? 'No description provided.') ?></p>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
