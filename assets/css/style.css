@@ -258,7 +258,7 @@ body {
 }
 
 .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.95); /* Increased opacity to hide underlying text */
     box-shadow: var(--shadow-glass);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
