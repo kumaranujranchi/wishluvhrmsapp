@@ -44,7 +44,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Attendance</span>
             </a>
 
-            <a href="leave.php" class="nav-item <?php echo isActive('leave'); ?>">
+            <a href="leave_apply.php" class="nav-item <?php echo isActive('leave_apply'); ?>">
                 <i data-lucide="coffee" class="icon"></i>
                 <span>Leave</span>
             </a>
