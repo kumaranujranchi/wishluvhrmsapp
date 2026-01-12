@@ -49,9 +49,9 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Leave</span>
             </a>
 
-            <a href="holiday.php" class="nav-item <?php echo isActive('holiday'); ?>">
-                <i data-lucide="palmtree" class="icon"></i>
-                <span>Holiday</span>
+            <a href="view_holidays.php" class="nav-item <?php echo isActive('view_holidays'); ?>">
+                <i data-lucide="calendar-days" class="icon"></i>
+                <span>Holidays</span>
             </a>
 
             <a href="notice.php" class="nav-item <?php echo isActive('notice'); ?>">
@@ -152,8 +152,8 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Leaves</span>
             </a>
 
-            <a href="#" class="nav-item">
-                <i data-lucide="palmtree" class="icon"></i>
+            <a href="holidays.php" class="nav-item <?php echo isActive('holidays'); ?>">
+                <i data-lucide="calendar-days" class="icon"></i>
                 <span>Holidays</span>
             </a>
 
