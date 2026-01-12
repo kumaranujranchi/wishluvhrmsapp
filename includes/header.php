@@ -46,20 +46,32 @@ if (!isset($_SESSION['user_id'])) {
         <div class="main-content">
             <!-- Header Included Here -->
             <header class="header glass-panel">
+                <div class="mobile-hamburger-trigger" onclick="toggleMobileDrawer()"
+                    style="display: none; cursor: pointer; margin-right: 15px; color: #1e293b;">
+                    <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
+                </div>
+
                 <div style="flex: 1;">
-                    <h2 style="margin:0; font-size:1.25rem; color:#1e293b;">Welcome,
+                    <h2 style="margin:0; font-size:1.1rem; color:#1e293b; font-weight: 700;">
                         <?php
                         $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
                         echo htmlspecialchars($display_name);
                         ?>
                     </h2>
-                    <p style="margin:0; font-size:0.85rem; color:#64748b;"><?= date('l, d F Y') ?></p>
+                    <p style="margin:0; font-size:0.75rem; color:#64748b; font-weight: 500;"><?= date('D, d M') ?></p>
                 </div>
 
                 <div class="header-actions">
                     <button class="action-btn" title="Notifications">
-                        <i data-lucide="bell" class="icon"></i>
+                        <i data-lucide="bell" class="icon" style="width: 20px;"></i>
                     </button>
-                    <!-- User Icon Removed as per request -->
                 </div>
             </header>
+
+            <style>
+                @media (max-width: 768px) {
+                    .mobile-hamburger-trigger {
+                        display: block !important;
+                    }
+                }
+            </style>

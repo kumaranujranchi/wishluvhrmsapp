@@ -228,6 +228,23 @@ foreach ($history as $h) {
         backdrop-filter: blur(5px);
     }
 
+    /* Mobile Polishing */
+    @media (max-width: 600px) {
+        .digital-clock {
+            font-size: 2.5rem;
+        }
+
+        .custom-punch-btn {
+            width: 150px;
+            height: 150px;
+            font-size: 1.1rem;
+        }
+
+        .punch-card {
+            padding: 2rem 1rem;
+        }
+    }
+
     /* History Timeline */
     .history-card {
         background: white;
@@ -383,7 +400,8 @@ foreach ($history as $h) {
                 <select name="month" class="form-control" style="width:auto; padding: 0.5rem 1rem;">
                     <?php for ($m = 1; $m <= 12; $m++): ?>
                         <option value="<?= $m ?>" <?= $m == $filter_month ? 'selected' : '' ?>>
-                            <?= date('F', mktime(0, 0, 0, $m, 1)) ?></option>
+                            <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
+                        </option>
                     <?php endfor; ?>
                 </select>
                 <button type="submit" class="btn-primary" style="padding:0.5rem 1rem;">Go</button>
@@ -413,13 +431,15 @@ foreach ($history as $h) {
                                 <i data-lucide="log-in" style="width:14px; vertical-align:middle; color:#10b981;"></i>
                                 <?= date('h:i A', strtotime($row['clock_in'])) ?>
                                 <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
-                                    <?= htmlspecialchars($row['clock_in_address'] ?? '') ?></div>
+                                    <?= htmlspecialchars($row['clock_in_address'] ?? '') ?>
+                                </div>
                             </div>
                             <div style="color:#64748b;">
                                 <i data-lucide="log-out" style="width:14px; vertical-align:middle; color:#f43f5e;"></i>
                                 <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working...' ?>
                                 <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
-                                    <?= htmlspecialchars($row['clock_out_address'] ?? '') ?></div>
+                                    <?= htmlspecialchars($row['clock_out_address'] ?? '') ?>
+                                </div>
                             </div>
                         </div>
                     </div>

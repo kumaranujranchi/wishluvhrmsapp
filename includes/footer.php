@@ -1,4 +1,5 @@
 <?php include 'includes/confirm_modal.php'; ?>
+<?php include 'includes/mobile_nav.php'; ?>
 </div> <!-- End Main Content -->
 </div> <!-- End App Container -->
 
