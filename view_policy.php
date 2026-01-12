@@ -1,14 +1,19 @@
 <?php
 require_once 'config/db.php';
-include 'includes/header.php';
 
-// Get policy slug from URL
-$slug = $_GET['slug'] ?? '';
-
-// Fetch all active policies for sidebar navigation
+// 1. Fetch all active policies for sidebar and default check
 $all_policies = $conn->query("SELECT title, slug, icon FROM policies WHERE is_active = 1 ORDER BY display_order ASC")->fetchAll();
 
-// Fetch specific policy if slug provided
+// 2. Get current policy slug
+$slug = $_GET['slug'] ?? '';
+
+// 3. Handle Default Redirect (Must be before header include)
+if (empty($slug) && !empty($all_policies)) {
+    header("Location: view_policy.php?slug=" . $all_policies[0]['slug']);
+    exit;
+}
+
+// 4. Fetch specific policy if slug provided
 $policy = null;
 if (!empty($slug)) {
     $stmt = $conn->prepare("SELECT * FROM policies WHERE slug = :slug AND is_active = 1");
@@ -16,15 +21,8 @@ if (!empty($slug)) {
     $policy = $stmt->fetch();
 }
 
-// If no slug or policy not found, try to default to the first one available
-if (!$policy && !empty($all_policies)) {
-    // If no slug was provided, just pick the first one
-    if (empty($slug)) {
-        $first_policy = $all_policies[0];
-        header("Location: view_policy.php?slug=" . $first_policy['slug']);
-        exit;
-    }
-}
+// Now include header
+include 'includes/header.php';
 ?>
 
 <style>
