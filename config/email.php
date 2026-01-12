@@ -29,6 +29,11 @@ function sendEmail($to, $subject, $body)
     try {
         // Server settings
         $mail->isSMTP();
+        $mail->SMTPDebug = 2; // Enable verbose debug output
+        $mail->Debugoutput = function ($str, $level) {
+            error_log("SMTP Debug ($level): $str");
+        };
+
         $mail->Host = SMTP_HOST;
         $mail->SMTPAuth = true;
         $mail->Username = SMTP_USERNAME;
