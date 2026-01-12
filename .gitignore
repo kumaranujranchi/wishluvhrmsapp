@@ -1,3 +1,6 @@
 .DS_Store
 *.log
 config/db_local.php
+vendor/
+uploads/
+config/email_credentials.php
