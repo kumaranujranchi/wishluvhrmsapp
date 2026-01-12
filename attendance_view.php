@@ -53,6 +53,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'addr' => $address
             ]);
             $message = "<div class='alert success-glass'>Checked In Successfully at " . date('h:i A', strtotime($current_time)) . "</div>";
+
+            // --- SEND EMAIL NOTIFICATION ---
+            require_once 'config/email.php';
+            // Fetch Employee Email
+            $empStmt = $conn->prepare("SELECT first_name, last_name, email FROM employees WHERE id = :uid");
+            $empStmt->execute(['uid' => $user_id]);
+            $emp = $empStmt->fetch();
+
+            if ($emp && !empty($emp['email'])) {
+                $subject = "Attendance Confirmed: " . date('d M Y');
+                $content = "
+                    <p>Hello <strong>{$emp['first_name']}</strong>,</p>
+                    <p>Your attendance for today has been successfully marked.</p>
+                    <ul>
+                        <li><strong>Date:</strong> " . date('d M Y') . "</li>
+                        <li><strong>Time:</strong> " . date('h:i A', strtotime($current_time)) . "</li>
+                        <li><strong>Status:</strong> <span style='color: " . ($status == 'Late' ? '#eab308' : '#16a34a') . "; font-weight: bold;'>{$status}</span></li>
+                        <li><strong>Location:</strong> " . htmlspecialchars($address) . "</li>
+                    </ul>
+                    <p>Have a productive day!</p>
+                ";
+                $body = getHtmlEmailTemplate("Punch In Confirmation", $content);
+                sendEmail($emp['email'], $subject, $body);
+            }
         }
     } elseif ($action === 'clock_out') {
         // Find today's record

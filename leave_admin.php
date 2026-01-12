@@ -31,6 +31,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare($sql);
         $stmt->execute(['status' => $action, 'remarks' => $remarks, 'id' => $request_id]);
         $message = "<div class='alert success'>Final Decision Recorded!</div>";
+
+        // --- SEND NOTIFICATION TO EMPLOYEE ---
+        require_once 'config/email.php';
+        // Fetch Request Details & Employee Email
+        $reqStmt = $conn->prepare("SELECT lr.*, e.first_name, e.last_name, e.email 
+                                  FROM leave_requests lr 
+                                  JOIN employees e ON lr.employee_id = e.id 
+                                  WHERE lr.id = :id");
+        $reqStmt->execute(['id' => $request_id]);
+        $reqData = $reqStmt->fetch();
+
+        if ($reqData && !empty($reqData['email'])) {
+            $statusColor = ($action == 'Approved') ? '#16a34a' : '#dc2626';
+            $subject = "Leave Request " . $action;
+            $bodyContent = "
+                <p>Dear {$reqData['first_name']},</p>
+                <p>Your leave request has been processed by Admin.</p>
+                <ul>
+                    <li><strong>Status:</strong> <span style='color: {$statusColor}; font-weight: bold;'>{$action}</span></li>
+                    <li><strong>Dates:</strong> " . date('d M', strtotime($reqData['start_date'])) . " - " . date('d M Y', strtotime($reqData['end_date'])) . "</li>
+                    <li><strong>Type:</strong> {$reqData['leave_type']}</li>
+                </ul>
+            ";
+            if (!empty($remarks)) {
+                $bodyContent .= "<p><strong>Remarks:</strong> " . htmlspecialchars($remarks) . "</p>";
+            }
+
+            $body = getHtmlEmailTemplate($subject, $bodyContent);
+            sendEmail($reqData['email'], "Leave Status: $action", $body);
+        }
     }
 }
 

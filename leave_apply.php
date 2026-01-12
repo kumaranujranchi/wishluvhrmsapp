@@ -37,6 +37,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      'reason' => $reason
                  ]);
                  $message = "<div class='alert success'>Leave Application Submitted Successfully!</div>";
+
+                 // --- NOTIFICATIONS ---
+                 require_once 'config/email.php';
+                 // 1. Get Employee & Manager Info
+                 $empStmt = $conn->prepare("SELECT e.first_name, e.last_name, e.email, e.employee_code, m.email as manager_email, m.first_name as manager_name 
+                                           FROM employees e 
+                                           LEFT JOIN employees m ON e.reporting_manager_id = m.id 
+                                           WHERE e.id = :uid");
+                 $empStmt->execute(['uid' => $user_id]);
+                 $empData = $empStmt->fetch();
+
+                 if ($empData) {
+                     $empName = $empData['first_name'] . ' ' . $empData['last_name'];
+                     $leaveInfo = "
+                        <ul>
+                            <li><strong>Type:</strong> $leave_type</li>
+                            <li><strong>Date:</strong> " . date('d M', strtotime($start_date)) . " to " . date('d M Y', strtotime($end_date)) . "</li>
+                            <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
+                        </ul>
+                     ";
+
+                     // A. Notify Employee
+                     if (!empty($empData['email'])) {
+                         $body = getHtmlEmailTemplate("Leave Request Received", 
+                             "<p>Dear $empName,</p><p>Your leave request has been submitted successfully and is pending approval.</p>$leaveInfo");
+                         sendEmail($empData['email'], "Leave Request Submitted", $body);
+                     }
+
+                     // B. Notify Manager
+                     if (!empty($empData['manager_email'])) {
+                         $body = getHtmlEmailTemplate("Team Leave Request", 
+                             "<p>Hello {$empData['manager_name']},</p><p><strong>$empName</strong> ({$empData['employee_code']}) has applied for leave.</p>$leaveInfo",
+                             "https://wishluvbuildcon.com/hrms/leave_manager_approval.php", "Review Request");
+                         sendEmail($empData['manager_email'], "Leave Request: $empName", $body);
+                     }
+
+                     // C. Notify Admin (e.g. fixed email or fetch)
+                     // Assuming admin@wishluv.com or finding active Admins
+                     $admins = $conn->query("SELECT email FROM employees WHERE role = 'Admin'")->fetchAll();
+                     foreach ($admins as $admin) {
+                         if (!empty($admin['email'])) {
+                            $body = getHtmlEmailTemplate("New Leave Application", 
+                                "<p><strong>$empName</strong> has applied for leave.</p>$leaveInfo",
+                                "https://wishluvbuildcon.com/hrms/leave_admin.php", "Manage Leaves");
+                            sendEmail($admin['email'], "Leave App: $empName", $body);
+                         }
+                     }
+                 }
              } catch (PDOException $e) {
                  $message = "<div class='alert error'>Error: " . $e->getMessage() . "</div>";
              }

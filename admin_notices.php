@@ -39,6 +39,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'created_by' => $admin_id
             ]);
             $message = "<div class='alert success'>Notice published successfully!</div>";
+
+            // --- NOTIFY ALL EMPLOYEES ---
+            require_once 'config/email.php';
+            // Fetch All Active Employees
+            $allEmp = $conn->query("SELECT email, first_name FROM employees WHERE status = 'Active' AND email IS NOT NULL AND email != ''")->fetchAll();
+
+            $subject = "New Notice: $title";
+            $noticeContent = "
+                <h2>" . htmlspecialchars($title) . "</h2>
+                <div style='background: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin: 15px 0;'>
+                    " . nl2br(htmlspecialchars($content)) . "
+                </div>
+                <p><strong>Urgency:</strong> " . $urgency . "</p>
+            ";
+
+            foreach ($allEmp as $emp) {
+                $uniqueBody = getHtmlEmailTemplate(
+                    "New Announcement",
+                    "<p>Hello {$emp['first_name']},</p><p>A new notice has been posted.</p>$noticeContent",
+                    "https://wishluvbuildcon.com/hrms/view_notices.php",
+                    "View Notice Board"
+                );
+
+                // Use a queue in production. For now, sending directly (might be slow for many employees)
+                sendEmail($emp['email'], $subject, $uniqueBody);
+            }
         } catch (PDOException $e) {
             $message = "<div class='alert error'>Error: " . $e->getMessage() . "</div>";
         }
