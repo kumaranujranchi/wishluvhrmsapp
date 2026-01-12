@@ -54,9 +54,9 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Holidays</span>
             </a>
 
-            <a href="notice.php" class="nav-item <?php echo isActive('notice'); ?>">
+            <a href="view_notices.php" class="nav-item <?php echo isActive('view_notices'); ?>">
                 <i data-lucide="bell" class="icon"></i>
-                <span>Notice</span>
+                <span>Notice Board</span>
             </a>
 
             <!-- Policy Dropdown -->
@@ -160,6 +160,11 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <a href="locations.php" class="nav-item <?php echo isActive('locations'); ?>">
                 <i data-lucide="map-pin" class="icon"></i>
                 <span>Locations</span>
+            </a>
+
+            <a href="admin_notices.php" class="nav-item <?php echo isActive('admin_notices'); ?>">
+                <i data-lucide="megaphone" class="icon"></i>
+                <span>Manage Notices</span>
             </a>
 
             <a href="#" class="nav-item">

@@ -82,8 +82,8 @@ function is_active_mobile($page, $current)
             <a href="view_holidays.php" class="nav-item-mobile <?= is_active_mobile('view_holidays.php', $current_page) ?>">
                 <i data-lucide="calendar-days"></i> Holidays
             </a>
-            <a href="notice.php" class="nav-item-mobile <?= is_active_mobile('notice.php', $current_page) ?>">
-                <i data-lucide="bell"></i> Notices
+            <a href="view_notices.php" class="nav-item-mobile <?= is_active_mobile('view_notices.php', $current_page) ?>">
+                <i data-lucide="bell"></i> Notice Board
             </a>
             <a href="view_policy.php" class="nav-item-mobile <?= is_active_mobile('view_policy.php', $current_page) ?>">
                 <i data-lucide="book-open"></i> Company Policies
@@ -131,6 +131,9 @@ function is_active_mobile($page, $current)
             </a>
             <a href="locations.php" class="nav-item-mobile <?= is_active_mobile('locations.php', $current_page) ?>">
                 <i data-lucide="map-pin"></i> Branch Locations
+            </a>
+            <a href="admin_notices.php" class="nav-item-mobile <?= is_active_mobile('admin_notices.php', $current_page) ?>">
+                <i data-lucide="megaphone"></i> Manage Notices
             </a>
             <a href="policy.php" class="nav-item-mobile <?= is_active_mobile('policy.php', $current_page) ?>">
                 <i data-lucide="book-open"></i> Policy Settings

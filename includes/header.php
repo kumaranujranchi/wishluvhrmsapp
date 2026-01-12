@@ -62,9 +62,25 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <div class="header-actions">
-                    <button class="action-btn" title="Notifications">
+                    <?php
+                    // Fetch unread notice count
+                    $unread_stmt = $conn->prepare("
+                        SELECT COUNT(*) FROM notices n 
+                        WHERE n.id NOT IN (SELECT notice_id FROM notice_reads WHERE employee_id = :uid)
+                    ");
+                    $unread_stmt->execute(['uid' => $_SESSION['user_id']]);
+                    $unread_count = $unread_stmt->fetchColumn();
+                    ?>
+                    <a href="view_notices.php" class="action-btn" title="Notices"
+                        style="position: relative; text-decoration: none; color: inherit;">
                         <i data-lucide="bell" class="icon" style="width: 20px;"></i>
-                    </button>
+                        <?php if ($unread_count > 0): ?>
+                            <span
+                                style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; border: 2px solid white;">
+                                <?= $unread_count ?>
+                            </span>
+                        <?php endif; ?>
+                    </a>
                 </div>
             </header>
 
