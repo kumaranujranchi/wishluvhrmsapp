@@ -29,7 +29,7 @@ function is_active_mobile($page, $current)
         </div>
     </div>
 
-    <div style="padding: 1rem 0; height: calc(100% - 130px); overflow-y: auto;">
+    <div class="drawer-body" style="padding: 1rem 0; flex: 1; overflow-y: auto;">
         <?php if ($userRole === 'Employee'): ?>
             <!-- EMPLOYEE DRAWER LINKS -->
             <a href="employee_dashboard.php"
@@ -232,11 +232,6 @@ function is_active_mobile($page, $current)
         width: 16px;
         height: 16px;
         opacity: 0.7;
-    }
-
-    .mobile-drawer {
-        display: flex;
-        flex-direction: column;
     }
 </style>
 
