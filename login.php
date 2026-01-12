@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #64748b; cursor: pointer;">
                     <input type="checkbox" style="accent-color: var(--color-primary);"> Remember me
                 </label>
-                <a href="#"
+                <a href="forgot_password.php"
                     style="font-size: 0.9rem; color: hsl(250, 84%, 60%); text-decoration: none; font-weight: 500;">Forgot
                     password?</a>
             </div>
