@@ -86,6 +86,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
 $month = $_GET['month'] ?? date('m');
 $year = $_GET['year'] ?? date('Y');
 $status_filter = $_GET['status'] ?? ''; // pending, approved, rejected
+$employee_filter = $_GET['employee'] ?? ''; // New employee filter
 
 // Fetch Requests
 $sql = "SELECT l.*, e.first_name, e.last_name, e.avatar, e.employee_code,
@@ -109,12 +110,20 @@ if ($status_filter) {
     $sql .= " AND l.admin_status = :s";
     $params['s'] = $status_filter;
 }
+if ($employee_filter) {
+    $sql .= " AND l.employee_id = :emp";
+    $params['emp'] = $employee_filter;
+}
 
 $sql .= " ORDER BY l.created_at DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
 $requests = $stmt->fetchAll();
+
+// Fetch all employees for dropdown
+$employees_sql = "SELECT id, first_name, last_name, employee_code FROM employees WHERE role = 'Employee' ORDER BY first_name ASC";
+$all_employees = $conn->query($employees_sql)->fetchAll();
 ?>
 
 <style>
@@ -248,6 +257,14 @@ $requests = $stmt->fetchAll();
                 <option value="Pending" <?= ($status_filter == 'Pending') ? 'selected' : '' ?>>Pending</option>
                 <option value="Approved" <?= ($status_filter == 'Approved') ? 'selected' : '' ?>>Approved</option>
                 <option value="Rejected" <?= ($status_filter == 'Rejected') ? 'selected' : '' ?>>Rejected</option>
+            </select>
+            <select name="employee" class="form-control" style="width: auto; min-width: 180px;">
+                <option value="">All Employees</option>
+                <?php foreach($all_employees as $emp): ?>
+                    <option value="<?= $emp['id'] ?>" <?= ($employee_filter == $emp['id']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?> (<?= $emp['employee_code'] ?>)
+                    </option>
+                <?php endforeach; ?>
             </select>
             <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem;">Apply</button>
         </form>
