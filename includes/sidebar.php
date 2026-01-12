@@ -6,11 +6,13 @@ function isActive($page)
     return ($current_page == $page) ? 'active' : '';
 }
 
-// Function to check if a group should be open
-function isGroupOpen($pages)
+// Function to check if a group should be open or active
+function isGroupOpen($pages, $include_view_policy = false)
 {
     $current_page = basename($_SERVER['PHP_SELF'], ".php");
-    return in_array($current_page, $pages) ? 'open' : '';
+    if ($include_view_policy && $current_page == 'view_policy')
+        return 'open active';
+    return in_array($current_page, $pages) ? 'open active' : '';
 }
 
 // Get User Info from Session
@@ -67,17 +69,17 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 $active_policies = $policy_stmt->fetchAll();
 
                 $policyPages = array_column($active_policies, 'slug');
-                $isPolicyOpen = isGroupOpen($policyPages);
+                $groupState = isGroupOpen($policyPages, true);
                 ?>
-                <button class="nav-item dropdown-btn" onclick="toggleSubNav('policySubNav', this)">
+                <button class="nav-item dropdown-btn <?= $groupState ?>" onclick="toggleSubNav('policySubNav', this)">
                     <div style="display:flex; align-items:center; gap:0.85rem;">
                         <i data-lucide="book-open" class="icon"></i>
                         <span>Policy</span>
                     </div>
                     <i data-lucide="chevron-right" class="icon chevron-icon"
-                        style="transition: transform 0.2s; transform: <?= $isPolicyOpen ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                        style="transition: transform 0.2s; transform: <?= strpos($groupState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                 </button>
-                <div id="policySubNav" class="sub-nav <?= $isPolicyOpen ?>">
+                <div id="policySubNav" class="sub-nav <?= strpos($groupState, 'open') !== false ? 'open' : '' ?>">
                     <?php foreach ($active_policies as $policy): ?>
                         <a href="view_policy.php?slug=<?= $policy['slug'] ?>"
                             class="sub-nav-item <?php echo (isset($_GET['slug']) && $_GET['slug'] == $policy['slug']) ? 'active' : ''; ?>">
@@ -114,18 +116,19 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <!-- Employee Onboarding Group -->
             <div class="nav-group">
                 <?php
-                $onboardingPages = ['designation', 'department', 'add_employee'];
-                $isOpen = isGroupOpen($onboardingPages);
+                $onboardingPages = ['designation', 'department', 'employees', 'add_employee'];
+                $onboardingState = isGroupOpen($onboardingPages);
                 ?>
-                <button class="nav-item dropdown-btn" onclick="toggleSubNav('employeeSubNav', this)">
+                <button class="nav-item dropdown-btn <?= $onboardingState ?>"
+                    onclick="toggleSubNav('employeeSubNav', this)">
                     <div style="display:flex; align-items:center; gap:0.85rem;">
                         <i data-lucide="users" class="icon"></i>
                         <span>Onboarding</span>
                     </div>
                     <i data-lucide="chevron-right" class="icon chevron-icon"
-                        style="transition: transform 0.2s; transform: <?= $isOpen ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                        style="transition: transform 0.2s; transform: <?= strpos($onboardingState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                 </button>
-                <div id="employeeSubNav" class="sub-nav <?= $isOpen ?>">
+                <div id="employeeSubNav" class="sub-nav <?= strpos($onboardingState, 'open') !== false ? 'open' : '' ?>">
                     <a href="designation.php" class="sub-nav-item <?php echo isActive('designation'); ?>">
                         <i data-lucide="briefcase" class="icon" style="width:16px;height:16px;"></i>
                         <span>Designation</span>
