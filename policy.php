@@ -35,7 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'active' => $is_active,
                 'id' => $id
             ]);
-            $message = "<div class='alert success'>Policy updated successfully!</div>";
+
+            // Create a notice for the update
+            if ($is_active) {
+                $notice_stmt = $conn->prepare("INSERT INTO notices (title, content, urgency, created_by) VALUES (:ntitle, :ncontent, 'Normal', :nby)");
+                $notice_stmt->execute([
+                    'ntitle' => "Policy Updated: " . $title,
+                    'ncontent' => "The policy '" . $title . "' has been updated. Please review the changes in the Policies section.",
+                    'nby' => $_SESSION['user_id']
+                ]);
+            }
+
+            $message = "<div class='alert success'>Policy updated and notification published!</div>";
         } else {
             // Add new policy
             $sql = "INSERT INTO policies (title, slug, content, icon, display_order, is_active) 
@@ -49,7 +60,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'order' => $display_order,
                 'active' => $is_active
             ]);
-            $message = "<div class='alert success'>Policy added successfully!</div>";
+
+            // Create a notice for the new policy
+            if ($is_active) {
+                $notice_stmt = $conn->prepare("INSERT INTO notices (title, content, urgency, created_by) VALUES (:ntitle, :ncontent, 'High', :nby)");
+                $notice_stmt->execute([
+                    'ntitle' => "New Policy Added: " . $title,
+                    'ncontent' => "A new company policy '" . $title . "' has been published. Please read it in the Policies section.",
+                    'nby' => $_SESSION['user_id']
+                ]);
+            }
+
+            $message = "<div class='alert success'>Policy added and notification published!</div>";
         }
     } catch (PDOException $e) {
         $message = "<div class='alert error'>Error: " . $e->getMessage() . "</div>";
@@ -227,23 +249,24 @@ if (isset($_GET['edit'])) {
                             </div>
                         </div>
 
-                        <div style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; max-height: 60px; overflow: hidden;">
+                        <div
+                            style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; max-height: 60px; overflow: hidden;">
                             <?= substr(strip_tags($policy['content']), 0, 150) ?>...
                         </div>
 
                         <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                            <a href="policy.php?edit=<?= $policy['id'] ?>" 
-                               style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #f0f9ff; color: #0369a1; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #bae6fd; transition: all 0.2s;"
-                               onmouseover="this.style.background='#e0f2fe'; this.style.borderColor='#7dd3fc';"
-                               onmouseout="this.style.background='#f0f9ff'; this.style.borderColor='#bae6fd';">
+                            <a href="policy.php?edit=<?= $policy['id'] ?>"
+                                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #f0f9ff; color: #0369a1; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #bae6fd; transition: all 0.2s;"
+                                onmouseover="this.style.background='#e0f2fe'; this.style.borderColor='#7dd3fc';"
+                                onmouseout="this.style.background='#f0f9ff'; this.style.borderColor='#bae6fd';">
                                 <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
                                 <span>Edit</span>
                             </a>
-                            <a href="policy.php?delete=<?= $policy['id'] ?>" 
-                               onclick="return confirm('Are you sure you want to delete this policy?')"
-                               style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #fef2f2; color: #dc2626; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #fecaca; transition: all 0.2s;"
-                               onmouseover="this.style.background='#fee2e2'; this.style.borderColor='#fca5a5';"
-                               onmouseout="this.style.background='#fef2f2'; this.style.borderColor='#fecaca';">
+                            <a href="policy.php?delete=<?= $policy['id'] ?>"
+                                onclick="return confirm('Are you sure you want to delete this policy?')"
+                                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #fef2f2; color: #dc2626; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #fecaca; transition: all 0.2s;"
+                                onmouseover="this.style.background='#fee2e2'; this.style.borderColor='#fca5a5';"
+                                onmouseout="this.style.background='#fef2f2'; this.style.borderColor='#fecaca';">
                                 <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                                 <span>Delete</span>
                             </a>

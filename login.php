@@ -15,14 +15,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($password, $user['password'])) {
-                // Login Success
+                // Login Success - Regenerate session ID for security
+                session_regenerate_id(true);
+
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
                 $_SESSION['first_name'] = $user['first_name'];
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_email'] = $user['email'];
 
-                header("Location: index.php");
+                // Explicitly set cache-control headers to prevent stale dashboards
+                header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+                header("Cache-Control: post-check=0, pre-check=0", false);
+                header("Pragma: no-cache");
+
+                if ($user['role'] === 'Employee') {
+                    header("Location: employee_dashboard.php");
+                } else {
+                    header("Location: index.php");
+                }
                 exit;
             } else {
                 $error = "Invalid email or password.";

@@ -1,5 +1,5 @@
 // Service Worker for HRMS PWA
-const CACHE_NAME = 'hrms-v1.0.0';
+const CACHE_NAME = 'hrms-v1.0.1';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache
@@ -46,42 +46,58 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - serve from network first for dynamic content, cache first for static assets
 self.addEventListener('fetch', (event) => {
-    // Skip non-GET requests
-    if (event.request.method !== 'GET') {
+    const url = new URL(event.request.url);
+    const isPhpRequest = url.pathname.endsWith('.php') || url.pathname === '/';
+
+    // Skip non-GET requests and logout page
+    if (event.request.method !== 'GET' || url.pathname.includes('logout.php')) {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            // Return cached response if found
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-
-            // Otherwise fetch from network
-            return fetch(event.request).then((response) => {
-                // Don't cache non-successful responses
-                if (!response || response.status !== 200 || response.type !== 'basic') {
-                    return response;
+    if (isPhpRequest) {
+        // Network First Strategy for dynamic PHP pages
+        event.respondWith(
+            fetch(event.request).then((response) => {
+                // Cache the latest version of the page
+                if (response && response.status === 200) {
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
                 }
-
-                // Clone response for caching
-                const responseToCache = response.clone();
-
-                // Cache dynamic content
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseToCache);
-                });
-
                 return response;
             }).catch(() => {
-                // If both cache and network fail, show offline page
-                return caches.match(OFFLINE_URL);
-            });
-        })
-    );
+                // If offline, serve from cache
+                return caches.match(event.request).then((cachedResponse) => {
+                    if (cachedResponse) {
+                        return cachedResponse;
+                    }
+                    return caches.match(OFFLINE_URL);
+                });
+            })
+        );
+    } else {
+        // Cache First Strategy for static assets (images, css, js, fonts)
+        event.respondWith(
+            caches.match(event.request).then((cachedResponse) => {
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+                return fetch(event.request).then((response) => {
+                    // Cache static assets that were not in the initial STATIC_CACHE
+                    if (response && response.status === 200) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return response;
+                });
+            })
+        );
+    }
 });
 
 // Background sync for attendance (future enhancement)

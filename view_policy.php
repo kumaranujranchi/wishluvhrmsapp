@@ -3,22 +3,28 @@ require_once 'config/db.php';
 include 'includes/header.php';
 
 // Get policy slug from URL
-$slug = $_GET['slug'] ?? 'policy_hr';
-
-// Fetch policy from database
-$stmt = $conn->prepare("SELECT * FROM policies WHERE slug = :slug AND is_active = 1");
-$stmt->execute(['slug' => $slug]);
-$policy = $stmt->fetch();
-
-// If policy not found, show error
-if (!$policy) {
-    echo "<div class='page-content'><div class='alert error'>Policy not found or inactive.</div></div>";
-    include 'includes/footer.php';
-    exit;
-}
+$slug = $_GET['slug'] ?? '';
 
 // Fetch all active policies for sidebar navigation
 $all_policies = $conn->query("SELECT title, slug, icon FROM policies WHERE is_active = 1 ORDER BY display_order ASC")->fetchAll();
+
+// Fetch specific policy if slug provided
+$policy = null;
+if (!empty($slug)) {
+    $stmt = $conn->prepare("SELECT * FROM policies WHERE slug = :slug AND is_active = 1");
+    $stmt->execute(['slug' => $slug]);
+    $policy = $stmt->fetch();
+}
+
+// If no slug or policy not found, try to default to the first one available
+if (!$policy && !empty($all_policies)) {
+    // If no slug was provided, just pick the first one
+    if (empty($slug)) {
+        $first_policy = $all_policies[0];
+        header("Location: view_policy.php?slug=" . $first_policy['slug']);
+        exit;
+    }
+}
 ?>
 
 <style>
@@ -150,21 +156,29 @@ $all_policies = $conn->query("SELECT title, slug, icon FROM policies WHERE is_ac
 
         <!-- Policy Content -->
         <div class="policy-content">
-            <h1>
-                <?= htmlspecialchars($policy['title']) ?>
-            </h1>
+            <?php if ($policy): ?>
+                <h1>
+                    <?= htmlspecialchars($policy['title']) ?>
+                </h1>
 
-            <div class="policy-meta">
-                <div>
-                    <i data-lucide="calendar" style="width: 14px; vertical-align: middle;"></i>
-                    Last Updated:
-                    <?= date('d M Y', strtotime($policy['updated_at'])) ?>
+                <div class="policy-meta">
+                    <div>
+                        <i data-lucide="calendar" style="width: 14px; vertical-align: middle;"></i>
+                        Last Updated:
+                        <?= date('d M Y', strtotime($policy['updated_at'])) ?>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <?= $policy['content'] ?>
-            </div>
+                <div>
+                    <?= $policy['content'] ?>
+                </div>
+            <?php else: ?>
+                <div style="text-align:center; padding:5rem 0; color:#64748b;">
+                    <i data-lucide="book-open" style="width:64px; height:64px; margin-bottom:1.5rem; opacity:0.2;"></i>
+                    <h2>Select a Policy</h2>
+                    <p>Please select a policy from the sidebar to view its details.</p>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
