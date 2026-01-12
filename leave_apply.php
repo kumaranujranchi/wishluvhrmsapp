@@ -368,6 +368,11 @@ $leaves = $stmt->fetchAll();
                 font-size: 0.9rem !important;
             }
 
+            /* Maintain padding for fields with icons on mobile */
+            div[style*="position: relative"] i+.form-control {
+                padding-left: 2.5rem !important;
+            }
+
             /* History refinements */
             .history-header {
                 padding: 1.25rem !important;
@@ -496,7 +501,7 @@ $leaves = $stmt->fetchAll();
                     <!-- Filter Form -->
                     <form method="GET" style="display: flex; gap: 10px; align-items: center;">
                         <select name="month" class="form-control"
-                            style="width: auto; padding: 0.5rem 1.75rem 0.5rem 0.75rem; font-size: 0.85rem;">
+                            style="width: auto; padding: 0.5rem 2rem 0.5rem 0.75rem; font-size: 0.85rem;">
                             <option value="">All Months</option>
                             <?php for ($m = 1; $m <= 12; $m++): ?>
                                 <option value="<?= $m ?>" <?= ($filter_month == $m) ? 'selected' : '' ?>>
@@ -505,7 +510,7 @@ $leaves = $stmt->fetchAll();
                             <?php endfor; ?>
                         </select>
                         <select name="year" class="form-control"
-                            style="width: auto; padding: 0.5rem 1.75rem 0.5rem 0.75rem; font-size: 0.85rem;">
+                            style="width: auto; padding: 0.5rem 2rem 0.5rem 0.75rem; font-size: 0.85rem;">
                             <option value="">All Years</option>
                             <?php for ($y = date('Y'); $y >= 2024; $y--): ?>
                                 <option value="<?= $y ?>" <?= ($filter_year == $y) ? 'selected' : '' ?>><?= $y ?></option>
@@ -610,7 +615,8 @@ $leaves = $stmt->fetchAll();
                                     style="padding: 1rem;">
                                     <div style="display: flex; flex-direction: column; gap: 4px;">
                                         <div style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">
-                                            <?= $leave['leave_type'] ?></div>
+                                            <?= $leave['leave_type'] ?>
+                                        </div>
                                         <div
                                             style="font-size: 0.8rem; color: #64748b; display: flex; align-items: center; gap: 5px;">
                                             <i data-lucide="calendar" style="width: 12px;"></i>

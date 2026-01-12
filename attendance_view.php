@@ -258,8 +258,14 @@ foreach ($history as $h) {
         transition: transform 0.2s;
     }
 
-    .mini-stat-card:hover { transform: translateY(-3px); }
-    .mini-stat-card i { width: 32px; height: 32px; }
+    .mini-stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .mini-stat-card i {
+        width: 32px;
+        height: 32px;
+    }
 
     /* History Timeline */
     .timeline-item {
@@ -286,7 +292,9 @@ foreach ($history as $h) {
         color: #64748b;
     }
 
-    .timeline-content { flex: 1; }
+    .timeline-content {
+        flex: 1;
+    }
 
     .details-collapse {
         max-height: 0;
@@ -330,24 +338,50 @@ foreach ($history as $h) {
             padding: 2rem 1rem;
         }
 
-        .digital-clock { font-size: 2.2rem; }
-        .custom-punch-btn { width: 140px; height: 140px; font-size: 1rem; }
+        .digital-clock {
+            font-size: 2.2rem;
+        }
+
+        .custom-punch-btn {
+            width: 140px;
+            height: 140px;
+            font-size: 1rem;
+        }
 
         .mobile-stats-grid .mini-stat-card {
             padding: 1rem 0.5rem;
             border-radius: 12px;
         }
 
-        .mobile-stats-grid .mini-stat-card i { width: 20px; height: 20px; }
-        .mobile-stats-grid h2 { font-size: 1.2rem; margin: 4px 0; }
-        .mobile-stats-grid span { font-size: 0.7rem; white-space: nowrap; }
+        .mobile-stats-grid .mini-stat-card i {
+            width: 20px;
+            height: 20px;
+        }
 
-        .timeline-item { padding-right: 30px; }
+        .mobile-stats-grid h2 {
+            font-size: 1.2rem;
+            margin: 4px 0;
+        }
+
+        .mobile-stats-grid span {
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+
+        .timeline-item {
+            padding-right: 30px;
+        }
     }
 
     @media (max-width: 600px) {
-        .timeline-date { min-width: 45px; font-size: 1.1rem; }
-        .timeline-date span { font-size: 0.7rem; }
+        .timeline-date {
+            min-width: 45px;
+            font-size: 1.1rem;
+        }
+
+        .timeline-date span {
+            font-size: 0.7rem;
+        }
     }
 </style>
 
@@ -432,7 +466,7 @@ foreach ($history as $h) {
             </h3>
             <form method="GET" style="display:flex; gap:8px;">
                 <select name="month" class="form-control"
-                    style="width:auto; padding: 0.4rem 0.75rem; font-size: 0.85rem; height: 36px; border-radius: 8px;">
+                    style="width:auto; padding: 0.4rem 2rem 0.4rem 0.75rem; font-size: 0.85rem; height: 36px; border-radius: 8px;">
                     <?php for ($m = 1; $m <= 12; $m++): ?>
                         <option value="<?= $m ?>" <?= $m == $filter_month ? 'selected' : '' ?>>
                             <?= date('M', mktime(0, 0, 0, $m, 1)) ?>
@@ -488,7 +522,8 @@ foreach ($history as $h) {
                                         style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                         In Location</div>
                                     <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
-                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?></div>
+                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
+                                    </div>
                                 </div>
                                 <?php if ($row['clock_out']): ?>
                                     <div>
@@ -496,7 +531,8 @@ foreach ($history as $h) {
                                             style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                             Out Location</div>
                                         <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
-                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?></div>
+                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
                             </div>
