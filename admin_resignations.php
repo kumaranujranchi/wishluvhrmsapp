@@ -106,65 +106,132 @@ $requests = $stmt->fetchAll();
                 <a href="?status=All" class="btn-sm <?= $filter == 'All' ? 'btn-primary' : 'btn-outline' ?>">All</a>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Applied On</th>
-                        <th>LWD (Proposed)</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($requests)): ?>
+        <!-- Desktop View (Table) -->
+        <div class="desktop-only">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td colspan="6" style="text-align:center;">No requests found.</td>
+                            <th>Employee</th>
+                            <th>Applied On</th>
+                            <th>LWD (Proposed)</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($requests as $req): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($requests)): ?>
                             <tr>
-                                <td>
-                                    <div style="font-weight:600;">
-                                        <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?>
+                                <td colspan="6" style="text-align:center;">No requests found.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($requests as $req): ?>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:600;">
+                                            <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?>
+                                        </div>
+                                        <small style="color:#64748b;">
+                                            <?= htmlspecialchars($req['employee_code']) ?> •
+                                            <?= htmlspecialchars($req['dept_name']) ?>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <?= date('d M Y', strtotime($req['created_at'])) ?>
+                                    </td>
+                                    <td>
+                                        <?= date('d M Y', strtotime($req['last_working_day'])) ?>
+                                    </td>
+                                    <td title="<?= htmlspecialchars($req['reason']) ?>">
+                                        <?= substr(htmlspecialchars($req['reason']), 0, 50) . (strlen($req['reason']) > 50 ? '...' : '') ?>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<?= strtolower($req['status']) ?>"
+                                            style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
+                                              background: <?= $req['status'] == 'Approved' ? '#dcfce7' : ($req['status'] == 'Rejected' ? '#fee2e2' : '#fef9c3') ?>; 
+                                              color: <?= $req['status'] == 'Approved' ? '#166534' : ($req['status'] == 'Rejected' ? '#991b1b' : '#854d0e') ?>;">
+                                            <?= $req['status'] ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if ($req['status'] == 'Pending'): ?>
+                                            <button class="btn-sm btn-outline"
+                                                onclick="openModal(<?= $req['id'] ?>)">Review</button>
+                                        <?php else: ?>
+                                            <button class="btn-sm btn-outline" disabled style="opacity:0.5">Processed</button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile View (Collapsible Cards) -->
+        <div class="mobile-only">
+            <div class="mobile-card-list">
+                <?php if (empty($requests)): ?>
+                    <div
+                        style="text-align:center; padding: 2rem; color: #64748b; background: #f8fafc; border-radius: 1rem;">
+                        No requests found.</div>
+                <?php else: ?>
+                    <?php foreach ($requests as $req): ?>
+                        <div class="mobile-card">
+                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div class="avatar-sm"
+                                        style="width: 40px; height: 40px; background: #fff1f2; color: #e11d48; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                                        <?= strtoupper(substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1)) ?>
                                     </div>
-                                    <small style="color:#64748b;">
-                                        <?= htmlspecialchars($req['employee_code']) ?> •
-                                        <?= htmlspecialchars($req['dept_name']) ?>
-                                    </small>
-                                </td>
-                                <td>
-                                    <?= date('d M Y', strtotime($req['created_at'])) ?>
-                                </td>
-                                <td>
-                                    <?= date('d M Y', strtotime($req['last_working_day'])) ?>
-                                </td>
-                                <td title="<?= htmlspecialchars($req['reason']) ?>">
-                                    <?= substr(htmlspecialchars($req['reason']), 0, 50) . (strlen($req['reason']) > 50 ? '...' : '') ?>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-<?= strtolower($req['status']) ?>"
-                                        style="padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
-                                          background: <?= $req['status'] == 'Approved' ? '#dcfce7' : ($req['status'] == 'Rejected' ? '#fee2e2' : '#fef9c3') ?>; 
-                                          color: <?= $req['status'] == 'Approved' ? '#166534' : ($req['status'] == 'Rejected' ? '#991b1b' : '#854d0e') ?>;">
+                                    <div>
+                                        <div style="font-weight: 600; color: #1e293b;">
+                                            <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?></div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">
+                                            LWD: <?= date('d M Y', strtotime($req['last_working_day'])) ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="badge"
+                                        style="background: <?= $req['status'] == 'Approved' ? '#dcfce7' : ($req['status'] == 'Rejected' ? '#fee2e2' : '#fef9c3') ?>; color: <?= $req['status'] == 'Approved' ? '#166534' : ($req['status'] == 'Rejected' ? '#991b1b' : '#854d0e') ?>; font-size: 0.7rem;">
                                         <?= $req['status'] ?>
                                     </span>
-                                </td>
-                                <td>
-                                    <?php if ($req['status'] == 'Pending'): ?>
-                                        <button class="btn-sm btn-outline" onclick="openModal(<?= $req['id'] ?>)">Review</button>
-                                    <?php else: ?>
-                                        <button class="btn-sm btn-outline" disabled style="opacity:0.5">Processed</button>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                                    <i data-lucide="chevron-down" class="toggle-icon" style="width: 18px;"></i>
+                                </div>
+                            </div>
+                            <div class="mobile-card-body">
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Employee Code</span>
+                                    <span class="mobile-value"><?= htmlspecialchars($req['employee_code']) ?></span>
+                                </div>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Department</span>
+                                    <span class="mobile-value"><?= htmlspecialchars($req['dept_name']) ?></span>
+                                </div>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Reason</span>
+                                    <span class="mobile-value"><?= htmlspecialchars($req['reason']) ?></span>
+                                </div>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Applied On</span>
+                                    <span class="mobile-value"><?= date('d M Y', strtotime($req['created_at'])) ?></span>
+                                </div>
+                                <?php if ($req['status'] == 'Pending'): ?>
+                                    <div style="margin-top: 1.5rem;">
+                                        <button class="btn-primary" style="width: 100%; justify-content: center;"
+                                            onclick="openModal(<?= $req['id'] ?>)">Review Request</button>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
+
     </div>
 </div>
 

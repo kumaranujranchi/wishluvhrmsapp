@@ -203,68 +203,130 @@ $requests = $stmt->fetchAll();
                 <p>No requests pending for Admin approval.</p>
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>Manager</th>
-                            <th>Type</th>
-                            <th>Dates</th>
-                            <th>Reason</th>
-                            <th style="text-align:right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($requests as $req): ?>
+            <!-- Desktop View -->
+            <div class="desktop-only">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <div style="font-weight:500;">
-                                        <?= $req['first_name'] . ' ' . $req['last_name'] ?>
-                                    </div>
-                                    <div style="font-size:0.75rem; color:#64748b;">
-                                        <?= $req['employee_code'] ?>
-                                    </div>
-                                </td>
-                                <td>
-                                    <?php if ($req['mgr_name']): ?>
-                                        <div style="font-size:0.9rem;">
-                                            <?= $req['mgr_name'] . ' ' . $req['mgr_last'] ?>
-                                        </div>
-                                        <div style="font-size:0.75rem; color:#10b981;">Approved</div>
-                                    <?php else: ?>
-                                        <span style="color:#64748b;">-</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><span class="badge" style="background:#f1f5f9;">
-                                        <?= $req['leave_type'] ?>
-                                    </span></td>
-                                <td>
-                                    <div style="font-weight:500;">
-                                        <?= date('d M', strtotime($req['start_date'])) ?> -
-                                        <?= date('d M', strtotime($req['end_date'])) ?>
-                                    </div>
-                                </td>
-                                <td style="max-width:200px;">
-                                    <p style="font-size:0.9rem; margin:0;">
-                                        <?= htmlspecialchars($req['reason']) ?>
-                                    </p>
-                                </td>
-                                <td style="text-align:right;">
-                                    <button class="btn-icon" style="color:#10b981; background:#dcfce7;"
-                                        onclick="openActionModal(<?= $req['id'] ?>, 'Approved')">
-                                        <i data-lucide="check-circle"></i>
-                                    </button>
-                                    <button class="btn-icon" style="color:#ef4444; background:#fee2e2;"
-                                        onclick="openActionModal(<?= $req['id'] ?>, 'Rejected')">
-                                        <i data-lucide="x-circle"></i>
-                                    </button>
-                                </td>
+                                <th>Employee</th>
+                                <th>Manager</th>
+                                <th>Type</th>
+                                <th>Dates</th>
+                                <th>Reason</th>
+                                <th style="text-align:right;">Actions</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($requests as $req): ?>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:500;">
+                                            <?= $req['first_name'] . ' ' . $req['last_name'] ?>
+                                        </div>
+                                        <div style="font-size:0.75rem; color:#64748b;">
+                                            <?= $req['employee_code'] ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <?php if ($req['mgr_name']): ?>
+                                            <div style="font-size:0.9rem;">
+                                                <?= $req['mgr_name'] . ' ' . $req['mgr_last'] ?>
+                                            </div>
+                                            <div style="font-size:0.75rem; color:#10b981;">Approved</div>
+                                        <?php else: ?>
+                                            <span style="color:#64748b;">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><span class="badge" style="background:#f1f5f9;">
+                                            <?= $req['leave_type'] ?>
+                                        </span></td>
+                                    <td>
+                                        <div style="font-weight:500;">
+                                            <?= date('d M', strtotime($req['start_date'])) ?> -
+                                            <?= date('d M', strtotime($req['end_date'])) ?>
+                                        </div>
+                                    </td>
+                                    <td style="max-width:200px;">
+                                        <p style="font-size:0.9rem; margin:0;">
+                                            <?= htmlspecialchars($req['reason']) ?>
+                                        </p>
+                                    </td>
+                                    <td style="text-align:right;">
+                                        <button class="btn-icon" style="color:#10b981; background:#dcfce7;"
+                                            onclick="openActionModal(<?= $req['id'] ?>, 'Approved')">
+                                            <i data-lucide="check-circle"></i>
+                                        </button>
+                                        <button class="btn-icon" style="color:#ef4444; background:#fee2e2;"
+                                            onclick="openActionModal(<?= $req['id'] ?>, 'Rejected')">
+                                            <i data-lucide="x-circle"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- Mobile View (Collapsible Cards) -->
+            <div class="mobile-only">
+                <div class="mobile-card-list">
+                    <?php foreach ($requests as $req): ?>
+                        <div class="mobile-card">
+                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div class="avatar-sm"
+                                        style="width: 40px; height: 40px; background: #e0e7ff; color: #4f46e5; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                                        <?= strtoupper(substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1)) ?>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: #1e293b;">
+                                            <?= $req['first_name'] . ' ' . $req['last_name'] ?></div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">
+                                            <?= date('d M', strtotime($req['start_date'])) ?> -
+                                            <?= date('d M', strtotime($req['end_date'])) ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="badge"
+                                        style="background:#f1f5f9; font-size: 0.7rem;"><?= $req['leave_type'] ?></span>
+                                    <i data-lucide="chevron-down" class="toggle-icon" style="width: 18px;"></i>
+                                </div>
+                            </div>
+                            <div class="mobile-card-body">
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Reason</span>
+                                    <span class="mobile-value"><?= htmlspecialchars($req['reason']) ?></span>
+                                </div>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Manager Verification</span>
+                                    <span class="mobile-value">
+                                        <?php if ($req['mgr_name']): ?>
+                                            <span style="color: #10b981; display: flex; align-items: center; gap: 4px;">
+                                                <i data-lucide="check-circle" style="width: 14px;"></i>
+                                                Approved by <?= $req['mgr_name'] ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span style="color: #94a3b8;">Not required/Direct Admin</span>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                                    <button class="btn-primary"
+                                        style="flex: 1; justify-content: center; background: #10b981; border-color: #10b981;"
+                                        onclick="openActionModal(<?= $req['id'] ?>, 'Approved')">Approve</button>
+                                    <button class="btn-primary"
+                                        style="flex: 1; justify-content: center; background: #ef4444; border-color: #ef4444;"
+                                        onclick="openActionModal(<?= $req['id'] ?>, 'Rejected')">Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
         <?php endif; ?>
     </div>
 </div>
