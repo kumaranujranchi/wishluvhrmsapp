@@ -29,20 +29,15 @@ $employees = $conn->query($sql)->fetchAll();
 <div class="page-content">
     <?= $message ?>
 
-    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h2 class="page-title">Employees</h2>
-            <p class="page-subtitle">Manage all your employees here.</p>
-        </div>
-        <div class="desktop-action-btn">
-            <a href="add_employee.php" class="btn-primary"
-                style="display: flex; align-items: center; text-decoration: none;">
-                <i data-lucide="plus" style="width:18px; margin-right:8px;"></i> Add Employee
-            </a>
-        </div>
-        <!-- Mobile FAB -->
-        <a href="add_employee.php" class="fab" title="Add Employee">
-            <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
+    <div class="page-header">
+        <h2 class="page-title">Employees</h2>
+        <p class="page-subtitle">Manage all your employees here.</p>
+    </div>
+
+    <div class="desktop-action-btn" style="display:flex; justify-content: flex-end; margin-bottom: 2rem;">
+        <a href="add_employee.php" class="btn-primary"
+            style="display: flex; align-items: center; text-decoration: none;">
+            <i data-lucide="plus" style="width:18px; margin-right:8px;"></i> Add Employee
         </a>
     </div>
 

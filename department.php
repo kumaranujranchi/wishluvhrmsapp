@@ -88,10 +88,7 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
                 Add Department
             </button>
         </div>
-        <!-- Mobile FAB -->
-        <button class="fab" onclick="openModal('add')" title="Add Department">
-            <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
-        </button>
+
 
         <!-- List Departments (Cards) -->
         <div class="card-grid">

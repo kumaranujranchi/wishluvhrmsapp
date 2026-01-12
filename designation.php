@@ -87,10 +87,7 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
                 Add Designation
             </button>
         </div>
-        <!-- Mobile FAB -->
-        <button class="fab" onclick="openModal('add')" title="Add Designation">
-            <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
-        </button>
+
 
         <!-- List Designations (Cards) -->
         <div class="card-grid">
