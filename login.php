@@ -66,60 +66,392 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <div class="login-card-app">
         <div class="login-header">
-            <div class="login-logo-app">MW</div>
+            <div class="login-logo-container">
+                <img src="assets/logo.png" alt="Myworld HRMS" class="login-brand-logo">
+            </div>
             <h1 class="login-title">Welcome Back</h1>
             <p class="login-subtitle">Sign in to your HRMS account</p>
         </div>
 
         <?php if ($error): ?>
             <div class="error-msg">
-                <?= $error ?>
+                <i data-lucide="alert-circle" style="width: 18px; height: 18px;"></i>
+                <span><?= $error ?></span>
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="">
+        <form method="POST" action="" class="login-form">
             <div class="input-group">
                 <label class="form-label">Email Address</label>
-                <input type="email" name="email" class="form-control" placeholder="name@company.com" required
-                    style="border-radius: 12px; padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0;">
+                <div class="input-wrapper">
+                    <i data-lucide="mail" class="input-icon"></i>
+                    <input type="email" name="email" class="form-control form-input-enhanced"
+                        placeholder="anuj.kumar@wishluvbuildcon.com" required>
+                </div>
             </div>
 
             <div class="input-group">
                 <label class="form-label">Password</label>
-                <div style="position: relative;">
-                    <input type="password" name="password" id="loginPassword" class="form-control"
-                        placeholder="••••••••" required
-                        style="border-radius: 12px; padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0;">
-                    <button type="button" onclick="togglePasswordLogin()"
-                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center;">
-                        <i data-lucide="eye" id="eyeShow" style="width: 20px;"></i>
-                        <i data-lucide="eye-off" id="eyeHide" style="display: none; width: 20px;"></i>
+                <div class="input-wrapper">
+                    <i data-lucide="lock" class="input-icon"></i>
+                    <input type="password" name="password" id="loginPassword" class="form-control form-input-enhanced"
+                        placeholder="••••••••" required>
+                    <button type="button" onclick="togglePasswordLogin()" class="password-toggle">
+                        <i data-lucide="eye" id="eyeShow"></i>
+                        <i data-lucide="eye-off" id="eyeHide" style="display: none;"></i>
                     </button>
                 </div>
             </div>
 
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; margin-top: 0.5rem;">
-                <label
-                    style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #64748b; cursor: pointer;">
-                    <input type="checkbox"
-                        style="accent-color: #6366f1; width: 16px; height: 16px; border-radius: 4px;"> Remember me
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" class="custom-checkbox">
+                    <span>Remember me</span>
                 </label>
-                <a href="forgot_password_otp.php"
-                    style="font-size: 0.85rem; color: #6366f1; text-decoration: none; font-weight: 600;">Forgot
-                    Password?</a>
+                <a href="forgot_password_otp.php" class="forgot-link">Forgot Password?</a>
             </div>
 
-            <button type="submit" class="btn-primary login-btn"
-                style="width: 100%; border-radius: 12px; padding: 1rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #a855f7); border: none; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);">
-                SIGN IN
+            <button type="submit" class="btn-primary login-btn">
+                <span>SIGN IN</span>
+                <i data-lucide="arrow-right" style="width: 20px; height: 20px;"></i>
             </button>
         </form>
 
-        <div style="text-align: center; margin-top: 2rem; font-size: 0.85rem; color: #94a3b8;">
+        <div class="login-footer">
             &copy; <?= date('Y') ?> Myworld HRMS. All rights reserved.
         </div>
     </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body.login-page {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.login-page::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -250px;
+            left: -250px;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        body.login-page::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -200px;
+            right: -200px;
+            animation: float 15s ease-in-out infinite reverse;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card-app {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .login-brand-logo {
+            height: 80px;
+            width: auto;
+            filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .error-msg {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.25rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            width: 20px;
+            height: 20px;
+            color: #94a3b8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .form-input-enhanced {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .form-input-enhanced:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input-enhanced::placeholder {
+            color: #cbd5e1;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .password-toggle i {
+            width: 20px;
+            height: 20px;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -0.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            font-size: 0.875rem;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-link:hover {
+            color: #764ba2;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(102, 126, 234, 0.5);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .login-card-app {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .login-title {
+                font-size: 1.75rem;
+            }
+
+            .login-brand-logo {
+                height: 60px;
+            }
+        }
+    </style>
 
     <script>
         function togglePasswordLogin() {
