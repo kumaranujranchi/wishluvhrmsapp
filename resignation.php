@@ -66,12 +66,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </html>
                         ";
 
-                        // Send Email
+                        // Send Email to Manager
                         try {
                             sendEmail($manager['email'], $subject, $body);
                         } catch (Exception $e) {
-                            $message .= "<br><small style='color:orange'>Email notification could not be sent: " . $e->getMessage() . "</small>";
+                            // Log error
                         }
+                    }
+                }
+
+                // --- SEND EMAIL TO ADMINS ---
+                $adminStmt = $conn->prepare("SELECT email, first_name, last_name FROM employees WHERE role = 'Admin' AND status = 'Active'");
+                $adminStmt->execute();
+                $admins = $adminStmt->fetchAll();
+
+                foreach ($admins as $admin) {
+                    $subject = "Resignation Alert: " . $emp['first_name'] . " " . $emp['last_name'];
+                    $body = "
+                        <html>
+                        <body style='font-family: Arial, sans-serif;'>
+                            <h3>Resignation Notification</h3>
+                            <p>Dear {$admin['first_name']},</p>
+                            <p>Employee <strong>{$emp['first_name']} {$emp['last_name']}</strong> ({$emp['employee_code']}) has submitted a resignation request.</p>
+                            <ul>
+                                <li><strong>Proposed Last Working Day:</strong> " . date('d M Y', strtotime($last_working_day)) . "</li>
+                                <li><strong>Reason:</strong> <br>" . nl2br(htmlspecialchars($reason)) . "</li>
+                            </ul>
+                            <p>Please log in to the HRMS portal to review and take necessary action.</p>
+                            <br>
+                            <p>Regards,<br>Myworld HRMS</p>
+                        </body>
+                        </html>
+                        ";
+
+                    try {
+                        sendEmail($admin['email'], $subject, $body);
+                    } catch (Exception $e) {
+                        // Log error to continue execution
                     }
                 }
             }

@@ -1,5 +1,6 @@
 <?php
 require_once 'config/db.php';
+require_once 'config/email.php';
 include 'includes/header.php';
 
 // Ensure user is Admin
@@ -19,7 +20,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['request_id'])) {
     try {
         $stmt = $conn->prepare("UPDATE resignations SET status = :status, admin_remarks = :remarks WHERE id = :id");
         $stmt->execute(['status' => $status, 'remarks' => $remarks, 'id' => $req_id]);
-        $message = "<div class='alert success'>Request marked as <strong>$status</strong>.</div>";
+
+        // Notify Employee
+        $empStmt = $conn->prepare("SELECT e.email, e.first_name, e.last_name FROM resignations r JOIN employees e ON r.employee_id = e.id WHERE r.id = :id");
+        $empStmt->execute(['id' => $req_id]);
+        $emp = $empStmt->fetch();
+
+        if ($emp) {
+            $subject = "Resignation Request Update - " . $status;
+            $color = $status == 'Approved' ? '#166534' : '#991b1b';
+
+            $body = "
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <h3>Resignation Update</h3>
+                <p>Dear {$emp['first_name']},</p>
+                <p>Your resignation request has been <strong style='color: {$color}'>{$status}</strong>.</p>
+                
+                <div style='background: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                    <strong>Admin Remarks:</strong><br>
+                    " . ($remarks ? nl2br(htmlspecialchars($remarks)) : 'No remarks provided.') . "
+                </div>
+
+                <p>Please contact HR for further steps.</p>
+                <br>
+                <p>Regards,<br>Myworld HRMS</p>
+            </body>
+            </html>
+            ";
+
+            try {
+                sendEmail($emp['email'], $subject, $body);
+                $message = "<div class='alert success'>Request marked as <strong>$status</strong> and email sent to employee.</div>";
+            } catch (Exception $e) {
+                $message = "<div class='alert success'>Request marked as <strong>$status</strong> but email failed.</div>";
+            }
+        } else {
+            $message = "<div class='alert success'>Request marked as <strong>$status</strong>.</div>";
+        }
     } catch (PDOException $e) {
         $message = "<div class='alert error'>Error: " . $e->getMessage() . "</div>";
     }
@@ -130,45 +168,57 @@ $requests = $stmt->fetchAll();
     </div>
 </div>
 
-<!-- Simple Modal for Action -->
-<div id="actionModal"
-    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-    <div class="card" style="width:400px; padding:0;">
-        <div class="card-header">
-            <h3>Process Request</h3>
-            <button onclick="closeModal()"
-                style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+<!-- Modern Modal for Action -->
+<div id="actionModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Process Request</h3>
+            <button onclick="closeModal()" class="modal-close">
+                <i data-lucide="x" style="width:20px;"></i>
+            </button>
         </div>
-        <div class="card-body">
-            <form method="POST">
+        <form method="POST">
+            <div class="modal-body">
                 <input type="hidden" name="request_id" id="modalRequestId">
+
                 <div class="form-group">
                     <label>Action</label>
-                    <select name="status" class="form-control" required>
-                        <option value="Approved">Approve (Accept Resignation)</option>
-                        <option value="Rejected">Reject</option>
-                    </select>
+                    <div style="position: relative;">
+                        <select name="status" class="form-control" required style="appearance: none;">
+                            <option value="Approved">Approve (Accept Resignation)</option>
+                            <option value="Rejected">Reject</option>
+                        </select>
+                        <i data-lucide="chevron-down"
+                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: #64748b; pointer-events: none;"></i>
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label>Remarks</label>
-                    <textarea name="remarks" class="form-control" rows="3" placeholder="Enter remarks..."></textarea>
+                    <textarea name="remarks" class="form-control" rows="4"
+                        placeholder="Enter remarks regarding this decision..." style="resize: none;"></textarea>
                 </div>
-                <div style="text-align:right; margin-top:1rem;">
-                    <button type="button" class="btn-outline" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-primary"
+                    style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;"
+                    onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-primary">
+                    Update Status
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
     function openModal(id) {
         document.getElementById('modalRequestId').value = id;
-        document.getElementById('actionModal').style.display = 'flex';
+        document.getElementById('actionModal').classList.add('show');
     }
     function closeModal() {
-        document.getElementById('actionModal').style.display = 'none';
+        document.getElementById('actionModal').classList.remove('show');
     }
     // Close on click outside
     window.onclick = function (event) {
