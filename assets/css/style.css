@@ -668,6 +668,7 @@ select.form-control {
     background-repeat: no-repeat;
     background-position: right 1rem top 50%;
     background-size: 0.65rem auto;
+    padding-right: 2.5rem; /* Add space for arrow icon */
 }
 
 @media (max-width: 768px) {
