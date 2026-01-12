@@ -62,7 +62,11 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <!-- Policy Dropdown -->
             <div class="nav-group">
                 <?php
-                $policyPages = ['policy_hr', 'policy_leave', 'policy_dress'];
+                // Fetch active policies from database
+                $policy_stmt = $conn->query("SELECT slug, title, icon FROM policies WHERE is_active = 1 ORDER BY display_order ASC");
+                $active_policies = $policy_stmt->fetchAll();
+
+                $policyPages = array_column($active_policies, 'slug');
                 $isPolicyOpen = isGroupOpen($policyPages);
                 ?>
                 <button class="nav-item dropdown-btn" onclick="toggleSubNav('policySubNav', this)">
@@ -74,18 +78,14 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                         style="transition: transform 0.2s; transform: <?= $isPolicyOpen ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                 </button>
                 <div id="policySubNav" class="sub-nav <?= $isPolicyOpen ?>">
-                    <a href="policy_hr.php" class="sub-nav-item <?php echo isActive('policy_hr'); ?>">
-                        <i data-lucide="file-text" class="icon" style="width:16px;height:16px;"></i>
-                        <span>HR Policy</span>
-                    </a>
-                    <a href="policy_leave.php" class="sub-nav-item <?php echo isActive('policy_leave'); ?>">
-                        <i data-lucide="file-text" class="icon" style="width:16px;height:16px;"></i>
-                        <span>Leave Policy</span>
-                    </a>
-                    <a href="policy_dress.php" class="sub-nav-item <?php echo isActive('policy_dress'); ?>">
-                        <i data-lucide="shirt" class="icon" style="width:16px;height:16px;"></i>
-                        <span>Dress Code</span>
-                    </a>
+                    <?php foreach ($active_policies as $policy): ?>
+                        <a href="view_policy.php?slug=<?= $policy['slug'] ?>"
+                            class="sub-nav-item <?php echo (isset($_GET['slug']) && $_GET['slug'] == $policy['slug']) ? 'active' : ''; ?>">
+                            <i data-lucide="<?= htmlspecialchars($policy['icon']) ?>" class="icon"
+                                style="width:16px;height:16px;"></i>
+                            <span><?= htmlspecialchars($policy['title']) ?></span>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -160,6 +160,11 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <a href="#" class="nav-item">
                 <i data-lucide="banknote" class="icon"></i>
                 <span>Payroll</span>
+            </a>
+
+            <a href="policy.php" class="nav-item <?php echo isActive('policy'); ?>">
+                <i data-lucide="book-open" class="icon"></i>
+                <span>Policies</span>
             </a>
         <?php endif; ?>
     </nav>
