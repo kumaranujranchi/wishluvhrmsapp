@@ -2,6 +2,21 @@
 require_once 'config/db.php';
 include 'includes/header.php';
 
+$message = "";
+
+// Handle Delete
+if (isset($_GET['delete'])) {
+    $delete_id = $_GET['delete'];
+    try {
+        // Check if employee has any dependencies (optional - can be removed if you want force delete)
+        $stmt = $conn->prepare("DELETE FROM employees WHERE id = :id");
+        $stmt->execute(['id' => $delete_id]);
+        $message = "<div class='alert success' style='background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;'>Employee deleted successfully!</div>";
+    } catch (PDOException $e) {
+        $message = "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+
 // Fetch Employees with Dept and Designation
 $sql = "SELECT e.*, d.name as dept_name, deg.name as desig_name 
         FROM employees e 
@@ -12,6 +27,8 @@ $employees = $conn->query($sql)->fetchAll();
 ?>
 
 <div class="page-content">
+    <?= $message ?>
+    
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h2 class="page-title">Employees</h2>
@@ -92,12 +109,14 @@ $employees = $conn->query($sql)->fetchAll();
                                         style="color:#2563eb; text-decoration:none; display:flex; align-items:center; justify-content:center;">
                                         <i data-lucide="eye" style="width:16px;"></i>
                                     </a>
-                                    <button class="btn-icon" title="Edit">
+                                    <a href="edit_employee.php?id=<?= $emp['id'] ?>" class="btn-icon" title="Edit"
+                                        style="color:#059669; text-decoration:none; display:flex; align-items:center; justify-content:center;">
                                         <i data-lucide="edit-2" style="width:16px;"></i>
-                                    </button>
-                                    <button class="btn-icon" style="color:#ef4444;" title="Delete">
+                                    </a>
+                                    <a href="?delete=<?= $emp['id'] ?>" class="btn-icon" style="color:#ef4444;" title="Delete"
+                                        onclick="return confirm('Are you sure you want to delete <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>? This action cannot be undone.')">
                                         <i data-lucide="trash-2" style="width:16px;"></i>
-                                    </button>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

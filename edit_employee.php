@@ -1,0 +1,233 @@
+<?php
+require_once 'config/db.php';
+include 'includes/header.php';
+
+// Get employee ID
+$emp_id = $_GET['id'] ?? null;
+if (!$emp_id) {
+    header("Location: employees.php");
+    exit;
+}
+
+// Fetch employee data
+$stmt = $conn->prepare("SELECT * FROM employees WHERE id = :id");
+$stmt->execute(['id' => $emp_id]);
+$employee = $stmt->fetch();
+
+if (!$employee) {
+    header("Location: employees.php");
+    exit;
+}
+
+// Fetch Dropdown Data
+$departments = $conn->query("SELECT * FROM departments ORDER BY name")->fetchAll();
+$designations = $conn->query("SELECT * FROM designations ORDER BY name")->fetchAll();
+$employees = $conn->query("SELECT id, first_name, last_name, employee_code FROM employees WHERE id != $emp_id ORDER BY first_name")->fetchAll();
+
+// Handle Form Submission
+$message = "";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $first_name = trim($_POST['first_name']);
+    $last_name = trim($_POST['last_name']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
+    $emp_code = trim($_POST['employee_code']);
+    $dept_id = $_POST['department_id'];
+    $desig_id = $_POST['designation_id'];
+    $joining_date = $_POST['joining_date'];
+    $salary = $_POST['salary'];
+    $dob = $_POST['dob'] ?: null;
+    $anniversary = $_POST['marriage_anniversary'] ?: null;
+    $reporting_manager_id = $_POST['reporting_manager_id'] ?: null;
+
+    // File Upload Logic
+    $avatarPath = $employee['avatar']; // Keep existing if no new upload
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
+        $uploadDir = 'uploads/employees/';
+        if (!is_dir($uploadDir))
+            mkdir($uploadDir, 0777, true);
+
+        $fileName = time() . '_' . basename($_FILES['avatar']['name']);
+        $targetPath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['avatar']['tmp_name'], $targetPath)) {
+            $avatarPath = $targetPath;
+        }
+    }
+
+    // Update query
+    try {
+        $sql = "UPDATE employees SET 
+                first_name = :fname, 
+                last_name = :lname, 
+                email = :email, 
+                phone = :phone, 
+                employee_code = :code,
+                department_id = :dept, 
+                designation_id = :desig, 
+                joining_date = :jdate, 
+                salary = :salary,
+                dob = :dob,
+                marriage_anniversary = :anniv,
+                reporting_manager_id = :manager,
+                avatar = :avatar
+                WHERE id = :id";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'fname' => $first_name,
+            'lname' => $last_name,
+            'email' => $email,
+            'phone' => $phone,
+            'code' => $emp_code,
+            'dept' => $dept_id ?: null,
+            'desig' => $desig_id ?: null,
+            'jdate' => $joining_date,
+            'salary' => $salary,
+            'dob' => $dob,
+            'anniv' => $anniversary,
+            'manager' => $reporting_manager_id,
+            'avatar' => $avatarPath,
+            'id' => $emp_id
+        ]);
+
+        $message = "<div class='alert success'>Employee <strong>$first_name $last_name</strong> updated successfully!</div>";
+
+        // Refresh employee data
+        $stmt = $conn->prepare("SELECT * FROM employees WHERE id = :id");
+        $stmt->execute(['id' => $emp_id]);
+        $employee = $stmt->fetch();
+    } catch (PDOException $e) {
+        $message = "<div class='alert error'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+?>
+
+<div class="page-content">
+    <div class="page-header">
+        <h2 class="page-title">Edit Employee</h2>
+        <p class="page-subtitle">Update employee information</p>
+    </div>
+
+    <?= $message ?>
+
+    <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <div class="card-header">
+            <h3>Employee Details</h3>
+        </div>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div class="content-grid two-column">
+
+                <!-- Personal Info -->
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Profile Picture</label>
+                    <?php if ($employee['avatar']): ?>
+                        <div style="margin-bottom: 0.5rem;">
+                            <img src="<?= $employee['avatar'] ?>"
+                                style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                        </div>
+                    <?php endif; ?>
+                    <input type="file" name="avatar" class="form-control" accept="image/*">
+                    <small style="color: #64748b;">Leave empty to keep current picture</small>
+                </div>
+
+                <div class="form-group">
+                    <label>First Name <span class="text-danger">*</span></label>
+                    <input type="text" name="first_name" class="form-control"
+                        value="<?= htmlspecialchars($employee['first_name']) ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" class="form-control"
+                        value="<?= htmlspecialchars($employee['last_name']) ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control"
+                        value="<?= htmlspecialchars($employee['email']) ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" class="form-control"
+                        value="<?= htmlspecialchars($employee['phone']) ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="dob" class="form-control" value="<?= $employee['dob'] ?>">
+                </div>
+                <div class="form-group">
+                    <label>Marriage Anniversary</label>
+                    <input type="date" name="marriage_anniversary" class="form-control"
+                        value="<?= $employee['marriage_anniversary'] ?>">
+                </div>
+
+                <!-- Job Info -->
+                <div class="form-group">
+                    <label>Employee Code <span class="text-danger">*</span></label>
+                    <input type="text" name="employee_code" class="form-control"
+                        value="<?= htmlspecialchars($employee['employee_code']) ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Joining Date <span class="text-danger">*</span></label>
+                    <input type="date" name="joining_date" class="form-control" value="<?= $employee['joining_date'] ?>"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label>Department</label>
+                    <select name="department_id" class="form-control">
+                        <option value="">Select Department</option>
+                        <?php foreach ($departments as $dept): ?>
+                            <option value="<?= $dept['id'] ?>" <?= ($employee['department_id'] == $dept['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($dept['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Designation</label>
+                    <select name="designation_id" class="form-control">
+                        <option value="">Select Designation</option>
+                        <?php foreach ($designations as $desig): ?>
+                            <option value="<?= $desig['id'] ?>" <?= ($employee['designation_id'] == $desig['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($desig['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Reporting Manager</label>
+                    <select name="reporting_manager_id" class="form-control">
+                        <option value="">Select Manager</option>
+                        <?php foreach ($employees as $emp): ?>
+                            <option value="<?= $emp['id'] ?>" <?= ($employee['reporting_manager_id'] == $emp['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>
+                                (
+                                <?= $emp['employee_code'] ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Salary (Monthly)</label>
+                    <input type="number" step="0.01" name="salary" class="form-control"
+                        value="<?= $employee['salary'] ?>">
+                </div>
+
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right; border-top: 1px solid #f3f4f6; padding-top: 1rem;">
+                <a href="employees.php" class="btn-primary"
+                    style="background: #f3f4f6; color: #374151; margin-right: 0.5rem; text-decoration: none; display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem;">Cancel</a>
+                <button type="submit" class="btn-primary">Update Employee</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<?php include 'includes/footer.php'; ?>
