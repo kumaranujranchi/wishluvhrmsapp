@@ -174,14 +174,15 @@ $requests = $stmt->fetchAll();
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(2px);
+        align-items: center;
+        justify-content: center;
     }
 
     .modal-content {
         background-color: #fefefe;
-        margin: 10% auto;
         padding: 2rem;
         border-radius: 1rem;
-        width: 100%;
+        width: 90%;
         max-width: 500px;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         position: relative;
@@ -415,7 +416,7 @@ $requests = $stmt->fetchAll();
 <script>
     function openActionModal(id) {
         document.getElementById('modalRequestId').value = id;
-        document.getElementById('actionModal').style.display = 'block';
+        document.getElementById('actionModal').style.display = 'flex';
     }
     function closeModal() {
         document.getElementById('actionModal').style.display = 'none';
