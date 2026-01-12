@@ -1,6 +1,6 @@
 .DS_Store
 *.log
 config/db_local.php
-vendor/
+# vendor/ - Temporarily allowing vendor/PHPMailer for deployment
 uploads/
 config/email_credentials.php
