@@ -88,6 +88,10 @@ $employees = $conn->query($sql)->fetchAll();
                             </td>
                             <td>
                                 <div style="display:flex; gap:0.5rem;">
+                                    <a href="view_employee.php?id=<?= $emp['id'] ?>" class="btn-icon" title="View Details"
+                                        style="color:#2563eb; text-decoration:none; display:flex; align-items:center; justify-content:center;">
+                                        <i data-lucide="eye" style="width:16px;"></i>
+                                    </a>
                                     <button class="btn-icon" title="Edit">
                                         <i data-lucide="edit-2" style="width:16px;"></i>
                                     </button>
