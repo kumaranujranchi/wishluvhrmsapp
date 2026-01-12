@@ -123,6 +123,71 @@ for ($i = 6; $i >= 0; $i--) {
         background: #f8fafc;
         transform: translateX(5px);
     }
+
+    .content-grid-responsive {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 1.5rem;
+    }
+
+    /* Mobile Enhancements */
+    @media (max-width: 768px) {
+        .welcome-banner {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-grid-sharp {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+            margin-bottom: 1.5rem;
+        }
+
+        .sharp-card {
+            min-height: 130px !important;
+            padding: 1rem !important;
+        }
+
+        .card-value {
+            font-size: 1.75rem !important;
+            margin: 0.25rem 0 !important;
+        }
+
+        .card-label {
+            font-size: 0.7rem !important;
+        }
+
+        .sharp-card span:not(.card-label) {
+            font-size: 0.7rem !important;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .card-footer {
+            margin: 1rem -1rem -1rem !important;
+            padding: 0.5rem 1rem !important;
+            font-size: 0.65rem !important;
+        }
+
+        .sharp-card i {
+            font-size: 3rem !important;
+            right: -5px !important;
+            bottom: -5px !important;
+        }
+
+        .content-grid-responsive {
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+        }
+
+        .chart-container-mobile {
+            padding: 1rem !important;
+        }
+
+        #employeeWaveChart {
+            height: 200px !important;
+        }
+    }
 </style>
 
 <div class="page-content">
@@ -174,14 +239,14 @@ for ($i = 6; $i >= 0; $i--) {
         </div>
     </div>
 
-    <div class="content-grid" style="grid-template-columns: 1fr 350px;">
+    <div class="content-grid-responsive">
         <!-- Left: Activity Chart -->
         <div>
             <div class="card" style="border-radius:0; border:none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <div class="card-header" style="background:white; border-bottom:1px solid #f1f5f9; padding:1.25rem;">
                     <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Weekly Performance</h3>
                 </div>
-                <div style="padding:1.5rem;">
+                <div class="chart-container-mobile" style="padding:1.5rem;">
                     <canvas id="employeeWaveChart" style="height:250px;"></canvas>
                 </div>
             </div>
@@ -227,9 +292,11 @@ for ($i = 6; $i >= 0; $i--) {
                         </div>
                         <div style="flex:1;">
                             <div style="font-weight:600; font-size:0.9rem; color:#1e293b;">
-                                <?= htmlspecialchars($notice['title']) ?></div>
+                                <?= htmlspecialchars($notice['title']) ?>
+                            </div>
                             <div style="font-size:0.75rem; color:#94a3b8;">
-                                <?= date('d M', strtotime($notice['created_at'])) ?></div>
+                                <?= date('d M', strtotime($notice['created_at'])) ?>
+                            </div>
                         </div>
                     </a>
                 <?php endforeach; ?>
