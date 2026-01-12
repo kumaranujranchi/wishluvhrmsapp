@@ -95,20 +95,20 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             </a>
 
             <a href="leave_manager_approval.php" class="nav-item <?php echo isActive('leave_manager_approval'); ?>">
-                    <i data-lucide="users" class="icon"></i>
-                    <span>Team Requests</span>
-                </a>
+                <i data-lucide="users" class="icon"></i>
+                <span>Team Requests</span>
+            </a>
 
         <?php else: ?>
             <!-- ADMIN MENU (Existing) -->
             <a href="index.php" class="nav-item <?php echo isActive('index'); ?>">
                 <i data-lucide="layout-dashboard" class="icon"></i>
                 <span>Dashboard</span>
-                </a>
+            </a>
 
-                <a href="leave_admin.php" class="nav-item <?php echo isActive('leave_admin'); ?>">
-                    <i data-lucide="shield-check" class="icon"></i>
-                    <span>Leave Approvals</span>
+            <a href="leave_admin.php" class="nav-item <?php echo isActive('leave_admin'); ?>">
+                <i data-lucide="shield-check" class="icon"></i>
+                <span>Leave Approvals</span>
             </a>
 
             <!-- Employee Onboarding Group -->
@@ -147,7 +147,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Attendance</span>
             </a>
 
-            <a href="#" class="nav-item">
+            <a href="leave.php" class="nav-item <?php echo isActive('leave'); ?>">
                 <i data-lucide="coffee" class="icon"></i>
                 <span>Leaves</span>
             </a>
