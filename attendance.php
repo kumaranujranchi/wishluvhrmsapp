@@ -140,26 +140,98 @@ if (isset($_POST['export_csv'])) {
             </form>
         </div>
         
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Status</th>
-                        <th>Check In</th>
-                        <th>Location In</th>
-                        <th>Check Out</th>
-                        <th>Location Out</th>
-                        <th>Total Hrs</th>
-                        <th style="text-align:right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($attendance_records as $row): ?>
+        <!-- Desktop View -->
+        <div class="desktop-only">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="width:35px; height:35px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:bold; color:#64748b;">
+                            <th>Employee</th>
+                            <th>Status</th>
+                            <th>Check In</th>
+                            <th>Location In</th>
+                            <th>Check Out</th>
+                            <th>Location Out</th>
+                            <th>Total Hrs</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($attendance_records as $row): ?>
+                            <tr>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <div style="width:35px; height:35px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:bold; color:#64748b;">
+                                            <?php if ($row['avatar']): ?>
+                                                <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
+                                            <?php else: ?>
+                                                <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight:500;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
+                                            <div style="font-size:0.75rem; color:#64748b;"><?= htmlspecialchars($row['dept_name']) ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php 
+                                        $sColor = match($row['status']) {
+                                            'Present' => 'background:#dcfce7; color:#166534;',
+                                            'Late' => 'background:#fef9c3; color:#854d0e;',
+                                            'Half Day' => 'background:#ffedd5; color:#9a3412;',
+                                            'Absent' => 'background:#fee2e2; color:#991b1b;',
+                                            default => 'background:#f1f5f9; color:#475569;'
+                                        };
+                                    ?>
+                                    <span class="badge" style="<?= $sColor ?>"><?= $row['status'] ?></span>
+                                </td>
+                                <td style="font-weight:500;"><?= date('h:i A', strtotime($row['clock_in'])) ?></td>
+                                <td>
+                                    <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_in_address']) ?>">
+                                        <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                        <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                                    </div>
+                                </td>
+                                <td style="font-weight:500;"><?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '<span style="color:#cbd5e1;">--:--</span>' ?></td>
+                                <td>
+                                    <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_out_address']) ?>">
+                                        <?php if($row['clock_out_address']): ?>
+                                            <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                            <?= htmlspecialchars($row['clock_out_address']) ?>
+                                        <?php else: ?>
+                                            <span style="color:#cbd5e1;">-</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td style="font-weight:600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></td>
+                                <td style="text-align:right;">
+                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>" target="_blank" class="btn-icon" title="View Map" style="display:inline-flex; align-items:center; justify-content:center;">
+                                        <i data-lucide="map" style="width:16px;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        
+                        <?php if (empty($attendance_records)): ?>
+                            <tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No attendance records for this date.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile View -->
+        <div class="mobile-only">
+            <div class="mobile-card-list">
+                <?php if (empty($attendance_records)): ?>
+                    <div style="text-align:center; padding:2rem; color:#64748b;">No attendance records for this date.</div>
+                <?php else: ?>
+                    <?php foreach ($attendance_records as $row): ?>
+                        <div class="mobile-card">
+                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:35px; height:35px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:bold; color:#64748b; font-size:0.75rem;">
                                         <?php if ($row['avatar']): ?>
                                             <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
                                         <?php else: ?>
@@ -167,56 +239,55 @@ if (isset($_POST['export_csv'])) {
                                         <?php endif; ?>
                                     </div>
                                     <div>
-                                        <div style="font-weight:500;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
-                                        <div style="font-size:0.75rem; color:#64748b;"><?= htmlspecialchars($row['dept_name']) ?></div>
+                                        <div style="font-weight:600; font-size:0.9rem; color:#1e293b;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
+                                        <div style="font-size:0.75rem; color:#64748b;"><?= date('h:i A', strtotime($row['clock_in'])) ?> - <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'In' ?></div>
                                     </div>
                                 </div>
-                            </td>
-                            <td>
-                                <?php 
-                                    $sColor = match($row['status']) {
-                                        'Present' => 'background:#dcfce7; color:#166534;',
-                                        'Late' => 'background:#fef9c3; color:#854d0e;',
-                                        'Half Day' => 'background:#ffedd5; color:#9a3412;',
-                                        'Absent' => 'background:#fee2e2; color:#991b1b;',
-                                        default => 'background:#f1f5f9; color:#475569;'
-                                    };
-                                ?>
-                                <span class="badge" style="<?= $sColor ?>"><?= $row['status'] ?></span>
-                            </td>
-                            <td style="font-weight:500;"><?= date('h:i A', strtotime($row['clock_in'])) ?></td>
-                            <td>
-                                <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_in_address']) ?>">
-                                    <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
-                                    <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <?php 
+                                        $sColorMobile = match($row['status']) {
+                                            'Present' => 'background:#dcfce7; color:#166534;',
+                                            'Late' => 'background:#fef9c3; color:#854d0e;',
+                                            'Half Day' => 'background:#ffedd5; color:#9a3412;',
+                                            'Absent' => 'background:#fee2e2; color:#991b1b;',
+                                            default => 'background:#f1f5f9; color:#475569;'
+                                        };
+                                    ?>
+                                    <span class="badge" style="font-size:0.7rem; <?= $sColorMobile ?>"><?= $row['status'] ?></span>
+                                    <i data-lucide="chevron-down" class="toggle-icon" style="width:18px;"></i>
                                 </div>
-                            </td>
-                            <td style="font-weight:500;"><?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '<span style="color:#cbd5e1;">--:--</span>' ?></td>
-                            <td>
-                                <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?= htmlspecialchars($row['clock_out_address']) ?>">
-                                    <?php if($row['clock_out_address']): ?>
-                                        <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
-                                        <?= htmlspecialchars($row['clock_out_address']) ?>
-                                    <?php else: ?>
-                                        <span style="color:#cbd5e1;">-</span>
-                                    <?php endif; ?>
+                            </div>
+                            <div class="mobile-card-body">
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Department</span>
+                                    <span class="mobile-value"><?= htmlspecialchars($row['dept_name'] ?? '-') ?></span>
                                 </div>
-                            </td>
-                            <td style="font-weight:600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></td>
-                            <td style="text-align:right;">
-                                <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>" target="_blank" class="btn-icon" title="View Map" style="display:inline-flex; align-items:center; justify-content:center;">
-                                    <i data-lucide="map" style="width:16px;"></i>
-                                </a>
-                            </td>
-                        </tr>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Total Hours</span>
+                                    <span class="mobile-value" style="font-weight:600; color:#3b82f6;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></span>
+                                </div>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Check-In Location</span>
+                                    <span class="mobile-value" style="font-size:0.8rem; line-height:1.4; color:#64748b;"><?= htmlspecialchars($row['clock_in_address'] ?? '-') ?></span>
+                                </div>
+                                <?php if($row['clock_out_address']): ?>
+                                    <div class="mobile-field">
+                                        <span class="mobile-label">Check-Out Location</span>
+                                        <span class="mobile-value" style="font-size:0.8rem; line-height:1.4; color:#64748b;"><?= htmlspecialchars($row['clock_out_address']) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                <div style="margin-top:1.5rem;">
+                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>" target="_blank" class="btn-primary" style="width:100%; justify-content:center; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; text-decoration:none;">
+                                        <i data-lucide="map" style="width:16px; margin-right:8px;"></i> View on Google Maps
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                    
-                    <?php if (empty($attendance_records)): ?>
-                        <tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No attendance records for this date.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                <?php endif; ?>
+            </div>
         </div>
+
     </div>
 </div>
 

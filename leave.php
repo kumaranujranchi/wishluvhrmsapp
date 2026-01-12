@@ -260,7 +260,7 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
             </select>
             <select name="employee" class="form-control" style="width: auto; min-width: 180px;">
                 <option value="">All Employees</option>
-                <?php foreach($all_employees as $emp): ?>
+                <?php foreach ($all_employees as $emp): ?>
                     <option value="<?= $emp['id'] ?>" <?= ($employee_filter == $emp['id']) ? 'selected' : '' ?>>
                         <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?> (<?= $emp['employee_code'] ?>)
                     </option>
@@ -270,111 +270,202 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
         </form>
 
         <!-- Requests List -->
-        <div class="table-responsive">
-            <table class="table" style="margin: 0;">
-                <thead style="background: #f8fafc;">
-                    <tr>
-                        <th style="padding-left: 1.5rem;">Employee</th>
-                        <th>Dates & Type</th>
-                        <th>Reason & Manager</th>
-                        <th>Status</th>
-                        <th style="text-align: right; padding-right: 1.5rem;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($requests)): ?>
+        <!-- Desktop View (Table) -->
+        <div class="desktop-only">
+            <div class="table-responsive">
+                <table class="table" style="margin: 0;">
+                    <thead style="background: #f8fafc;">
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 3rem; color: #94a3b8;">No records found.
-                            </td>
+                            <th style="padding-left: 1.5rem;">Employee</th>
+                            <th>Dates & Type</th>
+                            <th>Reason & Manager</th>
+                            <th>Status</th>
+                            <th style="text-align: right; padding-right: 1.5rem;">Action</th>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($requests as $req): ?>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($requests)): ?>
                             <tr>
-                                <td style="padding-left: 1.5rem;">
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div
-                                            style="width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #64748b;">
-                                            <?php if ($req['avatar']): ?>
-                                                <img src="<?= $req['avatar'] ?>"
-                                                    style="width: 100%; height: 100%; object-fit: cover;">
-                                            <?php else: ?>
-                                                <?= strtoupper(substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1)) ?>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div>
-                                            <div style="font-weight: 600; font-size: 0.9rem;">
-                                                <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?>
-                                            </div>
-                                            <div style="font-size: 0.75rem; color: #64748b;">
-                                                <?= htmlspecialchars($req['dept_name']) ?>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <td colspan="5" style="text-align: center; padding: 3rem; color: #94a3b8;">No records found.
                                 </td>
-                                <td>
-                                    <div style="font-weight: 600; color: #1e293b;">
-                                        <?= date('d M', strtotime($req['start_date'])) ?> -
-                                        <?= date('d M', strtotime($req['end_date'])) ?>
-                                    </div>
-                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
-                                        <?= $req['leave_type'] ?> &bull;
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($requests as $req): ?>
+                                <tr>
+                                    <td style="padding-left: 1.5rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <div
+                                                style="width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #64748b;">
+                                                <?php if ($req['avatar']): ?>
+                                                    <img src="<?= $req['avatar'] ?>"
+                                                        style="width: 100%; height: 100%; object-fit: cover;">
+                                                <?php else: ?>
+                                                    <?= strtoupper(substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1)) ?>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; font-size: 0.9rem;">
+                                                    <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?>
+                                                </div>
+                                                <div style="font-size: 0.75rem; color: #64748b;">
+                                                    <?= htmlspecialchars($req['dept_name']) ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600; color: #1e293b;">
+                                            <?= date('d M', strtotime($req['start_date'])) ?> -
+                                            <?= date('d M', strtotime($req['end_date'])) ?>
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                            <?= $req['leave_type'] ?> &bull;
+                                            <?php
+                                            $days = (new DateTime($req['end_date']))->diff(new DateTime($req['start_date']))->format("%a") + 1;
+                                            echo $days . ($days == 1 ? ' Day' : ' Days');
+                                            ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 250px;">
+                                            <div style="font-size: 0.85rem; color: #334155; margin-bottom: 0.5rem;">
+                                                <?= htmlspecialchars($req['reason']) ?>
+                                            </div>
+                                            <div
+                                                style="background: #f1f5f9; padding: 0.5rem; border-radius: 6px; font-size: 0.75rem;">
+                                                <span style="color: #64748b; font-weight: 500;">Manager:</span>
+                                                <?php if ($req['manager_status'] == 'Approved'): ?>
+                                                    <span style="color: #166534; font-weight: 600;">Approved</span>
+                                                <?php elseif ($req['manager_status'] == 'Rejected'): ?>
+                                                    <span style="color: #991b1b; font-weight: 600;">Rejected</span>:
+                                                    <?= htmlspecialchars($req['manager_remarks']) ?>
+                                                <?php else: ?>
+                                                    <span style="color: #854d0e;">Pending</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
                                         <?php
-                                        $days = (new DateTime($req['end_date']))->diff(new DateTime($req['start_date']))->format("%a") + 1;
-                                        echo $days . ($days == 1 ? ' Day' : ' Days');
+                                        $sClass = match ($req['admin_status']) {
+                                            'Approved' => 'status-approved',
+                                            'Rejected' => 'status-rejected',
+                                            'Clarification' => 'status-clarification',
+                                            default => 'status-pending'
+                                        };
                                         ?>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="max-width: 250px;">
-                                        <div style="font-size: 0.85rem; color: #334155; margin-bottom: 0.5rem;">
-                                            <?= htmlspecialchars($req['reason']) ?>
-                                        </div>
-                                        <div
-                                            style="background: #f1f5f9; padding: 0.5rem; border-radius: 6px; font-size: 0.75rem;">
-                                            <span style="color: #64748b; font-weight: 500;">Manager:</span>
-                                            <?php if ($req['manager_status'] == 'Approved'): ?>
-                                                <span style="color: #166534; font-weight: 600;">Approved</span>
-                                            <?php elseif ($req['manager_status'] == 'Rejected'): ?>
-                                                <span style="color: #991b1b; font-weight: 600;">Rejected</span>:
-                                                <?= htmlspecialchars($req['manager_remarks']) ?>
-                                            <?php else: ?>
-                                                <span style="color: #854d0e;">Pending</span>
+                                        <span class="status-badge <?= $sClass ?>">
+                                            <?= $req['admin_status'] ?>
+                                        </span>
+                                    </td>
+                                    <td style="text-align: right; padding-right: 1.5rem;">
+                                        <?php if ($req['admin_status'] == 'Pending' || $req['admin_status'] == 'Clarification'): ?>
+                                            <button onclick="openActionModal(<?= $req['id'] ?>)" class="btn-primary"
+                                                style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Review</button>
+                                        <?php else: ?>
+                                            <span style="font-size: 0.85rem; color: #64748b; font-style: italic;">Closed</span>
+                                            <?php if ($req['admin_remarks']): ?>
+                                                <div style="font-size: 0.7rem; color: #64748b; max-width: 150px; margin-left: auto;">
+                                                    Rem:
+                                                    <?= htmlspecialchars($req['admin_remarks']) ?>
+                                                </div>
                                             <?php endif; ?>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile View (Collapsible Cards) -->
+        <div class="mobile-only">
+            <div class="mobile-card-list">
+                <?php if (empty($requests)): ?>
+                    <div
+                        style="text-align:center; padding: 2rem; color: #64748b; background: #f8fafc; border-radius: 1rem;">
+                        No records found.</div>
+                <?php else: ?>
+                    <?php foreach ($requests as $req): ?>
+                        <div class="mobile-card">
+                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div
+                                        style="width: 40px; height: 40px; border-radius: 10px; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                                        <?= strtoupper(substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1)) ?>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: #1e293b;">
+                                            <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?></div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">
+                                            <?= date('d M', strtotime($req['start_date'])) ?> -
+                                            <?= date('d M', strtotime($req['end_date'])) ?>
                                         </div>
                                     </div>
-                                </td>
-                                <td>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
                                     <?php
-                                    $sClass = match ($req['admin_status']) {
+                                    $sClassMobile = match ($req['admin_status']) {
                                         'Approved' => 'status-approved',
                                         'Rejected' => 'status-rejected',
                                         'Clarification' => 'status-clarification',
                                         default => 'status-pending'
                                     };
                                     ?>
-                                    <span class="status-badge <?= $sClass ?>">
+                                    <span class="status-badge <?= $sClassMobile ?>" style="font-size: 0.65rem;">
                                         <?= $req['admin_status'] ?>
                                     </span>
-                                </td>
-                                <td style="text-align: right; padding-right: 1.5rem;">
-                                    <?php if ($req['admin_status'] == 'Pending' || $req['admin_status'] == 'Clarification'): ?>
-                                        <button onclick="openActionModal(<?= $req['id'] ?>)" class="btn-primary"
-                                            style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Review</button>
-                                    <?php else: ?>
-                                        <span style="font-size: 0.85rem; color: #64748b; font-style: italic;">Closed</span>
-                                        <?php if ($req['admin_remarks']): ?>
-                                            <div style="font-size: 0.7rem; color: #64748b; max-width: 150px; margin-left: auto;">Rem:
-                                                <?= htmlspecialchars($req['admin_remarks']) ?>
-                                            </div>
+                                    <i data-lucide="chevron-down" class="toggle-icon" style="width: 18px;"></i>
+                                </div>
+                            </div>
+                            <div class="mobile-card-body">
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Leave Type</span>
+                                    <span class="mobile-value"
+                                        style="color: #4f46e5; font-weight: 600;"><?= $req['leave_type'] ?>
+                                        (<?= (new DateTime($req['end_date']))->diff(new DateTime($req['start_date']))->format("%a") + 1 ?>
+                                        Days)</span>
+                                </div>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Reason</span>
+                                    <span class="mobile-value"><?= htmlspecialchars($req['reason']) ?></span>
+                                </div>
+                                <div class="mobile-field">
+                                    <span class="mobile-label">Manager Verification</span>
+                                    <span class="mobile-value">
+                                        <?php if ($req['manager_status'] == 'Approved'): ?>
+                                            <span style="color:#10b981; font-weight:600;"><i data-lucide="check-circle"
+                                                    style="width:14px; vertical-align:middle;"></i> Approved</span>
+                                        <?php elseif ($req['manager_status'] == 'Rejected'): ?>
+                                            <span style="color:#ef4444; font-weight:600;"><i data-lucide="x-circle"
+                                                    style="width:14px; vertical-align:middle;"></i> Rejected</span>
+                                        <?php else: ?>
+                                            <span style="color:#f59e0b; font-weight:600;"><i data-lucide="clock"
+                                                    style="width:14px; vertical-align:middle;"></i> Pending</span>
                                         <?php endif; ?>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                                    </span>
+                                </div>
+                                <?php if ($req['admin_status'] == 'Pending' || $req['admin_status'] == 'Clarification'): ?>
+                                    <div style="margin-top: 1.5rem;">
+                                        <button class="btn-primary" style="width: 100%; justify-content: center;"
+                                            onclick="openActionModal(<?= $req['id'] ?>)">Review Request</button>
+                                    </div>
+                                <?php elseif ($req['admin_remarks']): ?>
+                                    <div class="mobile-field">
+                                        <span class="mobile-label">Admin Remarks</span>
+                                        <span class="mobile-value"
+                                            style="font-style: italic; color: #64748b;"><?= htmlspecialchars($req['admin_remarks']) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
+
     </div>
 </div>
 

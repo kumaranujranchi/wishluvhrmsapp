@@ -34,12 +34,13 @@ header("Pragma: no-cache");
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Delius&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
 
 <!-- Main CSS -->
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v=1.2">
 
-<!-- Lucide Icons (Script for development/demo purposes) -->
+<!-- Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 

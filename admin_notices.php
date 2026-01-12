@@ -124,68 +124,136 @@ $notices = $conn->query("SELECT n.*, (SELECT COUNT(*) FROM notice_reads WHERE no
             <div class="card-header">
                 <h3>Recent Notices</h3>
             </div>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Notice Details</th>
-                            <th>Urgency</th>
-                            <th>Read By</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($notices as $row): ?>
+            <!-- Desktop View (Table) -->
+            <div class="desktop-only">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <div style="font-weight: 600; color: #1e293b;">
-                                        <?= htmlspecialchars($row['title']) ?>
-                                    </div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">
-                                        <?= date('d M Y, h:i A', strtotime($row['created_at'])) ?>
-                                    </div>
-                                </td>
-                                <td>
-                                    <?php
-                                    $uColor = match ($row['urgency']) {
-                                        'Low' => 'background:#f1f5f9; color:#475569;',
-                                        'Normal' => 'background:#dcfce7; color:#166534;',
-                                        'High' => 'background:#ffedd5; color:#9a3412;',
-                                        'Urgent' => 'background:#fee2e2; color:#991b1b;',
-                                        default => 'background:#f1f5f9; color:#475569;'
-                                    };
-                                    ?>
-                                    <span class="badge" style="<?= $uColor ?>">
-                                        <?= $row['urgency'] ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn-icon" onclick="viewReadStatus(<?= $row['id'] ?>)"
-                                        title="View Read Receipts">
-                                        <i data-lucide="eye" style="width: 16px;"></i>
-                                        <span style="font-size:0.8rem; margin-left:5px;">
-                                            <?= $row['read_count'] ?> Seen
+                                <th>Notice Details</th>
+                                <th>Urgency</th>
+                                <th>Read By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($notices as $row): ?>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 600; color: #1e293b;">
+                                            <?= htmlspecialchars($row['title']) ?>
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">
+                                            <?= date('d M Y, h:i A', strtotime($row['created_at'])) ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $uColor = match ($row['urgency']) {
+                                            'Low' => 'background:#f1f5f9; color:#475569;',
+                                            'Normal' => 'background:#dcfce7; color:#166534;',
+                                            'High' => 'background:#ffedd5; color:#9a3412;',
+                                            'Urgent' => 'background:#fee2e2; color:#991b1b;',
+                                            default => 'background:#f1f5f9; color:#475569;'
+                                        };
+                                        ?>
+                                        <span class="badge" style="<?= $uColor ?>">
+                                            <?= $row['urgency'] ?>
                                         </span>
-                                    </button>
-                                </td>
-                                <td>
-                                    <a href="admin_notices.php?delete_id=<?= $row['id'] ?>" class="btn-icon text-danger"
-                                        onclick="return confirm('Are you sure?')">
-                                        <i data-lucide="trash-2" style="width: 16px;"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-
-                        <?php if (empty($notices)): ?>
-                            <tr>
-                                <td colspan="4" style="text-align:center; padding:2rem; color:#64748b;">No notices published
-                                    yet.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                                    </td>
+                                    <td>
+                                        <button class="btn-icon" onclick="viewReadStatus(<?= $row['id'] ?>)"
+                                            title="View Read Receipts">
+                                            <i data-lucide="eye" style="width: 16px;"></i>
+                                            <span style="font-size:0.8rem; margin-left:5px;">
+                                                <?= $row['read_count'] ?> Seen
+                                            </span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <a href="admin_notices.php?delete_id=<?= $row['id'] ?>" class="btn-icon text-danger"
+                                            onclick="return confirm('Are you sure?')">
+                                            <i data-lucide="trash-2" style="width: 16px;"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- Mobile View (Notice List) -->
+            <div class="mobile-only">
+                <div class="mobile-card-list">
+                    <?php if (empty($notices)): ?>
+                        <div
+                            style="text-align:center; padding: 2rem; color: #64748b; background: #f8fafc; border-radius: 1rem;">
+                            No notices published yet.</div>
+                    <?php else: ?>
+                        <?php foreach ($notices as $row): ?>
+                            <div class="mobile-card">
+                                <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div
+                                            style="width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center;">
+                                            <i data-lucide="bell" style="width: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600; color: #1e293b;">
+                                                <?= htmlspecialchars($row['title']) ?></div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">
+                                                <?= date('d M Y', strtotime($row['created_at'])) ?></div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <?php
+                                        $uColorMobile = match ($row['urgency']) {
+                                            'Low' => 'background:#f1f5f9; color:#475569;',
+                                            'Normal' => 'background:#dcfce7; color:#166534;',
+                                            'High' => 'background:#ffedd5; color:#9a3412;',
+                                            'Urgent' => 'background:#fee2e2; color:#991b1b;',
+                                            default => 'background:#f1f5f9; color:#475569;'
+                                        };
+                                        ?>
+                                        <span class="badge" style="font-size: 0.7rem; <?= $uColorMobile ?>">
+                                            <?= $row['urgency'] ?>
+                                        </span>
+                                        <i data-lucide="chevron-down" class="toggle-icon" style="width: 18px;"></i>
+                                    </div>
+                                </div>
+                                <div class="mobile-card-body">
+                                    <div class="mobile-field">
+                                        <span class="mobile-label">Content Preview</span>
+                                        <span class="mobile-value"
+                                            style="font-size: 0.85rem; line-height: 1.5;"><?= substr(htmlspecialchars($row['content']), 0, 100) ?>...</span>
+                                    </div>
+                                    <div class="mobile-field">
+                                        <span class="mobile-label">Engagement</span>
+                                        <span class="mobile-value"
+                                            style="color: #6366f1; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                            <i data-lucide="users" style="width: 14px;"></i> <?= $row['read_count'] ?> Employees
+                                            seen
+                                        </span>
+                                    </div>
+                                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                        <button onclick="viewReadStatus(<?= $row['id'] ?>)" class="btn-primary"
+                                            style="flex: 2; justify-content: center; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
+                                            <i data-lucide="eye" style="width: 16px; margin-right: 8px;"></i> Receipts
+                                        </button>
+                                        <a href="admin_notices.php?delete_id=<?= $row['id'] ?>" class="btn-primary"
+                                            style="flex: 1; justify-content: center; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; text-decoration: none;"
+                                            onclick="return confirm('Delete this notice?')">
+                                            <i data-lucide="trash-2" style="width: 16px;"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
