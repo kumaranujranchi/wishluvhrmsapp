@@ -1214,3 +1214,42 @@ select.form-control {
     font-weight: 800;
 }
 
+/* Table Responsiveness */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+}
+
+.table-responsive table {
+    min-width: 600px; /* Force scroll on very small screens */
+}
+
+@media (max-width: 768px) {
+    .card {
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .table-responsive table {
+        font-size: 0.85rem;
+    }
+    
+    .action-icon-btn {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* Fix for overlapping cards in mobile */
+@media (max-width: 1024px) {
+    .dashboard-content-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem;
+    }
+}

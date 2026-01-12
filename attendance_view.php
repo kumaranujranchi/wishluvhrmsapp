@@ -8,6 +8,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Ensure only employees can punch
+if ($_SESSION['user_role'] === 'Admin') {
+    header("Location: index.php");
+    exit;
+}
+
 $user_id = $_SESSION['user_id'];
 $date = date('Y-m-d');
 $message = "";
