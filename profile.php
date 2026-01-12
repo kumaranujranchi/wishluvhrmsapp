@@ -50,69 +50,106 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $aadhar_doc = uploadDoc('aadhar_doc');
     $bank_doc = uploadDoc('bank_doc');
 
-    // Build Update Query
-    $sql = "UPDATE employees SET 
-            fathers_name = :fname,
-            dob = :dob,
-            marriage_anniversary = :ani,
-            personal_email = :pemail,
-            personal_phone = :pphone,
-            official_phone = :ophone,
-            emergency_contact_name = :ename,
-            emergency_contact_phone = :ephone,
-            emergency_contact_relation = :erel,
-            pan_number = :pan,
-            aadhar_number = :aadhar,
-            bank_account_number = :bank,
-            bank_ifsc = :ifsc,
-            uan_number = :uan,
-            pf_number = :pf";
+    // Handle Password Change
+    if (!empty($_POST['current_password']) && !empty($_POST['new_password'])) {
+        $current_pw = $_POST['current_password'];
+        $new_pw = $_POST['new_password'];
+        $confirm_pw = $_POST['confirm_password'];
 
-    $params = [
-        'fname' => $fathers_name,
-        'dob' => $dob,
-        'ani' => $marriage_anniversary,
-        'pemail' => $personal_email,
-        'pphone' => $personal_phone,
-        'ophone' => $official_phone,
-        'ename' => $emergency_name,
-        'ephone' => $emergency_phone,
-        'erel' => $emergency_rel,
-        'pan' => $pan_number,
-        'aadhar' => $aadhar_number,
-        'bank' => $bank_acc,
-        'ifsc' => $bank_ifsc,
-        'uan' => $uan,
-        'pf' => $pf,
-        'id' => $user_id
-    ];
+        // Verify current password
+        $pw_check = $conn->prepare("SELECT password FROM employees WHERE id = :id");
+        $pw_check->execute(['id' => $user_id]);
+        $stored_pw = $pw_check->fetchColumn();
 
-    if ($pan_doc) {
-        $sql .= ", pan_doc = :pandoc";
-        $params['pandoc'] = $pan_doc;
-    }
-    if ($aadhar_doc) {
-        $sql .= ", aadhar_doc = :aadhardoc";
-        $params['aadhardoc'] = $aadhar_doc;
-    }
-    if ($bank_doc) {
-        $sql .= ", bank_doc = :bankdoc";
-        $params['bankdoc'] = $bank_doc;
+        if (password_verify($current_pw, $stored_pw)) {
+            if ($new_pw === $confirm_pw) {
+                if (strlen($new_pw) >= 6) {
+                    $hashed_pw = password_hash($new_pw, PASSWORD_DEFAULT);
+                    $update_pw = $conn->prepare("UPDATE employees SET password = :pw WHERE id = :id");
+                    $update_pw->execute(['pw' => $hashed_pw, 'id' => $user_id]);
+                    $message .= "<div class='alert success' style='background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #bbf7d0;'>
+                                    <div style='display: flex; align-items: center; gap: 10px;'>
+                                        <i data-lucide='shield-check'></i>
+                                        <span>Password updated successfully!</span>
+                                    </div>
+                                </div>";
+                } else {
+                    $message .= "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>New password must be at least 6 characters.</div>";
+                }
+            } else {
+                $message .= "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>New passwords do not match.</div>";
+            }
+        } else {
+            $message .= "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>Current password is incorrect.</div>";
+        }
     }
 
-    $sql .= " WHERE id = :id";
+    // Only update profile if some non-password fields are present (e.g. fathers_name which is likely in every profile edit)
+    if (isset($_POST['fathers_name'])) {
+        // Build Update Query
+        $sql = "UPDATE employees SET 
+                fathers_name = :fname,
+                dob = :dob,
+                marriage_anniversary = :ani,
+                personal_email = :pemail,
+                personal_phone = :pphone,
+                official_phone = :ophone,
+                emergency_contact_name = :ename,
+                emergency_contact_phone = :ephone,
+                emergency_contact_relation = :erel,
+                pan_number = :pan,
+                aadhar_number = :aadhar,
+                bank_account_number = :bank,
+                bank_ifsc = :ifsc,
+                uan_number = :uan,
+                pf_number = :pf";
 
-    try {
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($params);
-        $message = "<div class='alert success' style='background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #bbf7d0;'>
-                        <div style='display: flex; align-items: center; gap: 10px;'>
-                            <i data-lucide='check-circle'></i>
-                            <span>Profile updated successfully!</span>
-                        </div>
-                    </div>";
-    } catch (PDOException $e) {
-        $message = "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>Error: " . $e->getMessage() . "</div>";
+        $params = [
+            'fname' => $fathers_name,
+            'dob' => $dob,
+            'ani' => $marriage_anniversary,
+            'pemail' => $personal_email,
+            'pphone' => $personal_phone,
+            'ophone' => $official_phone,
+            'ename' => $emergency_name,
+            'ephone' => $emergency_phone,
+            'erel' => $emergency_rel,
+            'pan' => $pan_number,
+            'aadhar' => $aadhar_number,
+            'bank' => $bank_acc,
+            'ifsc' => $bank_ifsc,
+            'uan' => $uan,
+            'pf' => $pf,
+            'id' => $user_id
+        ];
+
+        if ($pan_doc) {
+            $sql .= ", pan_doc = :pandoc";
+            $params['pandoc'] = $pan_doc;
+        }
+        if ($aadhar_doc) {
+            $sql .= ", aadhar_doc = :aadhardoc";
+            $params['aadhardoc'] = $aadhar_doc;
+        }
+        if ($bank_doc) {
+            $sql .= ", bank_doc = :bankdoc";
+            $params['bankdoc'] = $bank_doc;
+        }
+
+        $sql .= " WHERE id = :id";
+
+        try {
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($params);
+            $message .= "<div class='alert success' style='background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #bbf7d0;'>
+                            <div style='display: flex; align-items: center; gap: 10px;'>
+                                <i data-lucide='check-circle'></i>
+                                <span>Profile updated successfully!</span>
+                            </div>
+                        </div>";
+        } catch (PDOException $e) {
+            $message .= "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>Error: " . $e->getMessage() . "</div>";
+        }
     }
 }
 
@@ -699,6 +736,31 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                     <label>PF Number</label>
                     <input type="text" name="pf_number" class="modern-input" placeholder="Provident Fund No."
                         value="<?= htmlspecialchars($user['pf_number'] ?? '') ?>">
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon" style="background: #f1f5f9; color: #475569;"><i data-lucide="shield-lock"></i>
+                </div>
+                <h3 class="section-title">Security & Password</h3>
+            </div>
+            <p style="margin-bottom: 1.5rem; color: #64748b; font-size: 0.9rem;">To change your password, please fill in
+                your current password and choose a new one. Password must be at least 6 characters.</p>
+            <div class="content-grid three-column">
+                <div class="modern-form-group">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password" class="modern-input" placeholder="••••••••">
+                </div>
+                <div class="modern-form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" class="modern-input" placeholder="••••••••">
+                </div>
+                <div class="modern-form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password" class="modern-input" placeholder="••••••••">
                 </div>
             </div>
         </div>
