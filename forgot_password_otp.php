@@ -1,5 +1,8 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once 'config/db.php';
 require_once 'config/email.php';
 
@@ -31,20 +34,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['request_otp'])) {
             ]);
 
             // Send OTP via email
-            $emailSent = sendOTPEmail($email, $user['first_name'] . ' ' . $user['last_name'], $otp);
+            try {
+                $emailSent = sendOTPEmail($email, $user['first_name'] . ' ' . $user['last_name'], $otp);
 
-            if ($emailSent) {
-                $_SESSION['reset_email'] = $email;
-                header("Location: forgot_password_otp.php?step=verify");
-                exit;
-            } else {
-                $message = "<div class='error-msg'>Failed to send OTP email. Please try again or contact administrator.</div>";
+                if ($emailSent) {
+                    $_SESSION['reset_email'] = $email;
+                    header("Location: forgot_password_otp.php?step=verify");
+                    exit;
+                } else {
+                    $message = "<div class='error-msg'>Failed to send OTP email. Please check email configuration.</div>";
+                }
+            } catch (Exception $e) {
+                $message = "<div class='error-msg'>Email Error: " . htmlspecialchars($e->getMessage()) . "</div>";
             }
         } else {
             $message = "<div class='error-msg'>Invalid email or employee code.</div>";
         }
     } catch (PDOException $e) {
-        $message = "<div class='error-msg'>Error: " . $e->getMessage() . "</div>";
+        $message = "<div class='error-msg'>Database Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+    } catch (Exception $e) {
+        $message = "<div class='error-msg'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
     }
 }
 

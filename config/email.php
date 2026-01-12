@@ -1,20 +1,28 @@
 <?php
 // Email Configuration for Hostinger
-// SMTP Settings - Update these with your Hostinger email credentials
+// SMTP Settings - Hostinger Email
 
 define('SMTP_HOST', 'smtp.hostinger.com');
-define('SMTP_PORT', 465); // or 587 for TLS
-define('SMTP_USERNAME', 'noreply@yourcompany.com'); // Your Hostinger email
-define('SMTP_PASSWORD', 'your-email-password'); // Your email password
-define('SMTP_FROM_EMAIL', 'noreply@yourcompany.com');
+define('SMTP_PORT', 465); // SSL port
+define('SMTP_USERNAME', 'noreply@wishluvbuildcon.com');
+define('SMTP_PASSWORD', 'Wishluv@2025');
+define('SMTP_FROM_EMAIL', 'noreply@wishluvbuildcon.com');
 define('SMTP_FROM_NAME', 'Myworld HRMS');
 
 // Function to send email using PHPMailer
 function sendEmail($to, $subject, $body)
 {
-    require_once 'vendor/PHPMailer/PHPMailer.php';
-    require_once 'vendor/PHPMailer/SMTP.php';
-    require_once 'vendor/PHPMailer/Exception.php';
+    // Use absolute path for PHPMailer
+    $phpmailer_path = __DIR__ . '/../vendor/PHPMailer/';
+
+    if (!file_exists($phpmailer_path . 'PHPMailer.php')) {
+        error_log("PHPMailer not found at: " . $phpmailer_path);
+        return false;
+    }
+
+    require_once $phpmailer_path . 'PHPMailer.php';
+    require_once $phpmailer_path . 'SMTP.php';
+    require_once $phpmailer_path . 'Exception.php';
 
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
@@ -41,7 +49,7 @@ function sendEmail($to, $subject, $body)
         return true;
     } catch (Exception $e) {
         error_log("Email Error: {$mail->ErrorInfo}");
-        return false;
+        throw new Exception("Failed to send email: {$mail->ErrorInfo}");
     }
 }
 
