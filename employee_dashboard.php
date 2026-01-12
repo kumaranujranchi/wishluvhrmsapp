@@ -26,13 +26,28 @@ $holiday_q = $conn->prepare("SELECT * FROM holidays WHERE start_date >= CURDATE(
 $holiday_q->execute();
 $next_holiday = $holiday_q->fetch();
 
-// 4. Fetch Last 7 Days Attendance for Chart
+// 5. Fetch Upcoming Birthday (Next person to celebrate)
+$birthday_q = $conn->prepare("
+    SELECT first_name, last_name, dob, avatar 
+    FROM employees 
+    WHERE dob IS NOT NULL 
+    ORDER BY 
+        CASE 
+            WHEN DATE_ADD(dob, INTERVAL YEAR(CURDATE()) - YEAR(dob) YEAR) >= CURDATE()
+            THEN DATE_ADD(dob, INTERVAL YEAR(CURDATE()) - YEAR(dob) YEAR)
+            ELSE DATE_ADD(dob, INTERVAL YEAR(CURDATE()) - YEAR(dob) + 1 YEAR)
+        END ASC 
+    LIMIT 1
+");
+$birthday_q->execute();
+$next_birthday = $birthday_q->fetch();
+
+// 6. Fetch Chart Data (restore)
 $chart_labels = [];
 $chart_data = [];
 for ($i = 6; $i >= 0; $i--) {
     $d = date('Y-m-d', strtotime("-$i days"));
     $chart_labels[] = date('D', strtotime($d));
-
     $cq = $conn->prepare("SELECT total_hours FROM attendance WHERE employee_id = :uid AND date = :d");
     $cq->execute(['uid' => $user_id, 'd' => $d]);
     $chart_data[] = floatval($cq->fetchColumn() ?: 0);
@@ -100,9 +115,21 @@ for ($i = 6; $i >= 0; $i--) {
 
     .stats-grid-sharp {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
         margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 1400px) {
+        .stats-grid-sharp {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .stats-grid-sharp {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
     .notice-item-sharp {
@@ -141,6 +168,10 @@ for ($i = 6; $i >= 0; $i--) {
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 10px !important;
             margin-bottom: 1.5rem;
+        }
+
+        .stats-grid-sharp .sharp-card:last-child {
+            grid-column: span 2;
         }
 
         .sharp-card {
@@ -236,6 +267,23 @@ for ($i = 6; $i >= 0; $i--) {
             </div>
             <i data-lucide="palmtree"></i>
             <div class="card-footer">Pending: 0</div>
+        </div>
+
+        <div class="sharp-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+            <div>
+                <span class="card-label">Birthday</span>
+                <?php if ($next_birthday): ?>
+                    <div class="card-value" style="font-size: 1.5rem; margin-top: 10px;">
+                        <?= htmlspecialchars($next_birthday['first_name']) ?>
+                    </div>
+                    <span
+                        style="font-size:0.85rem; display:block;"><?= date('d M', strtotime($next_birthday['dob'])) ?></span>
+                <?php else: ?>
+                    <div class="card-value">---</div>
+                <?php endif; ?>
+            </div>
+            <i data-lucide="cake"></i>
+            <div class="card-footer">Next Celebration</div>
         </div>
     </div>
 
