@@ -29,15 +29,13 @@ $employees = $conn->query($sql)->fetchAll();
 <div class="page-content">
     <?= $message ?>
 
-    <div class="page-header">
-        <h2 class="page-title">Employees</h2>
-        <p class="page-subtitle">Manage all your employees here.</p>
-    </div>
-
-    <div class="desktop-action-btn" style="display:flex; justify-content: flex-end; margin-bottom: 2rem;">
-        <a href="add_employee.php" class="btn-primary"
-            style="display: flex; align-items: center; text-decoration: none;">
-            <i data-lucide="plus" style="width:18px; margin-right:8px;"></i> Add Employee
+    <div class="page-header-flex">
+        <div class="page-header-info">
+            <h1 class="page-title">Employees</h1>
+            <p class="page-subtitle">Manage all your employees here.</p>
+        </div>
+        <a href="add_employee.php" class="btn-primary header-action-btn" style="text-decoration: none;">
+            <i data-lucide="plus" style="width:18px;"></i> Add Employee
         </a>
     </div>
 
@@ -149,9 +147,11 @@ $employees = $conn->query($sql)->fetchAll();
                                 </div>
                                 <div style="display: flex; flex-direction: column;">
                                     <div style="font-weight: 600; color: #1e293b;">
-                                        <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?></div>
+                                        <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>
+                                    </div>
                                     <div style="font-size: 0.75rem; color: #64748b; font-family: monospace;">
-                                        <?= $emp['employee_code'] ?></div>
+                                        <?= $emp['employee_code'] ?>
+                                    </div>
                                 </div>
                             </div>
                             <i data-lucide="chevron-down" class="toggle-icon" style="width: 18px;"></i>

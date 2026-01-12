@@ -28,12 +28,12 @@ $chart_late = [];
 for ($i = 6; $i >= 0; $i--) {
     $d = date('Y-m-d', strtotime("-$i days"));
     $chart_labels[] = date('d M', strtotime($d));
-    
+
     // Present
     $p = $conn->prepare("SELECT COUNT(DISTINCT employee_id) FROM attendance WHERE date = :d");
     $p->execute(['d' => $d]);
     $chart_present[] = $p->fetchColumn();
-    
+
     // Late
     $l = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND status = 'Late'");
     $l->execute(['d' => $d]);
@@ -59,7 +59,7 @@ if (isset($_POST['export_csv'])) {
     header('Content-Disposition: attachment; filename="attendance_' . $filter_date . '.csv"');
     $output = fopen('php://output', 'w');
     fputcsv($output, ['Employee', 'Code', 'Department', 'Date', 'Status', 'Clock In', 'Location In', 'Clock Out', 'Location Out', 'Total Hours']);
-    
+
     foreach ($attendance_records as $row) {
         fputcsv($output, [
             $row['first_name'] . ' ' . $row['last_name'],
@@ -80,36 +80,36 @@ if (isset($_POST['export_csv'])) {
 ?>
 
 <div class="page-content">
-    
+
     <!-- Stats Cards -->
     <div class="stats-grid">
         <div class="card stats-card" style="border-left: 4px solid #3b82f6;">
-           <div class="stats-info">
-               <span class="stats-title">Total Employees</span>
-               <h3 class="stats-value"><?= $total_employees ?></h3>
-           </div>
-           <div class="stats-icon-wrapper"><i data-lucide="users" class="icon" style="color:#3b82f6;"></i></div>
+            <div class="stats-info">
+                <span class="stats-title">Total Employees</span>
+                <h3 class="stats-value"><?= $total_employees ?></h3>
+            </div>
+            <div class="stats-icon-wrapper"><i data-lucide="users" class="icon" style="color:#3b82f6;"></i></div>
         </div>
         <div class="card stats-card" style="border-left: 4px solid #10b981;">
-           <div class="stats-info">
-               <span class="stats-title">Present Today</span>
-               <h3 class="stats-value"><?= $present_count ?></h3>
-           </div>
-           <div class="stats-icon-wrapper"><i data-lucide="user-check" class="icon" style="color:#10b981;"></i></div>
+            <div class="stats-info">
+                <span class="stats-title">Present Today</span>
+                <h3 class="stats-value"><?= $present_count ?></h3>
+            </div>
+            <div class="stats-icon-wrapper"><i data-lucide="user-check" class="icon" style="color:#10b981;"></i></div>
         </div>
         <div class="card stats-card" style="border-left: 4px solid #f59e0b;">
-           <div class="stats-info">
-               <span class="stats-title">Late Today</span>
-               <h3 class="stats-value"><?= $late_count ?></h3>
-           </div>
-           <div class="stats-icon-wrapper"><i data-lucide="clock" class="icon" style="color:#f59e0b;"></i></div>
+            <div class="stats-info">
+                <span class="stats-title">Late Today</span>
+                <h3 class="stats-value"><?= $late_count ?></h3>
+            </div>
+            <div class="stats-icon-wrapper"><i data-lucide="clock" class="icon" style="color:#f59e0b;"></i></div>
         </div>
         <div class="card stats-card" style="border-left: 4px solid #8b5cf6;">
-           <div class="stats-info">
-               <span class="stats-title">Avg. Hours</span>
-               <h3 class="stats-value"><?= $avg ?> hr</h3>
-           </div>
-           <div class="stats-icon-wrapper"><i data-lucide="timer" class="icon" style="color:#8b5cf6;"></i></div>
+            <div class="stats-info">
+                <span class="stats-title">Avg. Hours</span>
+                <h3 class="stats-value"><?= $avg ?> hr</h3>
+            </div>
+            <div class="stats-icon-wrapper"><i data-lucide="timer" class="icon" style="color:#8b5cf6;"></i></div>
         </div>
     </div>
 
@@ -127,17 +127,21 @@ if (isset($_POST['export_csv'])) {
 
     <!-- Filters & List -->
     <div class="card">
-        <div class="card-header" style="justify-content: space-between;">
-            <h3>Daily Attendance</h3>
-            <form method="GET" class="filter-form" style="display:flex; gap:10px;">
-                <input type="date" name="date" class="form-control" value="<?= $filter_date ?>" onchange="this.form.submit()">
-                <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem;">Filter</button>
-            </form>
-             <form method="POST">
-                <button type="submit" name="export_csv" class="btn-primary" style="background:var(--color-success); border-color:var(--color-success);">
-                    <i data-lucide="download" style="width:16px; margin-right:5px;"></i> Export CSV
-                </button>
-            </form>
+        <div class="card-header page-header-flex" style="border-bottom: 1px solid #f1f5f9;">
+            <div class="page-header-info">
+                <h3 style="margin:0;">Daily Attendance</h3>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <form method="GET" class="filter-form" style="display:flex; gap:8px;">
+                    <input type="date" name="date" class="form-control" value="<?= $filter_date ?>" onchange="this.form.submit()" style="padding: 0.5rem; height: 38px; font-size: 0.85rem;">
+                    <button type="submit" class="btn-primary header-action-btn" style="padding: 0 1.5rem; height: 38px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);">Filter</button>
+                </form>
+                <form method="POST">
+                    <button type="submit" name="export_csv" class="btn-primary header-action-btn" style="background:#0f172a; height: 38px; padding: 0 1rem;">
+                        <i data-lucide="download" style="width:16px;"></i> <span class="desktop-only" style="margin-left: 5px;">Export CSV</span>
+                    </button>
+                </form>
+            </div>
         </div>
         
         <!-- Desktop View -->
@@ -148,12 +152,12 @@ if (isset($_POST['export_csv'])) {
                         <tr>
                             <th>Employee</th>
                             <th>Status</th>
-                            <th>Check In</th>
-                            <th>Location In</th>
-                            <th>Check Out</th>
-                            <th>Location Out</th>
-                            <th>Total Hrs</th>
-                            <th style="text-align:right;">Actions</th>
+                            <th>Clock In</th>
+                            <th>In Location</th>
+                            <th>Clock Out</th>
+                            <th>Out Location</th>
+                            <th>Duration</th>
+                            <th style="text-align:right;">Map</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -161,7 +165,7 @@ if (isset($_POST['export_csv'])) {
                             <tr>
                                 <td>
                                     <div style="display:flex; align-items:center; gap:10px;">
-                                        <div style="width:35px; height:35px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:bold; color:#64748b;">
+                                        <div style="width:32px; height:32px; border-radius:8px; background:#e2e8f0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#64748b; font-size:0.8rem;">
                                             <?php if ($row['avatar']): ?>
                                                 <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
                                             <?php else: ?>
@@ -169,8 +173,8 @@ if (isset($_POST['export_csv'])) {
                                             <?php endif; ?>
                                         </div>
                                         <div>
-                                            <div style="font-weight:500;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
-                                            <div style="font-size:0.75rem; color:#64748b;"><?= htmlspecialchars($row['dept_name']) ?></div>
+                                            <div style="font-weight:600; font-size:0.9rem; color:#1e293b;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
+                                            <div style="font-size:0.75rem; color:#64748b;"><?= $row['employee_code'] ?> &bull; <?= $row['dept_name'] ?></div>
                                         </div>
                                     </div>
                                 </td>
@@ -225,22 +229,28 @@ if (isset($_POST['export_csv'])) {
         <div class="mobile-only">
             <div class="mobile-card-list">
                 <?php if (empty($attendance_records)): ?>
-                    <div style="text-align:center; padding:2rem; color:#64748b;">No attendance records for this date.</div>
+                    <div style="text-align:center; padding:2.5rem; color:#64748b; background:#f8fafc; border-radius:1rem; margin:1rem;">
+                        <i data-lucide="calendar-x" style="width:32px; margin-bottom:10px; opacity:0.5;"></i>
+                        <p>No records for this date.</p>
+                    </div>
                 <?php else: ?>
                     <?php foreach ($attendance_records as $row): ?>
-                        <div class="mobile-card">
-                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')">
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <div style="width:35px; height:35px; background:#f1f5f9; border-radius:10px; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:bold; color:#64748b; font-size:0.75rem;">
+                        <div class="mobile-card" style="margin-bottom:0.75rem;">
+                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')" style="padding:1rem;">
+                                <div style="display:flex; align-items:center; gap:12px; flex:1;">
+                                    <div style="width:40px; height:40px; background:#e0e7ff; border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:700; color:#4f46e5; font-size:0.9rem;">
                                         <?php if ($row['avatar']): ?>
                                             <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
                                         <?php else: ?>
                                             <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
                                         <?php endif; ?>
                                     </div>
-                                    <div>
-                                        <div style="font-weight:600; font-size:0.9rem; color:#1e293b;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
-                                        <div style="font-size:0.75rem; color:#64748b;"><?= date('h:i A', strtotime($row['clock_in'])) ?> - <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'In' ?></div>
+                                    <div style="overflow:hidden;">
+                                        <div style="font-weight:700; font-size:0.95rem; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
+                                        <div style="font-size:0.75rem; color:#64748b; display:flex; align-items:center; gap:4px;">
+                                            <i data-lucide="clock" style="width:12px;"></i>
+                                            <?= date('h:i A', strtotime($row['clock_in'])) ?> - <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Active' ?>
+                                        </div>
                                     </div>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
@@ -253,32 +263,34 @@ if (isset($_POST['export_csv'])) {
                                             default => 'background:#f1f5f9; color:#475569;'
                                         };
                                     ?>
-                                    <span class="badge" style="font-size:0.7rem; <?= $sColorMobile ?>"><?= $row['status'] ?></span>
+                                    <span class="badge" style="<?= $sColorMobile ?> font-size:0.65rem; padding:2px 8px; border-radius:50px;"><?= $row['status'] ?></span>
                                     <i data-lucide="chevron-down" class="toggle-icon" style="width:18px;"></i>
                                 </div>
                             </div>
-                            <div class="mobile-card-body">
-                                <div class="mobile-field">
-                                    <span class="mobile-label">Department</span>
-                                    <span class="mobile-value"><?= htmlspecialchars($row['dept_name'] ?? '-') ?></span>
-                                </div>
-                                <div class="mobile-field">
-                                    <span class="mobile-label">Total Hours</span>
-                                    <span class="mobile-value" style="font-weight:600; color:#3b82f6;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></span>
-                                </div>
-                                <div class="mobile-field">
-                                    <span class="mobile-label">Check-In Location</span>
-                                    <span class="mobile-value" style="font-size:0.8rem; line-height:1.4; color:#64748b;"><?= htmlspecialchars($row['clock_in_address'] ?? '-') ?></span>
-                                </div>
-                                <?php if($row['clock_out_address']): ?>
+                            <div class="mobile-card-body" style="padding:1.25rem; background:#f8fafc; border-top:1px solid #f1f5f9;">
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
                                     <div class="mobile-field">
-                                        <span class="mobile-label">Check-Out Location</span>
-                                        <span class="mobile-value" style="font-size:0.8rem; line-height:1.4; color:#64748b;"><?= htmlspecialchars($row['clock_out_address']) ?></span>
+                                        <span class="mobile-label">In Time</span>
+                                        <span class="mobile-value"><i data-lucide="log-in" style="width:14px; vertical-align:middle; color:#10b981; margin-right:4px;"></i> <?= date('h:i A', strtotime($row['clock_in'])) ?></span>
+                                        <?php if($row['clock_in_address']): ?>
+                                            <small style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_in_address']) ?></small>
+                                        <?php endif; ?>
                                     </div>
-                                <?php endif; ?>
-                                <div style="margin-top:1.5rem;">
-                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>" target="_blank" class="btn-primary" style="width:100%; justify-content:center; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; text-decoration:none;">
-                                        <i data-lucide="map" style="width:16px; margin-right:8px;"></i> View on Google Maps
+                                    <div class="mobile-field">
+                                        <span class="mobile-label">Out Time</span>
+                                        <span class="mobile-value"><i data-lucide="log-out" style="width:14px; vertical-align:middle; color:#ef4444; margin-right:4px;"></i> <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working' ?></span>
+                                        <?php if($row['clock_out_address']): ?>
+                                            <small style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_out_address']) ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e2e8f0;">
+                                    <div class="mobile-field" style="margin:0;">
+                                        <span class="mobile-label">Working Hours</span>
+                                        <span class="mobile-value" style="color:#6366f1; font-weight:700; font-size:1.1rem;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></span>
+                                    </div>
+                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>" target="_blank" class="btn-primary" style="padding:0.4rem 0.85rem; font-size:0.8rem; border-radius:10px;">
+                                        <i data-lucide="map" style="width:14px; margin-right:5px;"></i> View Map
                                     </a>
                                 </div>
                             </div>
@@ -288,8 +300,9 @@ if (isset($_POST['export_csv'])) {
             </div>
         </div>
 
-    </div>
-</div>
+    </div> <!-- Close .card -->
+</div> <!-- Close .page-content -->
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

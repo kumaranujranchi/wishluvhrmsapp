@@ -223,14 +223,13 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
 <div class="page-content">
     <?= $action_message ?>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <div>
-            <h1 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0;">Leave Approvals</h1>
-            <!-- Updated Title -->
-            <p style="color: #64748b; margin: 0.5rem 0 0;">Manage and approve employee leave requests.</p>
+    <div class="page-header-flex">
+        <div class="page-header-info">
+            <h1 class="page-title">Leave Approvals</h1>
+            <p class="page-subtitle">Manage and approve employee leave requests.</p>
         </div>
-        <a href="?export=csv" class="btn-primary" style="background: #0f172a;">
-            <i data-lucide="download" style="width: 18px; margin-right: 8px;"></i> Export Report
+        <a href="?export=csv" class="btn-primary header-action-btn" style="background: #0f172a;">
+            <i data-lucide="download" style="width: 18px;"></i> Export Report
         </a>
     </div>
 
@@ -398,7 +397,8 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
                                     </div>
                                     <div>
                                         <div style="font-weight: 600; color: #1e293b;">
-                                            <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?></div>
+                                            <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?>
+                                        </div>
                                         <div style="font-size: 0.75rem; color: #64748b;">
                                             <?= date('d M', strtotime($req['start_date'])) ?> -
                                             <?= date('d M', strtotime($req['end_date'])) ?>
