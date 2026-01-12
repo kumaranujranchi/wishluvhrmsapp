@@ -157,18 +157,12 @@ foreach ($history as $h) {
 ?>
 
 <style>
-    /* Gradient Hero & Glassmorphism */
+    /* Layout & Hero Card */
     .dashboard-container {
         display: grid;
         grid-template-columns: 1fr 350px;
         gap: 2rem;
         align-items: start;
-    }
-
-    @media (max-width: 1024px) {
-        .dashboard-container {
-            grid-template-columns: 1fr;
-        }
     }
 
     .punch-card {
@@ -242,11 +236,6 @@ foreach ($history as $h) {
         cursor: not-allowed;
     }
 
-    .btn-disabled:hover {
-        transform: none;
-        box-shadow: none;
-    }
-
     .status-capsule {
         display: inline-flex;
         align-items: center;
@@ -258,37 +247,28 @@ foreach ($history as $h) {
         backdrop-filter: blur(5px);
     }
 
-    /* Mobile Polishing */
-    @media (max-width: 600px) {
-        .digital-clock {
-            font-size: 2.5rem;
-        }
-
-        .custom-punch-btn {
-            width: 150px;
-            height: 150px;
-            font-size: 1.1rem;
-        }
-
-        .punch-card {
-            padding: 2rem 1rem;
-        }
+    /* Stats Cards */
+    .mini-stat-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        transition: transform 0.2s;
     }
+
+    .mini-stat-card:hover { transform: translateY(-3px); }
+    .mini-stat-card i { width: 32px; height: 32px; }
 
     /* History Timeline */
-    .history-card {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        height: 100%;
-    }
-
     .timeline-item {
         display: flex;
         gap: 1rem;
         padding: 1.25rem 0;
         border-bottom: 1px dashed #e2e8f0;
+        cursor: pointer;
+        position: relative;
     }
 
     .timeline-date {
@@ -306,42 +286,68 @@ foreach ($history as $h) {
         color: #64748b;
     }
 
-    .timeline-content {
-        flex: 1;
+    .timeline-content { flex: 1; }
+
+    .details-collapse {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
     }
 
-    .stat-badge-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        margin-top: 2rem;
+    .timeline-item.expanded .details-collapse {
+        max-height: 500px;
+        transition: max-height 0.3s cubic-bezier(1, 0, 1, 0);
     }
 
-    .mini-stat-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        border: 1px solid #f1f5f9;
-        transition: transform 0.2s;
+    .expand-icon {
+        position: absolute;
+        right: 0;
+        top: 25px;
+        color: #cbd5e1;
+        transition: transform 0.3s;
     }
 
-    .mini-stat-card:hover {
-        transform: translateY(-3px);
+    .timeline-item.expanded .expand-icon {
+        transform: rotate(180deg);
     }
 
-    .alert-glass {
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.2);
-        color: #065f46;
-        padding: 1rem;
-        border-radius: 1rem;
-        margin-bottom: 2rem;
-        backdrop-filter: blur(5px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* Mobile Polishing */
+    @media (max-width: 1024px) {
+        .dashboard-container {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .mobile-stats-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+            order: 2;
+        }
+
+        .punch-card {
+            order: 1;
+            padding: 2rem 1rem;
+        }
+
+        .digital-clock { font-size: 2.2rem; }
+        .custom-punch-btn { width: 140px; height: 140px; font-size: 1rem; }
+
+        .mobile-stats-grid .mini-stat-card {
+            padding: 1rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .mobile-stats-grid .mini-stat-card i { width: 20px; height: 20px; }
+        .mobile-stats-grid h2 { font-size: 1.2rem; margin: 4px 0; }
+        .mobile-stats-grid span { font-size: 0.7rem; white-space: nowrap; }
+
+        .timeline-item { padding-right: 30px; }
+    }
+
+    @media (max-width: 600px) {
+        .timeline-date { min-width: 45px; font-size: 1.1rem; }
+        .timeline-date span { font-size: 0.7rem; }
     }
 </style>
 
@@ -351,9 +357,9 @@ foreach ($history as $h) {
     <div class="dashboard-container">
         <!-- LEFT: Active Punch Card -->
         <div class="punch-card">
-            <div style="font-size:1.1rem; opacity:0.9;">Current Time</div>
+            <div style="font-size:1rem; opacity:0.9; margin-bottom: 2px;">Current Time</div>
             <div class="digital-clock" id="liveClock">00:00:00</div>
-            <div style="font-size:1rem; opacity:0.8; margin-bottom:2rem;"><?= date('l, d F Y') ?></div>
+            <div style="font-size:0.9rem; opacity:0.8; margin-bottom:1.5rem;"><?= date('l, d F Y') ?></div>
 
             <form method="POST" id="attendanceForm">
                 <input type="hidden" name="action" id="actionInput">
@@ -363,90 +369,93 @@ foreach ($history as $h) {
 
                 <?php if (!$has_checked_in): ?>
                     <button type="button" class="custom-punch-btn" onclick="getLocationAndSubmit('clock_in')">
-                        <i data-lucide="power" style="width:48px; height:48px;"></i>
+                        <i data-lucide="power" style="width:40px; height:40px;"></i>
                         <span>Start Day</span>
                     </button>
                     <div class="status-capsule">
-                        <span style="width:10px; height:10px; background:#ef4444; border-radius:50%;"></span>
+                        <span style="width:8px; height:8px; background:#ef4444; border-radius:50%;"></span>
                         Not Yet Checked In
                     </div>
                 <?php elseif (!$has_checked_out): ?>
                     <button type="button" class="custom-punch-btn" onclick="getLocationAndSubmit('clock_out')"
                         style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4);">
-                        <i data-lucide="log-out" style="width:48px; height:48px;"></i>
+                        <i data-lucide="log-out" style="width:40px; height:40px;"></i>
                         <span>End Day</span>
                     </button>
                     <div class="status-capsule">
                         <span
-                            style="width:10px; height:10px; background:#10b981; border-radius:50%; box-shadow: 0 0 10px #10b981;"></span>
+                            style="width:8px; height:8px; background:#10b981; border-radius:50%; box-shadow: 0 0 8px #10b981;"></span>
                         Working Since <?= date('h:i A', strtotime($today_record['clock_in'])) ?>
                     </div>
                 <?php else: ?>
                     <button type="button" class="custom-punch-btn btn-disabled" disabled>
-                        <i data-lucide="check-circle" style="width:48px; height:48px;"></i>
+                        <i data-lucide="check-circle" style="width:40px; height:40px;"></i>
                         <span>Completed</span>
                     </button>
                     <div class="status-capsule">
-                        <i data-lucide="check" style="width:16px;"></i> Total: <?= $today_record['total_hours'] ?> Hours
+                        <i data-lucide="check" style="width:14px;"></i> Total: <?= $today_record['total_hours'] ?> Hours
                     </div>
                 <?php endif; ?>
             </form>
 
-            <div id="locationStatus" style="margin-top:1.5rem; font-size:0.85rem; opacity:0.7;">
+            <div id="locationStatus" style="margin-top:1.25rem; font-size:0.8rem; opacity:0.7;">
                 <i data-lucide="map-pin" style="width:14px; vertical-align:middle;"></i> Ready to capture location
             </div>
         </div>
 
-        <!-- RIGHT: Mini Stats -->
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- RIGHT/BOTTOM: Mini Stats (Compact Grid on Mobile) -->
+        <div class="mobile-stats-grid" style="display: flex; flex-direction: column; gap: 1rem;">
             <div class="mini-stat-card">
-                <div style="color:#10b981; margin-bottom:0.5rem;"><i data-lucide="calendar-check"
-                        style="width:32px; height:32px;"></i></div>
-                <h2 style="font-size:2.5rem; margin:0; color:#1e293b;"><?= $present_days ?></h2>
-                <span style="color:#64748b; font-size:0.9rem;">Days Present</span>
+                <div style="color:#10b981;"><i data-lucide="calendar-check"></i></div>
+                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= $present_days ?></h2>
+                <span style="color:#64748b; font-size:0.85rem;">Days Present</span>
             </div>
             <div class="mini-stat-card">
-                <div style="color:#f59e0b; margin-bottom:0.5rem;"><i data-lucide="clock"
-                        style="width:32px; height:32px;"></i></div>
-                <h2 style="font-size:2.5rem; margin:0; color:#1e293b;"><?= $late_days ?></h2>
-                <span style="color:#64748b; font-size:0.9rem;">Late Arrivals</span>
+                <div style="color:#f59e0b;"><i data-lucide="clock"></i></div>
+                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= $late_days ?></h2>
+                <span style="color:#64748b; font-size:0.85rem;">Late Arrivals</span>
             </div>
             <div class="mini-stat-card">
-                <div style="color:#3b82f6; margin-bottom:0.5rem;"><i data-lucide="timer"
-                        style="width:32px; height:32px;"></i></div>
-                <h2 style="font-size:2.5rem; margin:0; color:#1e293b;"><?= $total_work_hours ?></h2>
-                <span style="color:#64748b; font-size:0.9rem;">Total Hours</span>
+                <div style="color:#3b82f6;"><i data-lucide="timer"></i></div>
+                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= round($total_work_hours, 1) ?></h2>
+                <span style="color:#64748b; font-size:0.85rem;">Total Hours</span>
             </div>
         </div>
     </div>
 
     <!-- History Timeline Section -->
-    <div class="card" style="margin-top: 2rem;">
-        <div class="card-header" style="justify-content: space-between;">
-            <h3 style="display:flex; align-items:center; gap:10px;">
-                <i data-lucide="history" style="color:#6366f1;"></i> Attendance History
+    <div class="card" style="margin-top: 2rem; border-radius: 1.5rem; overflow: hidden;">
+        <div class="card-header"
+            style="justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9;">
+            <h3 style="display:flex; align-items:center; gap:10px; margin: 0; font-size: 1.1rem;">
+                <i data-lucide="history" style="color:#6366f1; width: 20px;"></i> Attendance History
             </h3>
-            <form method="GET" style="display:flex; gap:10px;">
-                <select name="month" class="form-control" style="width:auto; padding: 0.5rem 1rem;">
+            <form method="GET" style="display:flex; gap:8px;">
+                <select name="month" class="form-control"
+                    style="width:auto; padding: 0.4rem 0.75rem; font-size: 0.85rem; height: 36px; border-radius: 8px;">
                     <?php for ($m = 1; $m <= 12; $m++): ?>
                         <option value="<?= $m ?>" <?= $m == $filter_month ? 'selected' : '' ?>>
-                            <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
+                            <?= date('M', mktime(0, 0, 0, $m, 1)) ?>
                         </option>
                     <?php endfor; ?>
                 </select>
-                <button type="submit" class="btn-primary" style="padding:0.5rem 1rem;">Go</button>
+                <button type="submit" class="btn-primary"
+                    style="padding:0 1rem; height: 36px; border-radius: 8px; font-size: 0.85rem;">Go</button>
             </form>
         </div>
-        <div style="padding: 0 1.5rem;">
+        <div style="padding: 0 1.5rem 1rem;">
             <?php foreach ($history as $row): ?>
-                <div class="timeline-item">
+                <div class="timeline-item history-item-mobile" onclick="this.classList.toggle('expanded')">
+                    <i data-lucide="chevron-down" class="expand-icon mobile-only" style="width: 16px;"></i>
                     <div class="timeline-date">
                         <?= date('d', strtotime($row['date'])) ?>
                         <span><?= date('M', strtotime($row['date'])) ?></span>
                     </div>
                     <div class="timeline-content">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                            <span style="font-weight:600; color:#1e293b;"><?= date('l', strtotime($row['date'])) ?></span>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                            <span
+                                style="font-weight:700; color:#1e293b; font-size: 0.95rem;"><?= date('l', strtotime($row['date'])) ?></span>
                             <?php
                             $badgeStyle = match ($row['status']) {
                                 'Present' => 'background:#dcfce7; color:#166534;',
@@ -454,29 +463,50 @@ foreach ($history as $h) {
                                 default => 'background:#f1f5f9; color:#64748b;'
                             };
                             ?>
-                            <span class="badge" style="<?= $badgeStyle ?>"><?= $row['status'] ?></span>
+                            <span class="badge"
+                                style="<?= $badgeStyle ?> font-size: 0.65rem; padding: 2px 8px; font-weight: 700;"><?= $row['status'] ?></span>
                         </div>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; font-size:0.9rem;">
-                            <div style="color:#64748b;">
-                                <i data-lucide="log-in" style="width:14px; vertical-align:middle; color:#10b981;"></i>
+
+                        <!-- Always visible summary -->
+                        <div style="display:flex; gap:1.5rem; font-size:0.85rem; color:#64748b;">
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <i data-lucide="log-in" style="width:14px; color:#10b981;"></i>
                                 <?= date('h:i A', strtotime($row['clock_in'])) ?>
-                                <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
-                                    <?= htmlspecialchars($row['clock_in_address'] ?? '') ?>
-                                </div>
                             </div>
-                            <div style="color:#64748b;">
-                                <i data-lucide="log-out" style="width:14px; vertical-align:middle; color:#f43f5e;"></i>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <i data-lucide="log-out" style="width:14px; color:#f43f5e;"></i>
                                 <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working...' ?>
-                                <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
-                                    <?= htmlspecialchars($row['clock_out_address'] ?? '') ?>
+                            </div>
+                        </div>
+
+                        <!-- Collapsible Details (Mobile addresses) -->
+                        <div class="details-collapse" style="margin-top: 10px;">
+                            <div
+                                style="display: grid; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9;">
+                                <div>
+                                    <div
+                                        style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
+                                        In Location</div>
+                                    <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
+                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?></div>
                                 </div>
+                                <?php if ($row['clock_out']): ?>
+                                    <div>
+                                        <div
+                                            style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
+                                            Out Location</div>
+                                        <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
+                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?></div>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    <div style="text-align:right; min-width:80px;">
+                    <div style="text-align:right; min-width:60px;">
                         <span
-                            style="display:block; font-size:1.2rem; font-weight:700; color:#3b82f6;"><?= $row['total_hours'] ?: '0' ?></span>
-                        <span style="font-size:0.75rem; color:#64748b;">Hours</span>
+                            style="display:block; font-size:1.1rem; font-weight:800; color:#3b82f6;"><?= $row['total_hours'] ?: '0' ?></span>
+                        <span
+                            style="font-size:0.7rem; color:#94a3b8; font-weight: 600; text-transform: uppercase;">Hours</span>
                     </div>
                 </div>
             <?php endforeach; ?>
