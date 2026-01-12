@@ -296,185 +296,329 @@ $leaves = $stmt->fetchAll();
     <?= $message ?>
 
     <!-- Leave Statistics Cards -->
-    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-        <div class="card stats-card">
-            <div class="stats-icon-wrapper" style="background: #e0e7ff; color: #4f46e5;">
-                <i data-lucide="calendar" style="width:24px; height:24px;"></i>
-            </div>
-            <div class="stats-info">
-                <span class="stats-title">Total Annual Leaves</span>
-                <span class="stats-value"><?= $total_leaves_annual ?></span>
-            </div>
-        </div>
-        <div class="card stats-card">
-            <div class="stats-icon-wrapper" style="background: #dcfce7; color: #166534;">
-                <i data-lucide="check-circle" style="width:24px; height:24px;"></i>
-            </div>
-            <div class="stats-info">
-                <span class="stats-title">Leaves Consumed</span>
-                <span class="stats-value"><?= $leaves_taken ?></span>
-            </div>
-        </div>
-        <div class="card stats-card">
-            <div class="stats-icon-wrapper" style="background: #ffedd5; color: #9a3412;">
-                <i data-lucide="pie-chart" style="width:24px; height:24px;"></i>
-            </div>
-            <div class="stats-info">
-                <span class="stats-title">Leave Balance</span>
-                <span class="stats-value"><?= $leave_balance ?></span>
-            </div>
-        </div>
-    </div>
+    <style>
+        /* Mobile-Specific Refinements */
+        @media (max-width: 768px) {
+            .leave-dashboard {
+                gap: 1rem;
+            }
 
-    <div class="leave-dashboard">
-        <!-- Application Form -->
-        <div class="leave-form-card">
-            <!-- ... form content (untouched) ... -->
-            <h3 style="margin: 0 0 1.5rem 0; color: #1e293b; display: flex; align-items: center; gap: 10px;">
-                <span
-                    style="width: 32px; height: 32px; background: #e0e7ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #4f46e5;">
-                    <i data-lucide="send" style="width: 18px;"></i>
-                </span>
-                Apply for Leave
-            </h3>
+            /* Compact Stats Grid for Mobile */
+            .leave-stats-mobile {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8px !important;
+                margin-bottom: 1.5rem !important;
+            }
 
-            <form method="POST">
-                <!-- ... inputs ... -->
-                <div class="form-group">
-                    <label>Leave Type</label>
-                    <div style="position: relative;">
-                        <i data-lucide="layers"
-                            style="position: absolute; left: 12px; top: 12px; width: 18px; color: #94a3b8;"></i>
-                        <select name="leave_type" class="form-control" style="padding-left: 2.5rem;" required>
-                            <option value="">Select Type</option>
-                            <option value="Sick Leave">Sick Leave (SL)</option>
-                            <option value="Half Day">Half Day</option>
-                            <option value="Full Day">Full Day (CL)</option>
-                            <option value="PL">Privilege Leave (PL)</option>
-                            <option value="EL">Earned Leave (EL)</option>
+            .leave-stats-mobile .card {
+                padding: 0.75rem 0.5rem !important;
+                flex-direction: column !important;
+                text-align: center !important;
+                gap: 6px !important;
+                border-radius: 12px !important;
+                background: white !important;
+            }
+
+            .leave-stats-mobile .stats-icon-wrapper {
+                width: 32px !important;
+                height: 32px !important;
+                margin: 0 auto !important;
+            }
+
+            .leave-stats-mobile .stats-icon-wrapper i {
+                width: 16px !important;
+                height: 16px !important;
+            }
+
+            .leave-stats-mobile .stats-title {
+                font-size: 0.65rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                width: 100% !important;
+            }
+
+            .leave-stats-mobile .stats-value {
+                font-size: 1.1rem !important;
+            }
+
+            /* Compact Form Card */
+            .leave-form-card {
+                padding: 1.25rem !important;
+                border-radius: 1rem !important;
+            }
+
+            .leave-form-card h3 {
+                font-size: 1.1rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .form-group {
+                margin-bottom: 0.75rem !important;
+            }
+
+            .form-group label {
+                font-size: 0.8rem !important;
+                margin-bottom: 4px !important;
+            }
+
+            .form-control {
+                padding: 0.6rem 0.8rem !important;
+                font-size: 0.9rem !important;
+            }
+
+            /* History refinements */
+            .history-header {
+                padding: 1.25rem !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 1rem !important;
+            }
+
+            .history-header form {
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr auto !important;
+                gap: 6px !important;
+            }
+
+            .history-header form select,
+            .history-header form button {
+                width: 100% !important;
+                padding: 0.5rem !important;
+                font-size: 0.75rem !important;
+            }
+        }
+    </style>
+
+    <div class="page-content">
+        <?= $message ?>
+
+        <!-- Leave Statistics Cards (Desktop: Normal, Mobile: Compact Grid) -->
+        <div class="stats-grid leave-stats-mobile"
+            style="grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="card stats-card">
+                <div class="stats-icon-wrapper" style="background: #e0e7ff; color: #4f46e5;">
+                    <i data-lucide="calendar"></i>
+                </div>
+                <div class="stats-info">
+                    <span class="stats-title">Annual Leaves</span>
+                    <span class="stats-value"><?= $total_leaves_annual ?></span>
+                </div>
+            </div>
+            <div class="card stats-card">
+                <div class="stats-icon-wrapper" style="background: #dcfce7; color: #166534;">
+                    <i data-lucide="check-circle"></i>
+                </div>
+                <div class="stats-info">
+                    <span class="stats-title">Consumed</span>
+                    <span class="stats-value"><?= $leaves_taken ?></span>
+                </div>
+            </div>
+            <div class="card stats-card">
+                <div class="stats-icon-wrapper" style="background: #ffedd5; color: #9a3412;">
+                    <i data-lucide="pie-chart"></i>
+                </div>
+                <div class="stats-info">
+                    <span class="stats-title">Balance</span>
+                    <span class="stats-value"><?= $leave_balance ?></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="leave-dashboard">
+            <!-- Application Form -->
+            <div class="leave-form-card">
+                <h3 style="margin: 0 0 1.5rem 0; color: #1e293b; display: flex; align-items: center; gap: 12px;">
+                    <div
+                        style="width: 36px; height: 36px; background: #e0e7ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #4f46e5;">
+                        <i data-lucide="send" style="width: 20px;"></i>
+                    </div>
+                    Apply for Leave
+                </h3>
+
+                <form method="POST">
+                    <div class="form-group">
+                        <label>Leave Type</label>
+                        <div style="position: relative;">
+                            <i data-lucide="layers"
+                                style="position: absolute; left: 12px; top: 12px; width: 18px; color: #94a3b8;"></i>
+                            <select name="leave_type" class="form-control" style="padding-left: 2.5rem;" required>
+                                <option value="">Select Type</option>
+                                <option value="Sick Leave">Sick Leave (SL)</option>
+                                <option value="Half Day">Half Day</option>
+                                <option value="Full Day">Full Day (CL)</option>
+                                <option value="PL">Privilege Leave (PL)</option>
+                                <option value="EL">Earned Leave (EL)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <input type="date" name="start_date" id="startDate" class="form-control" required
+                                onchange="calculateDuration()">
+                        </div>
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" name="end_date" id="endDate" class="form-control" required
+                                onchange="calculateDuration()">
+                        </div>
+                    </div>
+
+                    <div id="durationDisplay" class="duration-capsule" style="padding: 0.75rem; margin-bottom: 1rem;">
+                        <span style="font-size: 0.8rem; opacity: 0.9;">Total Duration</span>
+                        <div style="font-size: 1.25rem; font-weight: 700;" id="daysCount">0 Days</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Mention the reason..."
+                            required style="resize: none;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary"
+                        style="width: 100%; justify-content: center; font-size: 0.95rem; padding: 0.8rem; border-radius: 10px;">
+                        Submit Application
+                    </button>
+                </form>
+            </div>
+
+            <!-- Leave History -->
+            <div class="history-card">
+                <div class="history-header">
+                    <div>
+                        <h3 style="margin: 0;">Leave History</h3>
+                        <span style="font-size: 0.85rem; color: #64748b;">Track your requests</span>
+                    </div>
+                    <!-- Filter Form -->
+                    <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+                        <select name="month" class="form-control"
+                            style="width: auto; padding: 0.5rem 1.75rem 0.5rem 0.75rem; font-size: 0.85rem;">
+                            <option value="">All Months</option>
+                            <?php for ($m = 1; $m <= 12; $m++): ?>
+                                <option value="<?= $m ?>" <?= ($filter_month == $m) ? 'selected' : '' ?>>
+                                    <?= date('M', mktime(0, 0, 0, $m, 1)) ?>
+                                </option>
+                            <?php endfor; ?>
                         </select>
+                        <select name="year" class="form-control"
+                            style="width: auto; padding: 0.5rem 1.75rem 0.5rem 0.75rem; font-size: 0.85rem;">
+                            <option value="">All Years</option>
+                            <?php for ($y = date('Y'); $y >= 2024; $y--): ?>
+                                <option value="<?= $y ?>" <?= ($filter_year == $y) ? 'selected' : '' ?>><?= $y ?></option>
+                            <?php endfor; ?>
+                        </select>
+                        <button type="submit" class="btn-primary"
+                            style="padding: 0.5rem 1rem; font-size: 0.85rem;">Filter</button>
+                    </form>
+                </div>
+                <!-- Desktop View -->
+                <div class="desktop-only">
+                    <div class="table-responsive">
+                        <table class="table table-modern">
+                            <thead>
+                                <tr>
+                                    <th width="15%">Applied On</th>
+                                    <th width="15%">Type</th>
+                                    <th width="20%">Dates</th>
+                                    <th width="30%">Approvals</th>
+                                    <th width="20%" style="text-align:right;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($leaves as $leave): ?>
+                                    <tr>
+                                        <td style="color: #64748b; font-size: 0.9rem;">
+                                            <?= date('d M Y', strtotime($leave['created_at'])) ?>
+                                        </td>
+                                        <td>
+                                            <span
+                                                style="font-weight: 600; color: #1e293b;"><?= $leave['leave_type'] ?></span>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 500; font-size: 0.95rem; color:#0f172a;">
+                                                <?= date('d M', strtotime($leave['start_date'])) ?> -
+                                                <?= date('d M', strtotime($leave['end_date'])) ?>
+                                            </div>
+                                            <?php
+                                            $d1 = new DateTime($leave['start_date']);
+                                            $d2 = new DateTime($leave['end_date']);
+                                            $diff = $d2->diff($d1)->format("%a") + 1;
+                                            ?>
+                                            <div style="font-size: 0.75rem; color: #64748b; margin-top:2px;"><?= $diff ?>
+                                                <?= $diff == 1 ? 'Day' : 'Days' ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="approval-block">
+                                                <div class="approval-row">
+                                                    <span class="approval-label" style="font-size: 0.75rem;">Manager:</span>
+                                                    <?php
+                                                    $mColor = match ($leave['manager_status']) {
+                                                        'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
+                                                    };
+                                                    ?>
+                                                    <span class="approval-val"
+                                                        style="color: <?= $mColor ?>; font-size: 0.75rem;"><?= $leave['manager_status'] ?></span>
+                                                </div>
+                                                <div class="approval-row">
+                                                    <span class="approval-label" style="font-size: 0.75rem;">Admin:</span>
+                                                    <?php
+                                                    $aColor = match ($leave['admin_status']) {
+                                                        'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
+                                                    };
+                                                    ?>
+                                                    <span class="approval-val"
+                                                        style="color: <?= $aColor ?>; font-size: 0.75rem;"><?= $leave['admin_status'] ?></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <?php
+                                            $badgeBg = match ($leave['status']) {
+                                                'Approved' => '#dcfce7', 'Rejected' => '#fee2e2', 'Pending' => '#fef9c3', default => '#f1f5f9'
+                                            };
+                                            $badgeColor = match ($leave['status']) {
+                                                'Approved' => '#166534', 'Rejected' => '#991b1b', 'Pending' => '#854d0e', default => '#64748b'
+                                            };
+                                            ?>
+                                            <span class="badge"
+                                                style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border-radius: 8px; padding: 0.4rem 0.8rem; font-size:0.75rem; font-weight: 600;">
+                                                <?= $leave['status'] ?: 'Pending' ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>From Date</label>
-                    <input type="date" name="start_date" id="startDate" class="form-control" required
-                        onchange="calculateDuration()">
-                </div>
-
-                <div class="form-group">
-                    <label>To Date</label>
-                    <input type="date" name="end_date" id="endDate" class="form-control" required
-                        onchange="calculateDuration()">
-                </div>
-
-                <div id="durationDisplay" class="duration-capsule">
-                    <span style="font-size: 0.85rem; opacity: 0.9;">Total Duration</span>
-                    <div style="font-size: 1.5rem; font-weight: 700;" id="daysCount">0 Days</div>
-                </div>
-
-                <div class="form-group">
-                    <label>Reason</label>
-                    <textarea name="reason" class="form-control" rows="4" placeholder="Mention the reason..."
-                        required></textarea>
-                </div>
-
-                <button type="submit" class="btn-primary"
-                    style="width: 100%; justify-content: center; font-size: 1rem; padding: 0.875rem;">
-                    Submit Application
-                </button>
-            </form>
-        </div>
-
-        <!-- Leave History -->
-        <div class="history-card">
-            <div class="history-header">
-                <div>
-                    <h3 style="margin: 0;">Leave History</h3>
-                    <span style="font-size: 0.85rem; color: #64748b;">Track your requests</span>
-                </div>
-                <!-- Filter Form -->
-                <form method="GET" style="display: flex; gap: 10px; align-items: center;">
-                    <select name="month" class="form-control"
-                        style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem; font-size: 0.85rem;">
-                        <option value="">All Months</option>
-                        <?php for ($m = 1; $m <= 12; $m++): ?>
-                            <option value="<?= $m ?>" <?= ($filter_month == $m) ? 'selected' : '' ?>>
-                                <?= date('M', mktime(0, 0, 0, $m, 1)) ?>
-                            </option>
-                        <?php endfor; ?>
-                    </select>
-                    <select name="year" class="form-control"
-                        style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem; font-size: 0.85rem;">
-                        <option value="">All Years</option>
-                        <?php for ($y = date('Y'); $y >= 2024; $y--): ?>
-                            <option value="<?= $y ?>" <?= ($filter_year == $y) ? 'selected' : '' ?>><?= $y ?></option>
-                        <?php endfor; ?>
-                    </select>
-                    <button type="submit" class="btn-primary"
-                        style="padding: 0.5rem 1rem; font-size: 0.85rem;">Filter</button>
-                </form>
-            </div>
-            <!-- Desktop View -->
-            <div class="desktop-only">
-                <div class="table-responsive">
-                    <table class="table table-modern">
-                        <thead>
-                            <tr>
-                                <th width="15%">Applied On</th>
-                                <th width="15%">Type</th>
-                                <th width="25%">Dates</th>
-                                <th width="25%">Approvals</th>
-                                <th width="20%" style="text-align:right;">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($leaves as $leave): ?>
-                                <tr>
-                                    <td style="color: #64748b; font-size: 0.9rem;">
-                                        <?= date('d M Y', strtotime($leave['created_at'])) ?>
-                                    </td>
-                                    <td>
-                                        <span style="font-weight: 600; color: #1e293b;"><?= $leave['leave_type'] ?></span>
-                                    </td>
-                                    <td>
-                                        <div style="font-weight: 500; font-size: 0.95rem; color:#0f172a;">
+                <!-- Mobile View -->
+                <div class="mobile-only">
+                    <div class="mobile-card-list" style="padding: 0 1rem 1rem;">
+                        <?php if (empty($leaves)): ?>
+                            <div style="text-align:center; padding: 2rem; color: #94a3b8;">No records found.</div>
+                        <?php endif; ?>
+                        <?php foreach ($leaves as $leave): ?>
+                            <div class="mobile-card"
+                                style="margin-bottom: 0.75rem; border-radius: 12px; border: 1px solid #f1f5f9; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')"
+                                    style="padding: 1rem;">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <div style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">
+                                            <?= $leave['leave_type'] ?></div>
+                                        <div
+                                            style="font-size: 0.8rem; color: #64748b; display: flex; align-items: center; gap: 5px;">
+                                            <i data-lucide="calendar" style="width: 12px;"></i>
                                             <?= date('d M', strtotime($leave['start_date'])) ?> -
                                             <?= date('d M', strtotime($leave['end_date'])) ?>
                                         </div>
-                                        <?php
-                                        $d1 = new DateTime($leave['start_date']);
-                                        $d2 = new DateTime($leave['end_date']);
-                                        $diff = $d2->diff($d1)->format("%a") + 1;
-                                        ?>
-                                        <div style="font-size: 0.75rem; color: #64748b; margin-top:2px;"><?= $diff ?> Days
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="approval-block">
-                                            <div class="approval-row">
-                                                <span class="approval-label">Manager</span>
-                                                <?php
-                                                $mColor = match ($leave['manager_status']) {
-                                                    'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
-                                                };
-                                                ?>
-                                                <span class="approval-val"
-                                                    style="color: <?= $mColor ?>;"><?= $leave['manager_status'] ?></span>
-                                            </div>
-                                            <div class="approval-row">
-                                                <span class="approval-label">Admin</span>
-                                                <?php
-                                                $aColor = match ($leave['admin_status']) {
-                                                    'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
-                                                };
-                                                ?>
-                                                <span class="approval-val"
-                                                    style="color: <?= $aColor ?>;"><?= $leave['admin_status'] ?></span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="text-align:right;">
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
                                         <?php
                                         $badgeBg = match ($leave['status']) {
                                             'Approved' => '#dcfce7', 'Rejected' => '#fee2e2', 'Pending' => '#fef9c3', default => '#f1f5f9'
@@ -484,77 +628,57 @@ $leaves = $stmt->fetchAll();
                                         };
                                         ?>
                                         <span class="badge"
-                                            style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border-radius: 6px; padding: 0.35rem 0.75rem; font-size:0.8rem;">
+                                            style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border-radius: 50px; padding: 2px 10px; font-size:0.65rem; font-weight: 700;">
                                             <?= $leave['status'] ?: 'Pending' ?>
                                         </span>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Mobile View -->
-            <div class="mobile-only">
-                <div class="mobile-card-list">
-                    <?php foreach ($leaves as $leave): ?>
-                        <div class="mobile-card">
-                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')">
-                                <div style="display: flex; flex-direction: column;">
-                                    <div style="font-weight: 600; color: #1e293b;"><?= $leave['leave_type'] ?></div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">
-                                        <?= date('d M', strtotime($leave['start_date'])) ?> -
-                                        <?= date('d M', strtotime($leave['end_date'])) ?>
+                                        <i data-lucide="chevron-down" class="toggle-icon"
+                                            style="width: 18px; color: #cbd5e1;"></i>
                                     </div>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <?php
-                                    $badgeBg = match ($leave['status']) {
-                                        'Approved' => '#dcfce7', 'Rejected' => '#fee2e2', 'Pending' => '#fef9c3', default => '#f1f5f9'
-                                    };
-                                    $badgeColor = match ($leave['status']) {
-                                        'Approved' => '#166534', 'Rejected' => '#991b1b', 'Pending' => '#854d0e', default => '#64748b'
-                                    };
-                                    ?>
-                                    <span class="badge"
-                                        style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; border-radius: 4px; padding: 0.2rem 0.5rem; font-size:0.7rem;">
-                                        <?= $leave['status'] ?: 'Pending' ?>
-                                    </span>
-                                    <i data-lucide="chevron-down" class="toggle-icon" style="width: 16px;"></i>
-                                </div>
-                            </div>
-                            <div class="mobile-card-body">
-                                <div class="mobile-field">
-                                    <span class="mobile-label">Applied On</span>
-                                    <span class="mobile-value"><?= date('d M Y', strtotime($leave['created_at'])) ?></span>
-                                </div>
-                                <div class="mobile-field">
-                                    <span class="mobile-label">Reason</span>
-                                    <span
-                                        class="mobile-value"><?= htmlspecialchars($leave['reason'] ?: 'No reason provided') ?></span>
-                                </div>
-                                <div class="mobile-field">
-                                    <span class="mobile-label">Approvals</span>
-                                    <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
-                                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                                            <span style="color: #64748b;">Manager:</span>
-                                            <span
-                                                style="font-weight: 600; color: <?= match ($leave['manager_status']) { 'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'} ?>;"><?= $leave['manager_status'] ?></span>
+                                <div class="mobile-card-body" style="padding: 0 1.25rem 1.25rem; font-size: 0.85rem;">
+                                    <div
+                                        style="padding-top: 1rem; border-top: 1px solid #f8fafc; display: flex; flex-direction: column; gap: 1rem;">
+                                        <div class="mobile-field">
+                                            <span class="mobile-label"
+                                                style="display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px;">Applied
+                                                On</span>
+                                            <span class="mobile-value"
+                                                style="font-weight: 600; color: #334155;"><?= date('d M Y, h:i A', strtotime($leave['created_at'])) ?></span>
                                         </div>
-                                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                                            <span style="color: #64748b;">Admin:</span>
-                                            <span
-                                                style="font-weight: 600; color: <?= match ($leave['admin_status']) { 'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'} ?>;"><?= $leave['admin_status'] ?></span>
+                                        <div class="mobile-field">
+                                            <span class="mobile-label"
+                                                style="display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px;">Reason</span>
+                                            <span class="mobile-value"
+                                                style="color: #475569; line-height: 1.4;"><?= htmlspecialchars($leave['reason'] ?: 'None') ?></span>
+                                        </div>
+                                        <div class="mobile-field">
+                                            <span class="mobile-label"
+                                                style="display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">Approval
+                                                Details</span>
+                                            <div
+                                                style="background: #f8fafc; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+                                                <div
+                                                    style="display: flex; justify-content: space-between; align-items: center;">
+                                                    <span style="color: #64748b;">Manager</span>
+                                                    <span
+                                                        style="font-weight: 700; color: <?= match ($leave['manager_status']) { 'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'} ?>;"><?= $leave['manager_status'] ?></span>
+                                                </div>
+                                                <div
+                                                    style="display: flex; justify-content: space-between; align-items: center;">
+                                                    <span style="color: #64748b;">Admin</span>
+                                                    <span
+                                                        style="font-weight: 700; color: <?= match ($leave['admin_status']) { 'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'} ?>;"><?= $leave['admin_status'] ?></span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
 </div>
