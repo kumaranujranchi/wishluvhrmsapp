@@ -76,8 +76,23 @@ if (isset($_GET['edit'])) {
     $stmt = $conn->prepare("SELECT * FROM policies WHERE id = :id");
     $stmt->execute(['id' => $_GET['edit']]);
     $edit_policy = $stmt->fetch();
+
+    // If policy not found, redirect
+    if (!$edit_policy) {
+        echo "<script>window.location.href='policy.php';</script>";
+        exit;
+    }
 }
 ?>
+
+<script>
+    // Scroll to form when editing
+    <?php if ($edit_policy): ?>
+        window.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    <?php endif; ?>
+</script>
 
 <style>
     .policy-grid {
