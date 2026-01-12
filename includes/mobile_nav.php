@@ -16,7 +16,8 @@ function is_active_mobile($page, $current)
 
 <!-- Mobile Drawer (Hamburger Menu) -->
 <div class="mobile-drawer" id="mobileDrawer">
-    <div style="padding: 2rem 1.5rem; background: linear-gradient(135deg, #6366f1, #a855f7); color: white;">
+    <div
+        style="padding: 2rem 1.5rem; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border-radius: 0 !important;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <div
                 style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
