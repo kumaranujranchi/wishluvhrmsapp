@@ -5,8 +5,36 @@ ini_set('display_errors', 1);
 
 echo "<h2>Direct SMTP Connection Test</h2>";
 
-// Load PHPMailer
-$phpmailer_path = __DIR__ . '/vendor/PHPMailer/';
+// Try multiple possible paths for PHPMailer
+$possible_paths = [
+    __DIR__ . '/vendor/PHPMailer/',
+    __DIR__ . '/../vendor/PHPMailer/',
+    dirname(__DIR__) . '/vendor/PHPMailer/',
+    $_SERVER['DOCUMENT_ROOT'] . '/vendor/PHPMailer/',
+];
+
+$phpmailer_path = null;
+foreach ($possible_paths as $path) {
+    if (file_exists($path . 'PHPMailer.php')) {
+        $phpmailer_path = $path;
+        echo "<p style='color: green;'>✅ PHPMailer found at: " . htmlspecialchars($path) . "</p>";
+        break;
+    }
+}
+
+if (!$phpmailer_path) {
+    echo "<div style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px;'>";
+    echo "<h3>❌ PHPMailer Not Found!</h3>";
+    echo "<p>Searched in these locations:</p><ul>";
+    foreach ($possible_paths as $path) {
+        echo "<li>" . htmlspecialchars($path) . "</li>";
+    }
+    echo "</ul>";
+    echo "<p><strong>Solution:</strong> Upload the <code>vendor/PHPMailer/</code> folder to your server.</p>";
+    echo "</div>";
+    exit;
+}
+
 require_once $phpmailer_path . 'PHPMailer.php';
 require_once $phpmailer_path . 'SMTP.php';
 require_once $phpmailer_path . 'Exception.php';

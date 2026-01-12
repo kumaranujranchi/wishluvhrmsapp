@@ -12,12 +12,25 @@ define('SMTP_FROM_NAME', 'Myworld HRMS');
 // Function to send email using PHPMailer
 function sendEmail($to, $subject, $body)
 {
-    // Use absolute path for PHPMailer
-    $phpmailer_path = __DIR__ . '/../vendor/PHPMailer/';
+    // Try multiple possible paths for PHPMailer
+    $possible_paths = [
+        __DIR__ . '/../vendor/PHPMailer/',
+        __DIR__ . '/vendor/PHPMailer/',
+        dirname(__DIR__) . '/vendor/PHPMailer/',
+        $_SERVER['DOCUMENT_ROOT'] . '/vendor/PHPMailer/',
+    ];
 
-    if (!file_exists($phpmailer_path . 'PHPMailer.php')) {
-        error_log("PHPMailer not found at: " . $phpmailer_path);
-        return false;
+    $phpmailer_path = null;
+    foreach ($possible_paths as $path) {
+        if (file_exists($path . 'PHPMailer.php')) {
+            $phpmailer_path = $path;
+            break;
+        }
+    }
+
+    if (!$phpmailer_path) {
+        error_log("PHPMailer not found in any of these paths: " . implode(', ', $possible_paths));
+        throw new Exception("PHPMailer library not found. Please ensure vendor/PHPMailer folder is uploaded to server.");
     }
 
     require_once $phpmailer_path . 'PHPMailer.php';
