@@ -369,7 +369,7 @@ $leaves = $stmt->fetchAll();
             }
 
             /* Maintain padding for fields with icons on mobile */
-            div[style*="position: relative"] i+.form-control {
+            div[style*="position: relative"] :is(i, svg, [data-lucide])+.form-control {
                 padding-left: 2.5rem !important;
             }
 
