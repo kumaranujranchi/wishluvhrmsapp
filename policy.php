@@ -227,20 +227,25 @@ if (isset($_GET['edit'])) {
                             </div>
                         </div>
 
-                        <div
-                            style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; max-height: 60px; overflow: hidden;">
+                        <div style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; max-height: 60px; overflow: hidden;">
                             <?= substr(strip_tags($policy['content']), 0, 150) ?>...
                         </div>
 
-                        <div class="policy-actions">
-                            <a href="?edit=<?= $policy['id'] ?>" class="btn-primary"
-                                style="padding: 0.4rem 0.8rem; font-size: 0.85rem; text-decoration: none;">
-                                <i data-lucide="edit-2" style="width: 14px;"></i> Edit
+                        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                            <a href="policy.php?edit=<?= $policy['id'] ?>" 
+                               style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #f0f9ff; color: #0369a1; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #bae6fd; transition: all 0.2s;"
+                               onmouseover="this.style.background='#e0f2fe'; this.style.borderColor='#7dd3fc';"
+                               onmouseout="this.style.background='#f0f9ff'; this.style.borderColor='#bae6fd';">
+                                <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
+                                <span>Edit</span>
                             </a>
-                            <a href="?delete=<?= $policy['id'] ?>"
-                                onclick="return confirm('Are you sure you want to delete this policy?')" class="btn-primary"
-                                style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ef4444; text-decoration: none;">
-                                <i data-lucide="trash-2" style="width: 14px;"></i> Delete
+                            <a href="policy.php?delete=<?= $policy['id'] ?>" 
+                               onclick="return confirm('Are you sure you want to delete this policy?')"
+                               style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #fef2f2; color: #dc2626; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #fecaca; transition: all 0.2s;"
+                               onmouseover="this.style.background='#fee2e2'; this.style.borderColor='#fca5a5';"
+                               onmouseout="this.style.background='#fef2f2'; this.style.borderColor='#fecaca';">
+                                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                <span>Delete</span>
                             </a>
                         </div>
                     </div>
