@@ -414,7 +414,8 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                 </div>
                 <div>
                     <h1 style="margin:0; font-size:2rem;">
-                        <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h1>
+                        <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?>
+                    </h1>
                     <p style="margin:5px 0 0; opacity:0.9;"><?= htmlspecialchars($user['desig_name'] ?? 'Employee') ?>
                         &bull; <?= htmlspecialchars($user['dept_name'] ?? '-') ?></p>
                 </div>
@@ -552,15 +553,47 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                             value="<?= htmlspecialchars($user['pan_number'] ?? '') ?>">
                     </div>
                     <div class="file-upload-box">
-                        <input type="file" name="pan_doc" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
-                        <i data-lucide="upload-cloud"
-                            style="width:32px; height:32px; color:#94a3b8; margin-bottom:0.5rem;"></i>
-                        <p style="margin:0; font-size:0.9rem; color:#64748b;">Click to upload PAN Doc</p>
+                        <input type="file" name="pan_doc" id="pan_doc_input" class="file-input"
+                            accept=".jpg,.jpeg,.png,.pdf" onchange="handleFileSelect(this, 'pan_preview_container')">
+                        <div class="upload-placeholder">
+                            <i data-lucide="upload-cloud"
+                                style="width:32px; height:32px; color:#94a3b8; margin-bottom:0.5rem;"></i>
+                            <p style="margin:0; font-size:0.9rem; color:#64748b;">Click to upload PAN Doc</p>
+                            <p style="margin:5px 0 0; font-size:0.75rem; color:#94a3b8;">(Max 5MB. JPG, PNG, or PDF)</p>
+                        </div>
                     </div>
-                    <?php if (!empty($user['pan_doc'])): ?>
-                        <div style="margin-top:0.5rem;"><a href="<?= $user['pan_doc'] ?>" target="_blank"
-                                class="current-doc"><i data-lucide="check" style="width:14px;"></i> Uploaded</a></div>
-                    <?php endif; ?>
+                    <div id="pan_preview_container" style="margin-top: 1rem;">
+                        <?php if (!empty($user['pan_doc'])): ?>
+                            <?php $ext = pathinfo($user['pan_doc'], PATHINFO_EXTENSION); ?>
+                            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <?php if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                                    <img src="<?= $user['pan_doc'] ?>"
+                                        style="max-width: 100%; height: auto; max-height: 200px; object-fit: contain; border-radius: 4px; display: block; margin-bottom: 0.5rem;">
+                                <?php else: ?>
+                                    <div
+                                        style="display:flex; align-items:center; gap:8px; margin-bottom:0.5rem; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;">
+                                        <i data-lucide="file-text" style="color:#475569;"></i>
+                                        <span style="font-size:0.9rem; font-weight:500; color:#334155;">Document Uploaded</span>
+                                    </div>
+                                <?php endif; ?>
+                                <div
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                                    <div style="display:flex; gap:10px; align-items: center;">
+                                        <a href="<?= $user['pan_doc'] ?>" target="_blank"
+                                            style="font-size:0.85rem; color:#2563eb; text-decoration:none; display:flex; align-items:center; gap:4px;"><i
+                                                data-lucide="eye" style="width:14px;"></i> View</a>
+                                        <span style="color:#cbd5e1;">|</span>
+                                        <button type="button" onclick="document.getElementById('pan_doc_input').click()"
+                                            style="background:none; border:none; color:#ea580c; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;"><i
+                                                data-lucide="refresh-cw" style="width:14px;"></i> Change</button>
+                                    </div>
+                                    <span
+                                        style="font-size:0.75rem; color:#166534; background: #dcfce7; padding: 2px 8px; border-radius: 10px;">Current
+                                        File</span>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <!-- Aadhar -->
@@ -575,15 +608,47 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                             value="<?= htmlspecialchars($user['aadhar_number'] ?? '') ?>">
                     </div>
                     <div class="file-upload-box">
-                        <input type="file" name="aadhar_doc" class="file-input" accept=".jpg,.jpeg,.png,.pdf">
-                        <i data-lucide="upload-cloud"
-                            style="width:32px; height:32px; color:#94a3b8; margin-bottom:0.5rem;"></i>
-                        <p style="margin:0; font-size:0.9rem; color:#64748b;">Click to upload Aadhar Doc</p>
+                        <input type="file" name="aadhar_doc" id="aadhar_doc_input" class="file-input"
+                            accept=".jpg,.jpeg,.png,.pdf" onchange="handleFileSelect(this, 'aadhar_preview_container')">
+                        <div class="upload-placeholder">
+                            <i data-lucide="upload-cloud"
+                                style="width:32px; height:32px; color:#94a3b8; margin-bottom:0.5rem;"></i>
+                            <p style="margin:0; font-size:0.9rem; color:#64748b;">Click to upload Aadhar Doc</p>
+                            <p style="margin:5px 0 0; font-size:0.75rem; color:#94a3b8;">(Max 5MB. JPG, PNG, or PDF)</p>
+                        </div>
                     </div>
-                    <?php if (!empty($user['aadhar_doc'])): ?>
-                        <div style="margin-top:0.5rem;"><a href="<?= $user['aadhar_doc'] ?>" target="_blank"
-                                class="current-doc"><i data-lucide="check" style="width:14px;"></i> Uploaded</a></div>
-                    <?php endif; ?>
+                    <div id="aadhar_preview_container" style="margin-top: 1rem;">
+                        <?php if (!empty($user['aadhar_doc'])): ?>
+                            <?php $ext = pathinfo($user['aadhar_doc'], PATHINFO_EXTENSION); ?>
+                            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <?php if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                                    <img src="<?= $user['aadhar_doc'] ?>"
+                                        style="max-width: 100%; height: auto; max-height: 200px; object-fit: contain; border-radius: 4px; display: block; margin-bottom: 0.5rem;">
+                                <?php else: ?>
+                                    <div
+                                        style="display:flex; align-items:center; gap:8px; margin-bottom:0.5rem; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;">
+                                        <i data-lucide="file-text" style="color:#475569;"></i>
+                                        <span style="font-size:0.9rem; font-weight:500; color:#334155;">Document Uploaded</span>
+                                    </div>
+                                <?php endif; ?>
+                                <div
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                                    <div style="display:flex; gap:10px; align-items: center;">
+                                        <a href="<?= $user['aadhar_doc'] ?>" target="_blank"
+                                            style="font-size:0.85rem; color:#2563eb; text-decoration:none; display:flex; align-items:center; gap:4px;"><i
+                                                data-lucide="eye" style="width:14px;"></i> View</a>
+                                        <span style="color:#cbd5e1;">|</span>
+                                        <button type="button" onclick="document.getElementById('aadhar_doc_input').click()"
+                                            style="background:none; border:none; color:#ea580c; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;"><i
+                                                data-lucide="refresh-cw" style="width:14px;"></i> Change</button>
+                                    </div>
+                                    <span
+                                        style="font-size:0.75rem; color:#166534; background: #dcfce7; padding: 2px 8px; border-radius: 10px;">Current
+                                        File</span>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -648,5 +713,39 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
 
     </form>
 </div>
+
+<script>
+    function handleFileSelect(input, containerId) {
+        const container = document.getElementById(containerId);
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                let preview = '';
+                if (file.type.startsWith('image/')) {
+                    preview = `<img src="${e.target.result}" style="max-width: 100%; height: auto; max-height: 200px; object-fit: contain; border-radius: 4px; margin-bottom: 0.5rem;">`;
+                } else {
+                    preview = `<div style="display:flex; align-items:center; gap:8px; margin-bottom:0.5rem; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;"><i data-lucide="file-text"></i> <span style="font-size:0.9rem;">${file.name}</span></div>`;
+                }
+
+                container.innerHTML = `
+                <div style="background: #eff6ff; padding: 1rem; border-radius: 8px; border: 1px solid #bfdbfe; position: relative;">
+                    ${preview}
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                         <div style="display:flex; gap:10px; align-items: center;">
+                             <span style="font-size:0.85rem; color:#1e40af; font-weight:500;">New File: ${file.name}</span>
+                             <span style="color:#93c5fd;">|</span>
+                            <button type="button" onclick="document.getElementById('${input.id}').click()" style="background:none; border:none; color:#ea580c; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;"><i data-lucide="refresh-cw" style="width:14px;"></i> Change</button>
+                        </div>
+                         <span style="font-size:0.75rem; color:#1e40af; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">Selected</span>
+                    </div>
+                </div>
+            `;
+                if (window.lucide) window.lucide.createIcons();
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
 
 <?php include 'includes/footer.php'; ?>
