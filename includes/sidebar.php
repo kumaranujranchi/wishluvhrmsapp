@@ -157,6 +157,11 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Holidays</span>
             </a>
 
+            <a href="locations.php" class="nav-item <?php echo isActive('locations'); ?>">
+                <i data-lucide="map-pin" class="icon"></i>
+                <span>Locations</span>
+            </a>
+
             <a href="#" class="nav-item">
                 <i data-lucide="banknote" class="icon"></i>
                 <span>Payroll</span>
