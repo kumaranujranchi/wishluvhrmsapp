@@ -3,7 +3,7 @@
 // SMTP Settings - Hostinger Email
 
 define('SMTP_HOST', 'smtp.hostinger.com');
-define('SMTP_PORT', 465); // SSL port
+define('SMTP_PORT', 587); // TLS port (changed from 465)
 define('SMTP_USERNAME', 'noreply@wishluvbuildcon.com');
 define('SMTP_PASSWORD', 'Wishluv@2025');
 define('SMTP_FROM_EMAIL', 'noreply@wishluvbuildcon.com');
@@ -33,8 +33,17 @@ function sendEmail($to, $subject, $body)
         $mail->SMTPAuth = true;
         $mail->Username = SMTP_USERNAME;
         $mail->Password = SMTP_PASSWORD;
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS; // SSL
+        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS; // TLS for port 587
         $mail->Port = SMTP_PORT;
+
+        // Disable SSL verification (for testing - remove in production if possible)
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
 
         // Recipients
         $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
