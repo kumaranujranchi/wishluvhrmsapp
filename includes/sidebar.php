@@ -113,6 +113,11 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Leave Approvals</span>
             </a>
 
+            <a href="admin_resignations.php" class="nav-item <?php echo isActive('admin_resignations'); ?>">
+                <i data-lucide="user-x" class="icon"></i>
+                <span>Resignations</span>
+            </a>
+
             <!-- Employee Onboarding Group -->
             <div class="nav-group">
                 <?php
