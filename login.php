@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Delius:wght@400&display=swap" rel="stylesheet">
     <!-- Main CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         body.login-page {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Delius', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -324,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             font-size: 0.95rem;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Delius', sans-serif;
             transition: all 0.3s ease;
             background: #f8fafc;
         }
