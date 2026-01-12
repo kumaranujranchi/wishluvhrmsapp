@@ -2,6 +2,9 @@
 </div> <!-- End Main Content -->
 </div> <!-- End App Container -->
 
+<!-- PWA Script -->
+<script src="/assets/js/pwa.js"></script>
+
 <!-- Init Lucide Icons -->
 <script>
     lucide.createIcons();

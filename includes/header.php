@@ -3,6 +3,18 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#6366f1">
+<meta name="description" content="Myworld HRMS - Attendance, Leave, Payroll Management System">
+<link rel="manifest" href="/manifest.json">
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HRMS">
+
 <title>Myworld Admin</title>
 <?php
 if (session_status() === PHP_SESSION_NONE) {
@@ -37,8 +49,8 @@ if (!isset($_SESSION['user_id'])) {
                 <div style="flex: 1;">
                     <h2 style="margin:0; font-size:1.25rem; color:#1e293b;">Welcome,
                         <?php
-                           $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
-                           echo htmlspecialchars($display_name);
+                        $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
+                        echo htmlspecialchars($display_name);
                         ?>
                     </h2>
                     <p style="margin:0; font-size:0.85rem; color:#64748b;"><?= date('l, d F Y') ?></p>
