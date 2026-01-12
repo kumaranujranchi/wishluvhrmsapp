@@ -144,9 +144,58 @@ $leaves = $stmt->fetchAll();
 ?>
 
 <style>
+    /* Sharp Edges Design Token from Dashboard */
+    .sharp-card {
+        border-radius: 0 !important;
+        border: none !important;
+        padding: 1.5rem;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 140px;
+        transition: transform 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sharp-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .sharp-card i {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 4rem;
+        opacity: 0.15;
+        transform: rotate(-15deg);
+    }
+
+    .card-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.9;
+    }
+
+    .card-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 0.5rem 0;
+    }
+
+    .card-footer-info {
+        font-size: 0.75rem;
+        background: rgba(0, 0, 0, 0.1);
+        margin: 1rem -1.5rem -1.5rem;
+        padding: 0.6rem 1.5rem;
+    }
+
     .leave-dashboard {
         display: grid;
-        grid-template-columns: 350px 1fr;
+        grid-template-columns: 380px 1fr;
         gap: 2rem;
         align-items: start;
     }
@@ -159,7 +208,7 @@ $leaves = $stmt->fetchAll();
 
     .leave-form-card {
         background: white;
-        border-radius: 1.5rem;
+        border-radius: 0;
         padding: 2rem;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         border: 1px solid #f1f5f9;
@@ -216,9 +265,10 @@ $leaves = $stmt->fetchAll();
 
     .history-card {
         background: white;
-        border-radius: 1.5rem;
+        border-radius: 0;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         overflow: hidden;
+        border: 1px solid #f1f5f9;
     }
 
     .history-header {
@@ -305,53 +355,37 @@ $leaves = $stmt->fetchAll();
 
             /* Compact Stats Grid for Mobile */
             .leave-stats-mobile {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 8px !important;
-                margin-bottom: 1.5rem !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
             }
 
-            .leave-stats-mobile .card {
-                padding: 0.75rem 0.5rem !important;
-                flex-direction: column !important;
-                text-align: center !important;
-                gap: 6px !important;
-                border-radius: 12px !important;
-                background: white !important;
+            .leave-stats-mobile .sharp-card {
+                min-height: 120px !important;
+                padding: 1rem !important;
             }
 
-            .leave-stats-mobile .stats-icon-wrapper {
-                width: 32px !important;
-                height: 32px !important;
-                margin: 0 auto !important;
+            .leave-stats-mobile .sharp-card:last-child {
+                grid-column: span 2;
             }
 
-            .leave-stats-mobile .stats-icon-wrapper i {
-                width: 16px !important;
-                height: 16px !important;
+            .leave-stats-mobile .card-value {
+                font-size: 1.75rem !important;
             }
 
-            .leave-stats-mobile .stats-title {
-                font-size: 0.65rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                width: 100% !important;
-            }
-
-            .leave-stats-mobile .stats-value {
-                font-size: 1.1rem !important;
+            .card-footer-info {
+                margin: 0.75rem -1rem -1rem !important;
+                padding: 0.5rem 1rem !important;
             }
 
             /* Compact Form Card */
             .leave-form-card {
-                padding: 1.25rem !important;
-                border-radius: 1rem !important;
+                padding: 1.5rem !important;
+                border-radius: 0 !important;
             }
 
             .leave-form-card h3 {
                 font-size: 1.1rem !important;
-                margin-bottom: 1rem !important;
+                margin-bottom: 1.25rem !important;
             }
 
             .form-group {
@@ -400,35 +434,37 @@ $leaves = $stmt->fetchAll();
     <div class="page-content">
         <?= $message ?>
 
-        <!-- Leave Statistics Cards (Desktop: Normal, Mobile: Compact Grid) -->
+        <!-- Leave Statistics Cards (Dashboard Matched Sharp Design) -->
         <div class="stats-grid leave-stats-mobile"
-            style="grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-            <div class="card stats-card">
-                <div class="stats-icon-wrapper" style="background: #e0e7ff; color: #4f46e5;">
-                    <i data-lucide="calendar"></i>
+            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="sharp-card" style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
+                <div>
+                    <span class="card-label">Annual Leaves</span>
+                    <div class="card-value"><?= $total_leaves_annual ?></div>
+                    <span style="font-size:0.8rem; opacity:0.8;">Yearly Entitlement</span>
                 </div>
-                <div class="stats-info">
-                    <span class="stats-title">Annual Leaves</span>
-                    <span class="stats-value"><?= $total_leaves_annual ?></span>
-                </div>
+                <i data-lucide="calendar"></i>
+                <div class="card-footer-info">Current Session: <?= date('Y') ?></div>
             </div>
-            <div class="card stats-card">
-                <div class="stats-icon-wrapper" style="background: #dcfce7; color: #166534;">
-                    <i data-lucide="check-circle"></i>
+
+            <div class="sharp-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <div>
+                    <span class="card-label">Consumed</span>
+                    <div class="card-value"><?= $leaves_taken ?></div>
+                    <span style="font-size:0.8rem; opacity:0.8;">Leaves Taken</span>
                 </div>
-                <div class="stats-info">
-                    <span class="stats-title">Consumed</span>
-                    <span class="stats-value"><?= $leaves_taken ?></span>
-                </div>
+                <i data-lucide="check-circle"></i>
+                <div class="card-footer-info">Approved Requests</div>
             </div>
-            <div class="card stats-card">
-                <div class="stats-icon-wrapper" style="background: #ffedd5; color: #9a3412;">
-                    <i data-lucide="pie-chart"></i>
+
+            <div class="sharp-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <div>
+                    <span class="card-label">Balance</span>
+                    <div class="card-value"><?= $leave_balance ?></div>
+                    <span style="font-size:0.8rem; opacity:0.8;">Remaining Leaves</span>
                 </div>
-                <div class="stats-info">
-                    <span class="stats-title">Balance</span>
-                    <span class="stats-value"><?= $leave_balance ?></span>
-                </div>
+                <i data-lucide="pie-chart"></i>
+                <div class="card-footer-info">Available to Apply</div>
             </div>
         </div>
 
