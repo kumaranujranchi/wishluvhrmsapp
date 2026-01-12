@@ -10,42 +10,6 @@ function is_active_mobile($page, $current)
 }
 ?>
 
-<!-- Bottom Navigation Bar (Mobile) -->
-<nav class="bottom-nav">
-    <?php if ($userRole === 'Employee'): ?>
-        <a href="employee_dashboard.php"
-            class="bottom-nav-item <?= is_active_mobile('employee_dashboard.php', $current_page) ?>">
-            <i data-lucide="home"></i>
-            <span>Home</span>
-        </a>
-        <a href="attendance_view.php" class="bottom-nav-item <?= is_active_mobile('attendance_view.php', $current_page) ?>">
-            <i data-lucide="calendar-check"></i>
-            <span>Punch</span>
-        </a>
-        <a href="leave_apply.php" class="bottom-nav-item <?= is_active_mobile('leave_apply.php', $current_page) ?>">
-            <i data-lucide="coffee"></i>
-            <span>Leaves</span>
-        </a>
-    <?php else: ?>
-        <a href="index.php" class="bottom-nav-item <?= is_active_mobile('index.php', $current_page) ?>">
-            <i data-lucide="layout-dashboard"></i>
-            <span>Dashboard</span>
-        </a>
-        <a href="attendance.php" class="bottom-nav-item <?= is_active_mobile('attendance.php', $current_page) ?>">
-            <i data-lucide="calendar"></i>
-            <span>Logs</span>
-        </a>
-        <a href="employees.php" class="bottom-nav-item <?= is_active_mobile('employees.php', $current_page) ?>">
-            <i data-lucide="users"></i>
-            <span>Staff</span>
-        </a>
-    <?php endif; ?>
-
-    <a href="javascript:void(0)" class="bottom-nav-item" onclick="toggleMobileDrawer()">
-        <i data-lucide="menu"></i>
-        <span>More</span>
-    </a>
-</nav>
 
 <!-- Mobile Drawer Overlay -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>

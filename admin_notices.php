@@ -55,11 +55,16 @@ $notices = $conn->query("SELECT n.*, (SELECT COUNT(*) FROM notice_reads WHERE no
         <p class="page-subtitle">Publish announcements for all employees.</p>
     </div>
 
+    <!-- Mobile FAB to scroll to form -->
+    <a href="#notice-form-section" class="fab" title="Publish Notice">
+        <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
+    </a>
+
     <?= $message ?>
 
     <div class="content-grid">
         <!-- Publish Form -->
-        <div class="card">
+        <div class="card" id="notice-form-section">
             <div class="card-header">
                 <h3>Publish New Notice</h3>
             </div>

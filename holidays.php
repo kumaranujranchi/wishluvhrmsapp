@@ -209,6 +209,11 @@ if (isset($_GET['edit'])) {
             </strong></span>
     </div>
 
+    <!-- Mobile FAB to scroll to form -->
+    <a href="#holiday-form-section" class="fab" title="Add Holiday">
+        <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
+    </a>
+
     <div class="holiday-grid">
         <!-- Holidays List -->
         <div>
@@ -266,7 +271,7 @@ if (isset($_GET['edit'])) {
         </div>
 
         <!-- Add/Edit Form -->
-        <div class="form-card">
+        <div class="form-card" id="holiday-form-section">
             <h3 style="margin-top: 0; color: #1e293b;">
                 <?= $edit_holiday ? 'Edit Holiday' : 'Add New Holiday' ?>
             </h3>

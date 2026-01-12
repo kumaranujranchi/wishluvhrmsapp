@@ -28,15 +28,21 @@ $employees = $conn->query($sql)->fetchAll();
 
 <div class="page-content">
     <?= $message ?>
-    
+
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h2 class="page-title">Employees</h2>
             <p class="page-subtitle">Manage all your employees here.</p>
         </div>
-        <a href="add_employee.php" class="btn-primary"
-            style="display: flex; align-items: center; text-decoration: none;">
-            <i data-lucide="plus" style="width:18px; margin-right:8px;"></i> Add Employee
+        <div class="desktop-action-btn">
+            <a href="add_employee.php" class="btn-primary"
+                style="display: flex; align-items: center; text-decoration: none;">
+                <i data-lucide="plus" style="width:18px; margin-right:8px;"></i> Add Employee
+            </a>
+        </div>
+        <!-- Mobile FAB -->
+        <a href="add_employee.php" class="fab" title="Add Employee">
+            <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
         </a>
     </div>
 
@@ -113,7 +119,8 @@ $employees = $conn->query($sql)->fetchAll();
                                         style="color:#059669; text-decoration:none; display:flex; align-items:center; justify-content:center;">
                                         <i data-lucide="edit-2" style="width:16px;"></i>
                                     </a>
-                                    <a href="?delete=<?= $emp['id'] ?>" class="btn-icon" style="color:#ef4444;" title="Delete"
+                                    <a href="?delete=<?= $emp['id'] ?>" class="btn-icon" style="color:#ef4444;"
+                                        title="Delete"
                                         onclick="return confirm('Are you sure you want to delete <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>? This action cannot be undone.')">
                                         <i data-lucide="trash-2" style="width:16px;"></i>
                                     </a>

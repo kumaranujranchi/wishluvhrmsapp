@@ -205,10 +205,10 @@ if (isset($_GET['edit'])) {
 <div class="page-content">
     <?= $message ?>
 
-    <div style="margin-bottom: 2rem;">
-        <h1 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0;">Attendance Locations</h1>
-        <p style="color: #64748b; margin: 0.5rem 0 0;">Manage geofencing locations for attendance tracking.</p>
-    </div>
+    <!-- Mobile FAB to scroll to form -->
+    <a href="#location-form-section" class="fab" title="Add Location">
+        <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
+    </a>
 
     <div class="location-grid">
         <!-- Locations List -->
@@ -276,7 +276,7 @@ if (isset($_GET['edit'])) {
         </div>
 
         <!-- Add/Edit Form -->
-        <div class="form-card" style="background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; position: sticky; top: 2rem;">
+        <div class="form-card" id="location-form-section" style="background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; position: sticky; top: 2rem;">
             <h3 style="margin-top: 0; color: #1e293b;">
                 <?= $edit_location ? 'Edit Location' : 'Add New Location' ?>
             </h3>

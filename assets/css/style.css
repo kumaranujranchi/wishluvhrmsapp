@@ -1048,46 +1048,46 @@ select.form-control {
    ============================================= */
 
 /* Bottom Navigation (Mobile Only) */
-.bottom-nav {
-    display: none;
+/* Floating Action Button (FAB) */
+.fab {
+    display: none; /* Hidden by default, show on mobile */
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid #e2e8f0;
-    z-index: 1000;
-    justify-content: space-around;
+    right: 20px;
+    bottom: 20px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    display: flex; /* We will use media query to show it */
     align-items: center;
-    padding: 0 1rem;
-    padding-bottom: env(safe-area-inset-bottom);
-}
-
-.bottom-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    color: #64748b;
+    justify-content: center;
     text-decoration: none;
-    font-size: 0.7rem;
-    font-weight: 500;
-    transition: all 0.2s;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.bottom-nav-item i {
-    width: 24px;
-    height: 24px;
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    color: white;
 }
 
-.bottom-nav-item.active {
-    color: hsl(var(--color-primary));
+@media (min-width: 769px) {
+    .fab {
+        display: none !important;
+    }
 }
 
-.bottom-nav-item.active i {
-    transform: translateY(-2px);
+@media (max-width: 768px) {
+    .fab {
+        display: flex;
+    }
+    
+    .desktop-action-btn {
+        display: none !important;
+    }
 }
 
 /* Hamburger Menu Drawer */
@@ -1133,7 +1133,7 @@ select.form-control {
     .main-content {
         margin-left: 0 !important;
         width: 100% !important;
-        padding-bottom: 80px; /* Space for bottom nav */
+        padding-bottom: 2rem; /* Reduced from 80px as bottom nav is gone */
     }
     
     .header {

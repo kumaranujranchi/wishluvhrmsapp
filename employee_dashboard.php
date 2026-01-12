@@ -14,8 +14,8 @@ include 'includes/header.php';
             <i data-lucide="layout-dashboard" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
             <h3>Welcome to your Dashboard</h3>
             <p class="desktop-only">Access your attendance, leaves, and policies from the sidebar.</p>
-            <p class="mobile-only" style="display: none;">Use the bottom navigation bar to punch in or check your
-                leaves.</p>
+            <p class="mobile-only" style="display: none;">Use the menu button in the top left to access your
+                attendance, leaves, and policies.</p>
         </div>
     </div>
 

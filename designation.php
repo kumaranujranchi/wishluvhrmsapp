@@ -80,13 +80,17 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
 
     <div class="content-grid">
         <!-- Add Button -->
-        <div style="display:flex; justify-content: flex-end;">
+        <div class="desktop-action-btn" style="display:flex; justify-content: flex-end;">
             <button class="btn-primary" onclick="openModal('add')">
                 <i data-lucide="plus"
                     style="width:18px; height:18px; margin-right:8px; display:inline-block; vertical-align:middle;"></i>
                 Add Designation
             </button>
         </div>
+        <!-- Mobile FAB -->
+        <button class="fab" onclick="openModal('add')" title="Add Designation">
+            <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
+        </button>
 
         <!-- List Designations (Cards) -->
         <div class="card-grid">
@@ -117,7 +121,8 @@ $designations = $conn->query("SELECT * FROM designations ORDER BY id DESC")->fet
 
                     <h3 class="floating-card-title"><?= htmlspecialchars($row['name']) ?></h3>
                     <p class="floating-card-desc" style="min-height: auto; margin-bottom: 0.5rem;">Created on
-                        <?= date('d M Y', strtotime($row['created_at'])) ?></p>
+                        <?= date('d M Y', strtotime($row['created_at'])) ?>
+                    </p>
                 </div>
             <?php endforeach; ?>
         </div>

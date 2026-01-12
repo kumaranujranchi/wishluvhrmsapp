@@ -81,13 +81,17 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY id DESC")->fetch
 
     <div class="content-grid">
         <!-- Add Button -->
-        <div style="display:flex; justify-content: flex-end;">
+        <div class="desktop-action-btn" style="display:flex; justify-content: flex-end;">
             <button class="btn-primary" onclick="openModal('add')">
                 <i data-lucide="plus"
                     style="width:18px; height:18px; margin-right:8px; display:inline-block; vertical-align:middle;"></i>
                 Add Department
             </button>
         </div>
+        <!-- Mobile FAB -->
+        <button class="fab" onclick="openModal('add')" title="Add Department">
+            <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
+        </button>
 
         <!-- List Departments (Cards) -->
         <div class="card-grid">
