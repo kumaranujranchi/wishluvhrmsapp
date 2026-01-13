@@ -59,6 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Delius:wght@400&display=swap" rel="stylesheet">
     <!-- Main CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
@@ -559,6 +563,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         lucide.createIcons();
     </script>
+    <script src="/assets/js/pwa.js"></script>
 </body>
 
 </html>

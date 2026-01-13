@@ -132,6 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reset_password'])) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
@@ -416,6 +420,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reset_password'])) {
     <script>
         lucide.createIcons();
     </script>
+    <script src="assets/js/pwa.js"></script>
 </body>
 
 </html>
