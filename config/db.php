@@ -1,4 +1,7 @@
 <?php
+// Set timezone globally
+date_default_timezone_set('Asia/Kolkata');
+
 // Database Configuration
 // When running on the same server (Hostinger shared hosting), use 'localhost'
 $host = 'localhost';

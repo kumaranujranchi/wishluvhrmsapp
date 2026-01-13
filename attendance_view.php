@@ -592,11 +592,20 @@ foreach ($history as $h) {
 
                 form.submit();
             }, (error) => {
-                statusDiv.innerHTML = "Location Access Denied.";
-                alert("Please allow location access to mark attendance.");
-            }, { enableHighAccuracy: true });
+                let errorMsg = "Location Access Denied.";
+                if (error.code === 1) errorMsg = "Location Access Denied. Please allow location in your browser settings.";
+                else if (error.code === 2) errorMsg = "Location unavailable. Please check your GPS/Internet.";
+                else if (error.code === 3) errorMsg = "Location request timed out. Please try again.";
+
+                statusDiv.innerHTML = `<span style="color:#ef4444;">${errorMsg}</span>`;
+                alert(errorMsg);
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
         } else {
-            alert("Geolocation not supported.");
+            alert("Geolocation not supported by this browser.");
         }
     }
 </script>
