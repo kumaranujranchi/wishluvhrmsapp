@@ -97,14 +97,24 @@ if ($step == 'reset' && isset($_GET['token'])) {
     <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
         body {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             background: linear-gradient(135deg, hsl(210, 20%, 98%), hsl(220, 20%, 95%));
-            margin: 0;
             font-family: 'Outfit', sans-serif;
+            touch-action: pan-y;
         }
 
         .reset-card {

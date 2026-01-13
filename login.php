@@ -127,10 +127,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <style>
-        * {
+        html,
+        body.login-page {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         body.login-page {
@@ -143,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
             position: relative;
-            overflow: hidden;
+            touch-action: pan-y;
         }
 
         body.login-page::before {
@@ -156,6 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             top: -250px;
             left: -250px;
             animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
         }
 
         body.login-page::after {
@@ -168,6 +174,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             bottom: -200px;
             right: -200px;
             animation: float 15s ease-in-out infinite reverse;
+            pointer-events: none;
+            z-index: 0;
         }
 
         @keyframes gradientShift {
@@ -445,7 +453,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             body.login-page {
                 background: #ffffff;
                 align-items: flex-start;
-                overflow-y: auto;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
             }
 
             body.login-page::before,
