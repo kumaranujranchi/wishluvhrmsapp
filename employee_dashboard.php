@@ -203,7 +203,7 @@ for ($i = 6; $i >= 0; $i--) {
 
         .card-footer {
             margin: 1rem -15px -15px !important;
-            padding: 0.6rem 15px !important;
+            padding: 0.8rem 15px !important;
             font-size: 0.7rem !important;
             border-bottom-left-radius: 16px;
             border-bottom-right-radius: 16px;
@@ -303,7 +303,7 @@ for ($i = 6; $i >= 0; $i--) {
             <div>
                 <span class="card-label">Birthday</span>
                 <?php if ($next_birthday): ?>
-                    <div class="card-value" style="font-size: 1.5rem; margin-top: 10px;">
+                    <div class="card-value" style="margin-top: 5px;">
                         <?= htmlspecialchars($next_birthday['first_name']) ?>
                     </div>
                     <span
