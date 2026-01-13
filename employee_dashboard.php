@@ -187,11 +187,36 @@ for ($i = 6; $i >= 0; $i--) {
         }
 
         .sharp-card {
-            min-height: 100px !important;
-            padding: 12px !important;
-            border-radius: 12px !important;
+            min-height: 140px !important;
+            padding: 15px !important;
+            border-radius: 16px !important;
             width: 100% !important;
             box-sizing: border-box;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+        }
+
+        .card-footer {
+            margin: 1rem -15px -15px !important;
+            padding: 0.6rem 15px !important;
+            font-size: 0.7rem !important;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+
+        .sharp-card i {
+            display: none;
+            /* Hide large icons on mobile for cleaner look as they overlap text */
+        }
+
+        .card-value {
+            font-size: 1.75rem !important;
+            margin: 5px 0 !important;
+        }
+
+        .card-label {
+            font-size: 0.75rem !important;
         }
 
         .content-grid-responsive {
@@ -205,6 +230,7 @@ for ($i = 6; $i >= 0; $i--) {
             margin: 0 0 15px 0 !important;
             padding: 15px !important;
             box-sizing: border-box !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
         }
 
         .chart-container-mobile {
@@ -217,14 +243,6 @@ for ($i = 6; $i >= 0; $i--) {
         #employeeWaveChart {
             width: 100% !important;
             height: 100% !important;
-        }
-
-        .card-value {
-            font-size: 1.5rem !important;
-        }
-
-        .card-label {
-            font-size: 0.7rem !important;
         }
     }
 </style>
