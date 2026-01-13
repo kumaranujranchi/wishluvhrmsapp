@@ -124,13 +124,35 @@ for ($i = 6; $i >= 0; $i--) {
         .stats-grid-sharp {
             grid-template-columns: repeat(3, 1fr);
         }
+
+        .stats-grid-sharp .sharp-card:last-child {
+            grid-column: span 2 !important;
+        }
     }
 
     @media (max-width: 1100px) {
         .stats-grid-sharp {
             grid-template-columns: repeat(2, 1fr);
         }
+
+        .stats-grid-sharp .sharp-card:last-child {
+            grid-column: span 2 !important;
+        }
     }
+
+    /* Tablet and Landscape Optimizations */
+    @media (min-width: 769px) and (max-width: 1200px) {
+        .content-grid-responsive {
+            grid-template-columns: 1fr 1fr !important;
+            align-items: start !important;
+        }
+
+        .sidebar {
+            height: 100% !important;
+            min-height: 100vh !important;
+        }
+    }
+
 
     .notice-item-sharp {
         background: white;
@@ -317,24 +339,26 @@ for ($i = 6; $i >= 0; $i--) {
         </div>
     </div>
 
-    <div class="content-grid-responsive">
+    <div class="content-grid-responsive" style="align-items: stretch;">
         <!-- Left: Activity Chart -->
-        <div>
-            <div class="card" style="border:none; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <div style="display: flex;">
+            <div class="card"
+                style="border:none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; display: flex; flex-direction: column; border-radius: 1rem;">
                 <div class="card-header" style="background:white; border-bottom:1px solid #f1f5f9; padding:1.25rem;">
                     <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Performance Analytics</h3>
                 </div>
-                <div class="chart-container-mobile">
+                <div class="chart-container-mobile" style="flex: 1; min-height: 250px;">
                     <canvas id="employeeWaveChart"></canvas>
                 </div>
             </div>
         </div>
 
+
         <!-- Right: Sidemenu Items -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
             <!-- Next Holiday -->
             <div class="card"
-                style="border-radius: 1rem; border:none; background:#0f172a; color:white; padding:1.5rem; margin-bottom: 1rem;">
+                style="border-radius: 1rem; border:none; background:#0f172a; color:white; padding:1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: center;">
                 <span style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; font-weight:600;">Upcoming
                     Holiday</span>
                 <?php if ($next_holiday): ?>
