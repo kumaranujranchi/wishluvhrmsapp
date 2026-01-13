@@ -212,8 +212,8 @@ for ($i = 6; $i >= 0; $i--) {
         }
 
         .chart-container-mobile {
-            padding: 1.25rem 0.75rem 1.25rem 2.25rem !important;
-            /* Increased left padding for Y-axis labels */
+            padding: 1.25rem 0.5rem 1.25rem 3rem !important;
+            /* Increased left padding significantly to prevent label cutoff */
         }
 
         #employeeWaveChart {
@@ -310,8 +310,8 @@ for ($i = 6; $i >= 0; $i--) {
                 <div class="card-header" style="background:white; border-bottom:1px solid #f1f5f9; padding:1.25rem;">
                     <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Weekly Performance</h3>
                 </div>
-                <div class="chart-container-mobile" style="padding:1.5rem;">
-                    <canvas id="employeeWaveChart" style="height:250px;"></canvas>
+                <div class="chart-container-mobile">
+                    <canvas id="employeeWaveChart"></canvas>
                 </div>
             </div>
         </div>
