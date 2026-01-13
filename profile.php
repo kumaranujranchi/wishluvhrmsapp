@@ -614,18 +614,18 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                                     </div>
                                 <?php endif; ?>
                                 <div
-                                    style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                                    <div style="display:flex; gap:10px; align-items: center;">
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; flex-wrap: wrap; gap: 10px;">
+                                    <div style="display:flex; gap:10px; align-items: center; flex-wrap: wrap;">
                                         <a href="<?= $user['pan_doc'] ?>" target="_blank"
                                             style="font-size:0.85rem; color:#2563eb; text-decoration:none; display:flex; align-items:center; gap:4px;"><i
                                                 data-lucide="eye" style="width:14px;"></i> View</a>
-                                        <span style="color:#cbd5e1;">|</span>
+                                        <span style="color:#cbd5e1;" class="desktop-only">|</span>
                                         <button type="button" onclick="document.getElementById('pan_doc_input').click()"
                                             style="background:none; border:none; color:#ea580c; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;"><i
                                                 data-lucide="refresh-cw" style="width:14px;"></i> Change</button>
                                     </div>
                                     <span
-                                        style="font-size:0.75rem; color:#166534; background: #dcfce7; padding: 2px 8px; border-radius: 10px;">Current
+                                        style="font-size:0.75rem; color:#166534; background: #dcfce7; padding: 2px 8px; border-radius: 10px; white-space: nowrap;">Current
                                         File</span>
                                 </div>
                             </div>
@@ -669,18 +669,18 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                                     </div>
                                 <?php endif; ?>
                                 <div
-                                    style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                                    <div style="display:flex; gap:10px; align-items: center;">
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; flex-wrap: wrap; gap: 10px;">
+                                    <div style="display:flex; gap:10px; align-items: center; flex-wrap: wrap;">
                                         <a href="<?= $user['aadhar_doc'] ?>" target="_blank"
                                             style="font-size:0.85rem; color:#2563eb; text-decoration:none; display:flex; align-items:center; gap:4px;"><i
                                                 data-lucide="eye" style="width:14px;"></i> View</a>
-                                        <span style="color:#cbd5e1;">|</span>
+                                        <span style="color:#cbd5e1;" class="desktop-only">|</span>
                                         <button type="button" onclick="document.getElementById('aadhar_doc_input').click()"
                                             style="background:none; border:none; color:#ea580c; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;"><i
                                                 data-lucide="refresh-cw" style="width:14px;"></i> Change</button>
                                     </div>
                                     <span
-                                        style="font-size:0.75rem; color:#166534; background: #dcfce7; padding: 2px 8px; border-radius: 10px;">Current
+                                        style="font-size:0.75rem; color:#166534; background: #dcfce7; padding: 2px 8px; border-radius: 10px; white-space: nowrap;">Current
                                         File</span>
                                 </div>
                             </div>
@@ -793,13 +793,13 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                 container.innerHTML = `
                 <div style="background: #eff6ff; padding: 1rem; border-radius: 8px; border: 1px solid #bfdbfe; position: relative;">
                     ${preview}
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                         <div style="display:flex; gap:10px; align-items: center;">
-                             <span style="font-size:0.85rem; color:#1e40af; font-weight:500;">New File: ${file.name}</span>
-                             <span style="color:#93c5fd;">|</span>
-                            <button type="button" onclick="document.getElementById('${input.id}').click()" style="background:none; border:none; color:#ea580c; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;"><i data-lucide="refresh-cw" style="width:14px;"></i> Change</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; flex-wrap: wrap; gap: 10px;">
+                         <div style="display:flex; gap:10px; align-items: center; flex-wrap: wrap; flex: 1; min-width: 0;">
+                             <span style="font-size:0.85rem; color:#1e40af; font-weight:500; word-break: break-all;">New File: ${file.name}</span>
+                             <span style="color:#93c5fd;" class="desktop-only">|</span>
+                            <button type="button" onclick="document.getElementById('${input.id}').click()" style="background:none; border:none; color:#ea580c; font-size:0.85rem; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px; white-space: nowrap;"><i data-lucide="refresh-cw" style="width:14px;"></i> Change</button>
                         </div>
-                         <span style="font-size:0.75rem; color:#1e40af; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">Selected</span>
+                         <span style="font-size:0.75rem; color:#1e40af; background: #dbeafe; padding: 2px 8px; border-radius: 10px; white-space: nowrap;">Selected</span>
                     </div>
                 </div>
             `;
