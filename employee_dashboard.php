@@ -212,11 +212,27 @@ for ($i = 6; $i >= 0; $i--) {
         }
 
         .chart-container-mobile {
-            padding: 1rem !important;
+            padding: 1.25rem 0.75rem 1.25rem 2.25rem !important;
+            /* Increased left padding for Y-axis labels */
         }
 
         #employeeWaveChart {
-            height: 200px !important;
+            height: 220px !important;
+        }
+
+        /* Prevent cards from touching edges on mobile */
+        .page-content {
+            padding: 1rem 0.75rem !important;
+            overflow-x: hidden;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card,
+        .sharp-card {
+            margin-left: 2px;
+            margin-right: 2px;
+            width: auto !important;
         }
     }
 </style>
@@ -303,7 +319,8 @@ for ($i = 6; $i >= 0; $i--) {
         <!-- Right: Sidemenu Items -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
             <!-- Next Holiday -->
-            <div class="card" style="border-radius: 0; border:none; background:#0f172a; color:white; padding:1.5rem;">
+            <div class="card"
+                style="border-radius: 1rem; border:none; background:#0f172a; color:white; padding:1.5rem; margin-bottom: 1rem;">
                 <span style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; font-weight:600;">Upcoming
                     Holiday</span>
                 <?php if ($next_holiday): ?>
@@ -383,9 +400,25 @@ for ($i = 6; $i >= 0; $i--) {
                 y: {
                     beginAtZero: true,
                     grid: { display: false },
-                    ticks: { callback: value => value + 'h' }
+                    ticks: {
+                        callback: value => value + 'h',
+                        padding: 10 // Space between ticks and axis
+                    }
                 },
-                x: { grid: { display: false } }
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        padding: 5
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    left: 5,
+                    right: 15,
+                    top: 10,
+                    bottom: 0
+                }
             }
         }
     });
