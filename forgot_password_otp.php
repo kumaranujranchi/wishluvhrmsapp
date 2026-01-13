@@ -141,6 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reset_password'])) {
             min-height: 100vh;
             background: linear-gradient(135deg, hsl(210, 20%, 98%), hsl(220, 20%, 95%));
             margin: 0;
+            font-family: 'Outfit', sans-serif;
         }
 
         .reset-card {
@@ -235,6 +236,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reset_password'])) {
             margin-bottom: 1.5rem;
             font-size: 0.85rem;
             color: #1e40af;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                background: #ffffff;
+                align-items: stretch;
+            }
+
+            .reset-card {
+                padding: 3rem 2rem;
+                border-radius: 0;
+                box-shadow: none;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                max-width: none;
+            }
+
+            .reset-title {
+                font-size: 2rem;
+                text-align: left;
+            }
+
+            .reset-subtitle {
+                text-align: left;
+                font-size: 1.05rem;
+                margin-bottom: 2rem;
+            }
+
+            .form-control {
+                padding: 1.1rem 1rem;
+                border-radius: 12px;
+                background: #f1f5f9;
+                border: 2px solid transparent;
+            }
+
+            .form-control:focus {
+                background: #ffffff;
+                border-color: hsl(250, 84%, 60%);
+            }
+
+            .reset-btn {
+                padding: 1.25rem;
+                border-radius: 12px;
+                font-weight: 600;
+            }
+
+            .back-link {
+                margin-top: auto;
+                padding: 2rem 0;
+            }
         }
     </style>
 </head>

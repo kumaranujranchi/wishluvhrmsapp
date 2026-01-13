@@ -436,19 +436,92 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-top: 1px solid #e2e8f0;
         }
 
-        /* Responsive Design */
+        /* Mobile UI Enhancement - App-like Experience */
         @media (max-width: 640px) {
-            .login-card-app {
-                margin: 1rem;
-                padding: 2rem 1.5rem;
+            body.login-page {
+                background: #ffffff;
+                /* Clean white background for mobile app feel */
+                align-items: stretch;
             }
 
-            .login-title {
-                font-size: 1.75rem;
+            body.login-page::before,
+            body.login-page::after {
+                display: none;
+                /* Hide decorative elements on mobile for cleaner UI */
+            }
+
+            .login-card-app {
+                margin: 0;
+                padding: 3rem 2rem;
+                width: 100%;
+                max-width: none;
+                min-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                animation: none;
+                backdrop-filter: none;
+            }
+
+            .login-header {
+                margin-bottom: 3rem;
+            }
+
+            .login-logo-container {
+                margin-bottom: 2rem;
             }
 
             .login-brand-logo {
-                height: 60px;
+                height: 80px;
+                filter: none;
+            }
+
+            .login-title {
+                font-size: 2.25rem;
+                text-align: left;
+            }
+
+            .login-subtitle {
+                text-align: left;
+                font-size: 1.1rem;
+            }
+
+            .login-form {
+                gap: 2rem;
+            }
+
+            .form-input-enhanced {
+                padding: 1.1rem 1rem 1.1rem 3.5rem;
+                font-size: 1.05rem;
+                border-radius: 16px;
+                background: #f1f5f9;
+                border: 2px solid transparent;
+            }
+
+            .form-input-enhanced:focus {
+                background: #ffffff;
+                border-color: #667eea;
+            }
+
+            .input-icon {
+                left: 1.25rem;
+            }
+
+            .login-btn {
+                padding: 1.25rem;
+                border-radius: 16px;
+                font-size: 1.1rem;
+                margin-top: 1rem;
+            }
+
+            .login-footer {
+                margin-top: auto;
+                padding: 2rem 0;
+                border-top: none;
+                font-weight: 500;
             }
         }
     </style>
