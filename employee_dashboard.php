@@ -158,81 +158,73 @@ for ($i = 6; $i >= 0; $i--) {
     }
 
     /* Mobile Enhancements */
+
+    /* Mobile Enhancements (STRICT RESET) */
     @media (max-width: 768px) {
+        .page-content {
+            padding: 10px !important;
+            width: 100% !important;
+            overflow-x: hidden !important;
+            box-sizing: border-box !important;
+            display: block !important;
+        }
+
         .welcome-banner {
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            width: 100% !important;
+            box-sizing: border-box;
+            border-radius: 12px !important;
+            margin-bottom: 15px !important;
+            padding: 15px !important;
+            border-left-width: 4px;
         }
 
         .stats-grid-sharp {
+            display: grid !important;
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 10px !important;
-            margin-bottom: 1.5rem;
-        }
-
-        .stats-grid-sharp .sharp-card:last-child {
-            grid-column: span 2;
+            width: 100% !important;
+            margin-bottom: 20px !important;
         }
 
         .sharp-card {
-            min-height: 130px !important;
-            padding: 1rem !important;
+            min-height: 100px !important;
+            padding: 12px !important;
+            border-radius: 12px !important;
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+
+        .content-grid-responsive {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        .card {
+            border-radius: 16px !important;
+            width: 100% !important;
+            margin: 0 0 15px 0 !important;
+            padding: 15px !important;
+            box-sizing: border-box !important;
+        }
+
+        .chart-container-mobile {
+            width: 100% !important;
+            height: 250px !important;
+            padding: 5px !important;
+            box-sizing: border-box !important;
+        }
+
+        #employeeWaveChart {
+            width: 100% !important;
+            height: 100% !important;
         }
 
         .card-value {
-            font-size: 1.75rem !important;
-            margin: 0.25rem 0 !important;
+            font-size: 1.5rem !important;
         }
 
         .card-label {
             font-size: 0.7rem !important;
-        }
-
-        .sharp-card span:not(.card-label) {
-            font-size: 0.7rem !important;
-            display: block;
-            line-height: 1.2;
-        }
-
-        .card-footer {
-            margin: 1rem -1rem -1rem !important;
-            padding: 0.5rem 1rem !important;
-            font-size: 0.65rem !important;
-        }
-
-        .sharp-card i {
-            font-size: 3rem !important;
-            right: -5px !important;
-            bottom: -5px !important;
-        }
-
-        .content-grid-responsive {
-            grid-template-columns: 1fr !important;
-            gap: 1.5rem !important;
-        }
-
-        .chart-container-mobile {
-            padding: 1.25rem 0.5rem 1.25rem 3rem !important;
-            /* Increased left padding significantly to prevent label cutoff */
-        }
-
-        #employeeWaveChart {
-            height: 220px !important;
-        }
-
-        /* Prevent cards from touching edges on mobile */
-        .page-content {
-            padding: 1rem 0.75rem !important;
-            overflow-x: hidden;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .card,
-        .sharp-card {
-            margin-left: 2px;
-            margin-right: 2px;
-            width: auto !important;
         }
     }
 </style>
@@ -306,9 +298,9 @@ for ($i = 6; $i >= 0; $i--) {
     <div class="content-grid-responsive">
         <!-- Left: Activity Chart -->
         <div>
-            <div class="card" style="border-radius:0; border:none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <div class="card" style="border:none; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                 <div class="card-header" style="background:white; border-bottom:1px solid #f1f5f9; padding:1.25rem;">
-                    <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Weekly Performance</h3>
+                    <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Performance Analytics</h3>
                 </div>
                 <div class="chart-container-mobile">
                     <canvas id="employeeWaveChart"></canvas>
@@ -375,19 +367,16 @@ for ($i = 6; $i >= 0; $i--) {
     // Employee Performance Chart
     const ctx = document.getElementById('employeeWaveChart').getContext('2d');
     new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: <?= json_encode($chart_labels) ?>,
             datasets: [{
                 label: 'Work Hours',
                 data: <?= json_encode($chart_data) ?>,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#6366f1',
-                pointRadius: 4
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderRadius: 5,
+                barThickness: 'flex',
+                maxBarThickness: 30
             }]
         },
         options: {
@@ -399,26 +388,19 @@ for ($i = 6; $i >= 0; $i--) {
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: { display: false },
+                    grid: { color: '#f1f5f9' },
                     ticks: {
                         callback: value => value + 'h',
-                        padding: 10 // Space between ticks and axis
+                        font: { size: 10 }
                     }
                 },
                 x: {
                     grid: { display: false },
-                    ticks: {
-                        padding: 5
-                    }
+                    ticks: { font: { size: 10 } }
                 }
             },
             layout: {
-                padding: {
-                    left: 5,
-                    right: 15,
-                    top: 10,
-                    bottom: 0
-                }
+                padding: { left: 10, right: 10, top: 10, bottom: 0 }
             }
         }
     });
