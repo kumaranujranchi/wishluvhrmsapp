@@ -1144,6 +1144,12 @@ select.form-control {
         margin-left: 0 !important;
         width: 100% !important;
         padding-bottom: 2rem; /* Reduced from 80px as bottom nav is gone */
+        overflow-x: hidden;
+    }
+    
+    body {
+        overflow-x: hidden;
+        width: 100%;
     }
     
     .header {
@@ -1151,6 +1157,7 @@ select.form-control {
         border-radius: 0;
         top: 0;
         padding: 0 1rem;
+        width: 100%;
     }
     
     .bottom-nav {
@@ -1159,6 +1166,8 @@ select.form-control {
     
     .page-content {
         padding: 1rem;
+        width: 100%;
+        overflow-x: hidden;
     }
 
     .sidebar .nav-item span,
@@ -1175,11 +1184,6 @@ select.form-control {
     .nav-item {
         justify-content: center;
         padding: 1rem;
-    }
-    
-    .main-content {
-        margin-left: 80px;
-        width: calc(100% - 80px);
     }
 }
 
