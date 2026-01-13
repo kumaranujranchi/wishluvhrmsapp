@@ -186,6 +186,10 @@ for ($i = 6; $i >= 0; $i--) {
             margin-bottom: 20px !important;
         }
 
+        .stats-grid-sharp .sharp-card:last-child {
+            grid-column: span 2 !important;
+        }
+
         .sharp-card {
             min-height: 140px !important;
             padding: 15px !important;
