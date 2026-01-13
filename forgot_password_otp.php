@@ -241,33 +241,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reset_password'])) {
         @media (max-width: 640px) {
             body {
                 background: #ffffff;
-                align-items: stretch;
+                align-items: flex-start;
+                overflow-y: auto;
             }
 
             .reset-card {
-                padding: 3rem 2rem;
+                padding: 2.5rem 1.5rem;
                 border-radius: 0;
                 box-shadow: none;
                 min-height: 100vh;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-start;
                 max-width: none;
             }
 
             .reset-title {
-                font-size: 2rem;
+                font-size: 1.75rem;
                 text-align: left;
             }
 
             .reset-subtitle {
                 text-align: left;
-                font-size: 1.05rem;
-                margin-bottom: 2rem;
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
             }
 
             .form-control {
-                padding: 1.1rem 1rem;
+                padding: 0.75rem 1rem;
                 border-radius: 12px;
                 background: #f1f5f9;
                 border: 2px solid transparent;
@@ -279,14 +280,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reset_password'])) {
             }
 
             .reset-btn {
-                padding: 1.25rem;
+                padding: 0.875rem;
                 border-radius: 12px;
                 font-weight: 600;
+                font-size: 1rem;
             }
 
             .back-link {
-                margin-top: auto;
-                padding: 2rem 0;
+                margin-top: 3rem;
+                padding: 1.5rem 0;
+                border-top: 1px solid #f1f5f9;
+            }
+
+            .otp-input {
+                font-size: 1.25rem;
             }
         }
     </style>
