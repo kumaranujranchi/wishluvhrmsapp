@@ -24,8 +24,23 @@ function has($msg, $keywords)
 }
 
 try {
-    // 1. Leave Balance Intent
-    if (has($message, ['leave', 'chutti', 'balance'])) {
+    // 1. Today's Punch/Attendance Intent
+    if (has($message, ['intime', 'punch', 'in time', 'out time', 'clock', 'aaj', 'today', 'in-time'])) {
+        $stmt = $conn->prepare("SELECT clock_in, clock_out, status FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
+        $stmt->execute(['uid' => $user_id]);
+        $today = $stmt->fetch();
+
+        if ($today) {
+            $in = $today['clock_in'] ? date('h:i A', strtotime($today['clock_in'])) : "N/A";
+            $out = $today['clock_out'] ? date('h:i A', strtotime($today['clock_out'])) : "Not yet";
+            $response = "Aaj ka apka status '" . $today['status'] . "' hai. Clock-In: " . $in . ", Clock-Out: " . $out . ".";
+        } else {
+            $response = "Aaj ki attendance record nahi mili. Kya aapne punch-in kiya hai?";
+        }
+    }
+
+    // 2. Leave Balance Intent
+    else if (has($message, ['leave', 'chutti', 'balance', 'vacation'])) {
         $stmt = $conn->prepare("SELECT 
             COUNT(CASE WHEN status = 'Approved' THEN 1 END) as approved,
             COUNT(CASE WHEN status = 'Pending' THEN 1 END) as pending
@@ -36,8 +51,8 @@ try {
         $response = "Aapke is saal ke total " . $leaves['approved'] . " leaves approved hain, aur " . $leaves['pending'] . " requests abhi pending hain.";
     }
 
-    // 2. Attendance/Late Marks Intent
-    else if (has($message, ['attendance', 'late', 'present', 'presents'])) {
+    // 3. Attendance/Late Marks Intent (Monthly)
+    else if (has($message, ['attendance', 'late', 'present', 'presents', 'mahina', 'month'])) {
         $month = date('m');
         $year = date('Y');
         $stmt = $conn->prepare("SELECT 
@@ -48,11 +63,11 @@ try {
         $stmt->execute(['uid' => $user_id, 'm' => $month, 'y' => $year]);
         $stats = $stmt->fetch();
 
-        $response = "Is mahine (Month: " . date('F') . ") aap " . $stats['present_days'] . " din present rahe hain aur " . $stats['late_days'] . " baar late mark laga hai.";
+        $response = "Is mahine (" . date('F') . ") aap " . $stats['present_days'] . " din present rahe hain aur " . $stats['late_days'] . " baar late mark laga hai.";
     }
 
-    // 3. Holiday Intent
-    else if (has($message, ['holiday', 'chuttiyan', 'vacation'])) {
+    // 4. Holiday Intent
+    else if (has($message, ['holiday', 'chuttiyan', 'chhutti'])) {
         $stmt = $conn->prepare("SELECT title, start_date FROM holidays WHERE start_date >= CURDATE() AND is_active = 1 ORDER BY start_date ASC LIMIT 1");
         $stmt->execute();
         $holiday = $stmt->fetch();
