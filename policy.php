@@ -20,6 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $display_order = $_POST['display_order'] ?? 0;
     $is_active = isset($_POST['is_active']) ? 1 : 0;
 
+    // DEBUG: Check content size
+    if (empty($content) || strlen($content) < 10) {
+        // Log it or just append a small notice to the screen for the user
+        // $message .= "<div class='alert warning'>Warning: Content seems too short (".strlen($content)." chars).</div>";
+    }
+
     try {
         if ($id) {
             // Update existing policy
@@ -376,13 +382,18 @@ if (isset($_GET['edit'])) {
 
         console.log('Quill Editor initialized successfully');
 
-        // Sync Quill content to hidden textarea on form submit
+        // Sync Quill content to hidden textarea on every change (Active Sync)
+        quill.on('text-change', function () {
+            document.getElementById('policyEditor').value = quill.root.innerHTML;
+        });
+
+        // Also sync on form submit as a final check
         const policyForm = document.querySelector('form');
         if (policyForm) {
             policyForm.addEventListener('submit', function (e) {
                 const content = quill.root.innerHTML;
                 document.getElementById('policyEditor').value = content;
-                console.log('Synced content length:', content.length);
+                console.log('Final sync content length:', content.length);
             });
         }
 
