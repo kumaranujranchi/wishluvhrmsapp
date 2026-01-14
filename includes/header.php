@@ -59,6 +59,9 @@
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chatbot CSS -->
+    <link rel="stylesheet" href="assets/css/chatbot.css">
 </head>
 
 <body>
