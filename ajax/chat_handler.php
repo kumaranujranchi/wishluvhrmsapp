@@ -77,7 +77,8 @@ try {
     5. Next Holiday: $holiday_context
 
     RULES:
-    - Respond strictly in Hinglish (Romanized Hindi + English).
+    - User message can be in English, Hinglish, or Hindi (Devanagari script).
+    - Always respond strictly in Hinglish (Romanized Hindi + English).
     - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
     - If the user asks for 'aaj' or 'today' data, use DATA 1.
     - DO NOT cut off sentences. Completeness is critical.
@@ -105,8 +106,8 @@ try {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
 
     $response_json = curl_exec($ch);
     if ($response_json === false) {
