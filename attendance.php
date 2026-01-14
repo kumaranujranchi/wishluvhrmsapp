@@ -166,7 +166,6 @@ if (isset($_POST['export_csv'])) {
                             <th>Clock Out</th>
                             <th>Out Location</th>
                             <th>Duration</th>
-                            <th style="text-align:right;">Map</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -208,43 +207,52 @@ if (isset($_POST['export_csv'])) {
                                 </td>
                                 <td style="font-weight:500;"><?= date('h:i A', strtotime($row['clock_in'])) ?></td>
                                 <td>
-                                    <div style="font-size:0.8rem; min-width:180px;"
-                                        title="<?= htmlspecialchars($row['clock_in_address']) ?>">
-                                        <i data-lucide="map-pin"
-                                            style="width:12px; vertical-align:middle; color:#64748b;"></i>
-                                        <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                                    <div style="display:flex; align-items:flex-start; gap:6px;">
+                                        <div style="font-size:0.8rem; min-width:180px;"
+                                            title="<?= htmlspecialchars($row['clock_in_address']) ?>">
+                                            <i data-lucide="map-pin"
+                                                style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                            <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                                        </div>
+                                        <?php if ($row['clock_in_lat']): ?>
+                                            <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
+                                                target="_blank" title="View Map" style="color:#6366f1; flex-shrink:0;">
+                                                <i data-lucide="map" style="width:14px;"></i>
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td style="font-weight:500;">
                                     <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '<span style="color:#cbd5e1;">--:--</span>' ?>
                                 </td>
                                 <td>
-                                    <div style="font-size:0.8rem; min-width:180px;"
-                                        title="<?= htmlspecialchars($row['clock_out_address']) ?>">
-                                        <?php if ($row['clock_out_address']): ?>
-                                            <i data-lucide="map-pin"
-                                                style="width:12px; vertical-align:middle; color:#64748b;"></i>
-                                            <?= htmlspecialchars($row['clock_out_address']) ?>
-                                        <?php else: ?>
-                                            <span style="color:#cbd5e1;">-</span>
+                                    <div style="display:flex; align-items:flex-start; gap:6px;">
+                                        <div style="font-size:0.8rem; min-width:180px;"
+                                            title="<?= htmlspecialchars($row['clock_out_address']) ?>">
+                                            <?php if ($row['clock_out_address']): ?>
+                                                <i data-lucide="map-pin"
+                                                    style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                                <?= htmlspecialchars($row['clock_out_address']) ?>
+                                            <?php else: ?>
+                                                <span style="color:#cbd5e1;">-</span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php if ($row['clock_out_lat']): ?>
+                                            <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_out_lat'] ?>,<?= $row['clock_out_lng'] ?>"
+                                                target="_blank" title="View Map" style="color:#6366f1; flex-shrink:0;">
+                                                <i data-lucide="map" style="width:14px;"></i>
+                                            </a>
                                         <?php endif; ?>
                                     </div>
                                 </td>
                                 <td style="font-weight:600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?>
-                                </td>
-                                <td style="text-align:right;">
-                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
-                                        target="_blank" class="btn-icon" title="View Map"
-                                        style="display:inline-flex; align-items:center; justify-content:center;">
-                                        <i data-lucide="map" style="width:16px;"></i>
-                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
 
                         <?php if (empty($attendance_records)): ?>
                             <tr>
-                                <td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No attendance
+                                <td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No attendance
                                     records
                                     for this date.</td>
                             </tr>
@@ -314,8 +322,17 @@ if (isset($_POST['export_csv'])) {
                                                 style="width:14px; vertical-align:middle; color:#10b981; margin-right:4px;"></i>
                                             <?= date('h:i A', strtotime($row['clock_in'])) ?></span>
                                         <?php if ($row['clock_in_address']): ?>
-                                            <small
-                                                style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_in_address']) ?></small>
+                                            <div style="display:flex; align-items:flex-start; gap:8px; margin-top:4px;">
+                                                <small style="font-size:0.7rem; color:#94a3b8; line-height:1.3; flex:1;">
+                                                    <?= htmlspecialchars($row['clock_in_address']) ?>
+                                                </small>
+                                                <?php if ($row['clock_in_lat']): ?>
+                                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
+                                                        target="_blank" style="color:#6366f1;">
+                                                        <i data-lucide="map" style="width:14px;"></i>
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="mobile-field">
@@ -324,8 +341,17 @@ if (isset($_POST['export_csv'])) {
                                                 style="width:14px; vertical-align:middle; color:#ef4444; margin-right:4px;"></i>
                                             <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working' ?></span>
                                         <?php if ($row['clock_out_address']): ?>
-                                            <small
-                                                style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_out_address']) ?></small>
+                                            <div style="display:flex; align-items:flex-start; gap:8px; margin-top:4px;">
+                                                <small style="font-size:0.7rem; color:#94a3b8; line-height:1.3; flex:1;">
+                                                    <?= htmlspecialchars($row['clock_out_address']) ?>
+                                                </small>
+                                                <?php if ($row['clock_out_lat']): ?>
+                                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_out_lat'] ?>,<?= $row['clock_out_lng'] ?>"
+                                                        target="_blank" style="color:#6366f1;">
+                                                        <i data-lucide="map" style="width:14px;"></i>
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -336,11 +362,6 @@ if (isset($_POST['export_csv'])) {
                                         <span class="mobile-value"
                                             style="color:#6366f1; font-weight:700; font-size:1.1rem;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></span>
                                     </div>
-                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
-                                        target="_blank" class="btn-primary"
-                                        style="padding:0.4rem 0.85rem; font-size:0.8rem; border-radius:10px;">
-                                        <i data-lucide="map" style="width:14px; margin-right:5px;"></i> View Map
-                                    </a>
                                 </div>
                             </div>
                         </div>
