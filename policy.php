@@ -116,10 +116,14 @@ if (isset($_GET['edit'])) {
     <?php endif; ?>
 </script>
 
+<!-- Jodit Editor CDN -->
+<link rel="stylesheet" href="https://unpkg.com/jodit@4.1.16/build/jodit.min.css" />
+<script src="https://unpkg.com/jodit@4.1.16/build/jodit.min.js"></script>
+
 <style>
     .policy-grid {
         display: grid;
-        grid-template-columns: 1fr 400px;
+        grid-template-columns: 350px 1fr;
         gap: 2rem;
         align-items: start;
     }
@@ -171,7 +175,8 @@ if (isset($_GET['edit'])) {
         padding: 2rem;
         border: 1px solid #e2e8f0;
         position: sticky;
-        top: 2rem;
+        top: 1rem;
+        box-shadow: var(--shadow-sm);
     }
 
     .status-badge {
@@ -212,71 +217,65 @@ if (isset($_GET['edit'])) {
     </div>
 
     <div class="policy-grid">
-        <!-- Policies List -->
+        <!-- Policies List (Now on Left) -->
         <div>
-            <h3 style="margin-bottom: 1rem; color: #475569;">All Policies (
-                <?= count($policies) ?>)
-            </h3>
+            <h3 style="margin-bottom: 1rem; color: #475569;">All Policies (<?= count($policies) ?>)</h3>
 
-            <?php if (empty($policies)): ?>
-                <div class="card" style="text-align: center; padding: 3rem; color: #94a3b8;">
-                    <i data-lucide="file-text" style="width: 48px; height: 48px; margin: 0 auto 1rem;"></i>
-                    <p>No policies created yet. Add your first policy!</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($policies as $policy): ?>
-                    <div class="policy-card">
-                        <div class="policy-header">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <div class="icon-preview">
-                                    <i data-lucide="<?= htmlspecialchars($policy['icon']) ?>" style="width: 20px;"></i>
+            <div style="max-height: calc(100vh - 250px); overflow-y: auto; padding-right: 5px; scrollbar-width: thin;">
+                <?php if (empty($policies)): ?>
+                    <div class="card" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                        <i data-lucide="file-text" style="width: 48px; height: 48px; margin: 0 auto 1rem;"></i>
+                        <p>No policies created yet.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($policies as $policy): ?>
+                        <div class="policy-card" style="padding: 1rem;">
+                            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                                <div class="icon-preview" style="width: 32px; height: 32px; flex-shrink: 0;">
+                                    <i data-lucide="<?= htmlspecialchars($policy['icon']) ?>" style="width: 16px;"></i>
                                 </div>
-                                <div>
-                                    <div class="policy-title">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div class="policy-title"
+                                        style="font-size: 0.95rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                         <?= htmlspecialchars($policy['title']) ?>
                                     </div>
-                                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
-                                        Slug:
-                                        <?= htmlspecialchars($policy['slug']) ?> | Order:
-                                        <?= $policy['display_order'] ?>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem;">
+                                        Slug: <?= htmlspecialchars($policy['slug']) ?>
                                     </div>
                                 </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span class="status-badge <?= $policy['is_active'] ? 'status-active' : 'status-inactive' ?>">
-                                    <?= $policy['is_active'] ? 'Active' : 'Inactive' ?>
+                                <span class="status-badge <?= $policy['is_active'] ? 'status-active' : 'status-inactive' ?>"
+                                    style="font-size: 0.65rem; padding: 0.15rem 0.5rem;">
+                                    <?= $policy['is_active'] ? 'ON' : 'OFF' ?>
                                 </span>
                             </div>
-                        </div>
 
-                        <div
-                            style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; max-height: 60px; overflow: hidden;">
-                            <?= substr(strip_tags($policy['content']), 0, 150) ?>...
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="policy.php?edit=<?= $policy['id'] ?>" class="btn-primary"
+                                    style="flex: 1; padding: 0.4rem; font-size: 0.8rem; background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe;">
+                                    Edit
+                                </a>
+                                <a href="policy.php?delete=<?= $policy['id'] ?>" onclick="return confirm('Delete this policy?')"
+                                    class="btn-primary"
+                                    style="flex: 1; padding: 0.4rem; font-size: 0.8rem; background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6;">
+                                    Delete
+                                </a>
+                            </div>
                         </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
 
-                        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                            <a href="policy.php?edit=<?= $policy['id'] ?>"
-                                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #f0f9ff; color: #0369a1; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #bae6fd; transition: all 0.2s;"
-                                onmouseover="this.style.background='#e0f2fe'; this.style.borderColor='#7dd3fc';"
-                                onmouseout="this.style.background='#f0f9ff'; this.style.borderColor='#bae6fd';">
-                                <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
-                                <span>Edit</span>
-                            </a>
-                            <a href="policy.php?delete=<?= $policy['id'] ?>"
-                                onclick="return confirm('Are you sure you want to delete this policy?')"
-                                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #fef2f2; color: #dc2626; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #fecaca; transition: all 0.2s;"
-                                onmouseover="this.style.background='#fee2e2'; this.style.borderColor='#fca5a5';"
-                                onmouseout="this.style.background='#fef2f2'; this.style.borderColor='#fecaca';">
-                                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-                                <span>Delete</span>
-                            </a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+            <?php if ($edit_policy): ?>
+                <div style="margin-top: 1rem;">
+                    <a href="policy.php" class="btn-primary"
+                        style="width: 100%; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">
+                        <i data-lucide="plus" style="width: 16px;"></i> Add New Policy
+                    </a>
+                </div>
             <?php endif; ?>
         </div>
 
-        <!-- Add/Edit Form -->
+        <!-- Add/Edit Form (Now on Right, Wider) -->
         <div class="form-card">
             <h3 style="margin-top: 0; color: #1e293b;">
                 <?= $edit_policy ? 'Edit Policy' : 'Add New Policy' ?>
@@ -304,29 +303,27 @@ if (isset($_GET['edit'])) {
                     <small style="color: #64748b; font-size: 0.75rem;">Use lowercase with underscores</small>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Icon (Lucide
-                        icon name)</label>
-                    <input type="text" name="icon" class="form-control"
-                        value="<?= $edit_policy ? htmlspecialchars($edit_policy['icon']) : 'file-text' ?>"
-                        placeholder="e.g., briefcase, coffee, shirt">
-                    <small style="color: #64748b; font-size: 0.75rem;">Visit <a href="https://lucide.dev/icons"
-                            target="_blank">lucide.dev</a> for icons</small>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Icon
+                            (Lucide name)</label>
+                        <input type="text" name="icon" class="form-control"
+                            value="<?= $edit_policy ? htmlspecialchars($edit_policy['icon']) : 'file-text' ?>"
+                            placeholder="e.g., briefcase, coffee">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Display
+                            Order</label>
+                        <input type="number" name="display_order" class="form-control"
+                            value="<?= $edit_policy ? $edit_policy['display_order'] : 0 ?>" placeholder="0">
+                    </div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Display
-                        Order</label>
-                    <input type="number" name="display_order" class="form-control"
-                        value="<?= $edit_policy ? $edit_policy['display_order'] : 0 ?>" placeholder="0">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label
-                        style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Content</label>
-                    <textarea name="content" class="form-control" rows="10" required
-                        placeholder="Enter policy content (HTML supported)..."><?= $edit_policy ? htmlspecialchars($edit_policy['content']) : '' ?></textarea>
-                    <small style="color: #64748b; font-size: 0.75rem;">You can use HTML tags for formatting</small>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Full
+                        Content</label>
+                    <textarea name="content" id="policyEditor" class="form-control" required
+                        placeholder="Enter policy content..."><?= $edit_policy ? htmlspecialchars($edit_policy['content']) : '' ?></textarea>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -349,5 +346,34 @@ if (isset($_GET['edit'])) {
         </div>
     </div>
 </div>
+
+<script>
+    const editor = new Jodit('#policyEditor', {
+        height: 500,
+        toolbarSticky: false,
+        buttons: [
+            'bold', 'italic', 'underline', 'strikethrough', 'eraser', '|',
+            'h1', 'h2', 'h3', '|',
+            'align', 'ul', 'ol', '|',
+            'blockquote', 'link', 'image', 'table', '|',
+            'undo', 'redo', '|',
+            'source'
+        ],
+        uploader: {
+            insertImageAsBase64URI: true
+        }
+    });
+
+    // Handle Title to Slug auto-fill
+    document.querySelector('input[name="title"]').addEventListener('input', function (e) {
+        if (!document.querySelector('input[name="id"]')) { // Only for new policies
+            const slugInput = document.querySelector('input[name="slug"]');
+            slugInput.value = e.target.value
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+        }
+    });
+</script>
 
 <?php include 'includes/footer.php'; ?>
