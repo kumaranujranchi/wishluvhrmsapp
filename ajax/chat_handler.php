@@ -116,7 +116,18 @@ try {
         }
     }
 
-    // 5. Admin Only: Employee Lookup
+    // 5. Acknowledgment Intent
+    else if (has($message, ['ok', 'thanks', 'thank you', 'dhanyawad', 'shukriya', 'done', 'accha', 'theek'])) {
+        $responses = [
+            "You're welcome! Aur kuch puchna hai?",
+            "Glad I could help! 😊",
+            "Theek hai! Main yahi hun agar aapko aur kuch help chahiye ho.",
+            "You are welcome! Have a great day ahead."
+        ];
+        $response = $responses[array_rand($responses)];
+    }
+
+    // 6. Admin Only: Employee Lookup
     else if ($user_role === 'Admin' && has($message, ['search', 'employee', 'details', 'name'])) {
         // Extract a potential name or code (simplified)
         $words = explode(' ', $message);
