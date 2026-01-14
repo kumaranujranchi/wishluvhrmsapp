@@ -358,11 +358,13 @@ if (isset($_GET['edit'])) {
                 buttons: [
                     'source', '|',
                     'bold', 'italic', 'underline', 'strikethrough', '|',
+                    'fontsize', 'brush', '|',
                     'eraser', '|',
                     'paragraph', '|',
                     'left', 'center', 'right', 'justify', '|',
                     'ul', 'ol', '|',
                     'blockquote', 'link', 'image', 'table', '|',
+                    'fullsize', '|',
                     'undo', 'redo'
                 ],
                 uploader: {
