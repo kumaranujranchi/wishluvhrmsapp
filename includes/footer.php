@@ -14,12 +14,14 @@
 <!-- Chatbot UI -->
 <div class="chatbot-container">
     <div class="chat-bubble" id="chatBubble">
-        <i data-lucide="message-square"></i>
+        <i data-lucide="bot" style="width: 30px; height: 30px;"></i>
     </div>
 
     <div class="chat-window" id="chatWindow">
         <div class="chat-header">
-            <img src="assets/logo.png" alt="Bot">
+            <div class="bot-icon-circle">
+                <i data-lucide="sparkles" style="width: 20px; color: #a855f7;"></i>
+            </div>
             <div class="bot-info">
                 <h4>Smart Assistant</h4>
                 <span>Online</span>
