@@ -101,7 +101,7 @@ if ($filter_emp) {
 }
 
 // 4. Fetch Requests based on Filter OR Default (Pending)
-$sql = "SELECT lr.*, e.first_name, e.last_name, e.employee_code, e.avatar, m.first_name as mgr_name, m.last_name as mgr_last 
+$sql = "SELECT lr.*, e.first_name, e.last_name, e.employee_code, e.avatar, m.first_name as mgr_name, m.last_name as mgr_last, m.role as mgr_role 
         FROM leave_requests lr
         JOIN employees e ON lr.employee_id = e.id
         LEFT JOIN employees m ON e.reporting_manager_id = m.id
@@ -229,11 +229,13 @@ $requests = $stmt->fetchAll();
                                         </div>
                                     </td>
                                     <td>
-                                        <?php if ($req['mgr_name']): ?>
+                                        <?php if ($req['mgr_name'] && $req['mgr_role'] !== 'Admin'): ?>
                                             <div style="font-size:0.9rem;">
                                                 <?= $req['mgr_name'] . ' ' . $req['mgr_last'] ?>
                                             </div>
                                             <div style="font-size:0.75rem; color:#10b981;">Approved</div>
+                                        <?php elseif ($req['mgr_role'] === 'Admin' || !$req['mgr_name']): ?>
+                                            <span style="font-size:0.8rem; color:#64748b; font-style:italic;">Direct to Admin</span>
                                         <?php else: ?>
                                             <span style="color:#64748b;">-</span>
                                         <?php endif; ?>
@@ -282,7 +284,8 @@ $requests = $stmt->fetchAll();
                                     </div>
                                     <div>
                                         <div style="font-weight: 600; color: #1e293b;">
-                                            <?= $req['first_name'] . ' ' . $req['last_name'] ?></div>
+                                            <?= $req['first_name'] . ' ' . $req['last_name'] ?>
+                                        </div>
                                         <div style="font-size: 0.75rem; color: #64748b;">
                                             <?= date('d M', strtotime($req['start_date'])) ?> -
                                             <?= date('d M', strtotime($req['end_date'])) ?>
@@ -303,13 +306,13 @@ $requests = $stmt->fetchAll();
                                 <div class="mobile-field">
                                     <span class="mobile-label">Manager Verification</span>
                                     <span class="mobile-value">
-                                        <?php if ($req['mgr_name']): ?>
+                                        <?php if ($req['mgr_name'] && $req['mgr_role'] !== 'Admin'): ?>
                                             <span style="color: #10b981; display: flex; align-items: center; gap: 4px;">
                                                 <i data-lucide="check-circle" style="width: 14px;"></i>
                                                 Approved by <?= $req['mgr_name'] ?>
                                             </span>
                                         <?php else: ?>
-                                            <span style="color: #94a3b8;">Not required/Direct Admin</span>
+                                            <span style="color: #94a3b8; font-style:italic;">Not required / Direct Admin</span>
                                         <?php endif; ?>
                                     </span>
                                 </div>

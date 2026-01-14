@@ -21,6 +21,10 @@ $leave_q = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id
 $leave_q->execute(['uid' => $user_id]);
 $approved_leaves = $leave_q->fetchColumn();
 
+$pending_leave_q = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id = :uid AND status = 'Pending'");
+$pending_leave_q->execute(['uid' => $user_id]);
+$pending_leaves = $pending_leave_q->fetchColumn();
+
 // 3. Fetch Upcoming Holiday
 $holiday_q = $conn->prepare("SELECT * FROM holidays WHERE start_date >= CURDATE() AND is_active = 1 ORDER BY start_date ASC LIMIT 1");
 $holiday_q->execute();
@@ -318,7 +322,7 @@ for ($i = 6; $i >= 0; $i--) {
                 <span style="font-size:0.85rem;">Vacations & Sick Leaves</span>
             </div>
             <i data-lucide="palmtree"></i>
-            <div class="card-footer">Pending: 0</div>
+            <div class="card-footer">Pending: <?= $pending_leaves ?></div>
         </div>
 
         <div class="sharp-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">

@@ -25,8 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (strtotime($end_date) < strtotime($start_date)) {
             $message = "<div class='alert error'>End Date cannot be before Start Date.</div>";
         } else {
-            $sql = "INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason) 
-                     VALUES (:uid, :type, :start, :end, :reason)";
+            // --- CHECK REPORTING MANAGER ---
+            $checkMgr = $conn->prepare("SELECT m.id, m.role FROM employees e LEFT JOIN employees m ON e.reporting_manager_id = m.id WHERE e.id = :uid");
+            $checkMgr->execute(['uid' => $user_id]);
+            $mgrInfo = $checkMgr->fetch();
+            $mgrRole = $mgrInfo['role'] ?? 'Admin'; // Default to Admin if no manager found
+
+            $manager_status = ($mgrRole === 'Admin') ? 'Approved' : 'Pending';
+
+            $sql = "INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason, manager_status) 
+                     VALUES (:uid, :type, :start, :end, :reason, :mstatus)";
             try {
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([
@@ -34,7 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'type' => $leave_type,
                     'start' => $start_date,
                     'end' => $end_date,
-                    'reason' => $reason
+                    'reason' => $reason,
+                    'mstatus' => $manager_status
                 ]);
                 $message = "<div class='alert success'>Leave Application Submitted Successfully!</div>";
 
@@ -67,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         sendEmail($empData['email'], "Leave Request Submitted", $body);
                     }
 
-                    // B. Notify Manager
-                    if (!empty($empData['manager_email'])) {
+                    // B. Notify Manager (Only if NOT Admin)
+                    if (!empty($empData['manager_email']) && $empData['manager_role'] !== 'Admin') {
                         $body = getHtmlEmailTemplate(
                             "Team Leave Request",
                             "<p>Hello {$empData['manager_name']},</p><p><strong>$empName</strong> ({$empData['employee_code']}) has applied for leave.</p>$leaveInfo",
@@ -124,19 +133,23 @@ $leave_balance = $total_leaves_annual - $leaves_taken;
 $filter_month = $_GET['month'] ?? '';
 $filter_year = $_GET['year'] ?? '';
 
-$sql = "SELECT * FROM leave_requests WHERE employee_id = :uid";
+$sql = "SELECT lr.*, m.role as mgr_role 
+        FROM leave_requests lr
+        JOIN employees e ON lr.employee_id = e.id
+        LEFT JOIN employees m ON e.reporting_manager_id = m.id
+        WHERE lr.employee_id = :uid";
 $params = ['uid' => $user_id];
 
 if ($filter_month) {
-    $sql .= " AND MONTH(start_date) = :m";
+    $sql .= " AND MONTH(lr.start_date) = :m";
     $params['m'] = $filter_month;
 }
 if ($filter_year) {
-    $sql .= " AND YEAR(start_date) = :y";
+    $sql .= " AND YEAR(lr.start_date) = :y";
     $params['y'] = $filter_year;
 }
 
-$sql .= " ORDER BY created_at DESC";
+$sql .= " ORDER BY lr.created_at DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
@@ -595,16 +608,18 @@ $leaves = $stmt->fetchAll();
                                         </td>
                                         <td>
                                             <div class="approval-block">
-                                                <div class="approval-row">
-                                                    <span class="approval-label" style="font-size: 0.75rem;">Manager:</span>
-                                                    <?php
-                                                    $mColor = match ($leave['manager_status']) {
-                                                        'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
-                                                    };
-                                                    ?>
-                                                    <span class="approval-val"
-                                                        style="color: <?= $mColor ?>; font-size: 0.75rem;"><?= $leave['manager_status'] ?></span>
-                                                </div>
+                                                <?php if ($leave['mgr_role'] && $leave['mgr_role'] !== 'Admin'): ?>
+                                                    <div class="approval-row">
+                                                        <span class="approval-label" style="font-size: 0.75rem;">Manager:</span>
+                                                        <?php
+                                                        $mColor = match ($leave['manager_status']) {
+                                                            'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'
+                                                        };
+                                                        ?>
+                                                        <span class="approval-val"
+                                                            style="color: <?= $mColor ?>; font-size: 0.75rem;"><?= $leave['manager_status'] ?></span>
+                                                    </div>
+                                                <?php endif; ?>
                                                 <div class="approval-row">
                                                     <span class="approval-label" style="font-size: 0.75rem;">Admin:</span>
                                                     <?php
@@ -699,12 +714,14 @@ $leaves = $stmt->fetchAll();
                                                 Details</span>
                                             <div
                                                 style="background: #f8fafc; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-                                                <div
-                                                    style="display: flex; justify-content: space-between; align-items: center;">
-                                                    <span style="color: #64748b;">Manager</span>
-                                                    <span
-                                                        style="font-weight: 700; color: <?= match ($leave['manager_status']) { 'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'} ?>;"><?= $leave['manager_status'] ?></span>
-                                                </div>
+                                                <?php if ($leave['mgr_role'] && $leave['mgr_role'] !== 'Admin'): ?>
+                                                    <div
+                                                        style="display: flex; justify-content: space-between; align-items: center;">
+                                                        <span style="color: #64748b;">Manager</span>
+                                                        <span
+                                                            style="font-weight: 700; color: <?= match ($leave['manager_status']) { 'Approved' => '#10b981', 'Rejected' => '#ef4444', default => '#f59e0b'} ?>;"><?= $leave['manager_status'] ?></span>
+                                                    </div>
+                                                <?php endif; ?>
                                                 <div
                                                     style="display: flex; justify-content: space-between; align-items: center;">
                                                     <span style="color: #64748b;">Admin</span>
