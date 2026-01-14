@@ -6,22 +6,16 @@
 <!-- PWA Script -->
 <script src="/assets/js/pwa.js"></script>
 
-<!-- Init Lucide Icons -->
-<script>
-    lucide.createIcons();
-</script>
-
 <!-- Chatbot UI -->
 <div class="chatbot-container">
     <div class="chat-bubble" id="chatBubble">
-        <i data-lucide="bot" style="width: 30px; height: 30px;"></i>
+        <i data-lucide="message-circle-more" style="width: 30px; height: 30px;"></i>
     </div>
 
     <div class="chat-window" id="chatWindow">
         <div class="chat-header">
-            <div class="bot-icon-circle">
-                <i data-lucide="sparkles" style="width: 20px; color: #a855f7;"></i>
-            </div>
+            <img src="assets/logo.png" alt="Wishluv Logo"
+                style="width: 40px; height: 40px; border-radius: 10px; background: white; padding: 5px;">
             <div class="bot-info">
                 <h4>Smart Assistant</h4>
                 <span>Online</span>
@@ -43,6 +37,11 @@
         </div>
     </div>
 </div>
+
+<!-- Init Lucide Icons AFTER UI is loaded -->
+<script>
+    lucide.createIcons();
+</script>
 
 <!-- Chatbot JS -->
 <script src="assets/js/chatbot.js"></script>
