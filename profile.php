@@ -97,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 emergency_contact_name = :ename,
                 emergency_contact_phone = :ephone,
                 emergency_contact_relation = :erel,
+                gender = :gender,
                 pan_number = :pan,
                 aadhar_number = :aadhar,
                 bank_account_number = :bank,
@@ -114,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             'ename' => $emergency_name,
             'ephone' => $emergency_phone,
             'erel' => $emergency_rel,
+            'gender' => $_POST['gender'] ?? 'Male',
             'pan' => $pan_number,
             'aadhar' => $aadhar_number,
             'bank' => $bank_acc,
@@ -504,6 +506,14 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                     <label>Father's Name</label>
                     <input type="text" name="fathers_name" class="modern-input" placeholder="Enter Full Name"
                         value="<?= htmlspecialchars($user['fathers_name'] ?? '') ?>">
+                </div>
+                <div class="modern-form-group">
+                    <label>Gender</label>
+                    <select name="gender" class="modern-input">
+                        <option value="Male" <?= ($user['gender'] ?? '') == 'Male' ? 'selected' : '' ?>>Male</option>
+                        <option value="Female" <?= ($user['gender'] ?? '') == 'Female' ? 'selected' : '' ?>>Female</option>
+                        <option value="Other" <?= ($user['gender'] ?? '') == 'Other' ? 'selected' : '' ?>>Other</option>
+                    </select>
                 </div>
                 <div class="modern-form-group">
                     <label>Date of Birth</label>
