@@ -51,6 +51,22 @@ function is_active_mobile($page, $current)
                 <i data-lucide="bell"></i> Notice Board
             </a>
 
+            <!-- Payroll Dropdown for Mobile -->
+            <div class="nav-group-mobile">
+                <div class="nav-item-mobile dropdown-toggle-mobile" onclick="toggleMobileSubNav('payrollSubMobile', this)">
+                    <i data-lucide="banknote"></i>
+                    <span>Payroll</span>
+                    <i data-lucide="chevron-down" class="chevron-icon-mobile"
+                        style="margin-left: auto; width: 16px; transition: transform 0.2s;"></i>
+                </div>
+                <div id="payrollSubMobile" class="sub-nav-mobile">
+                    <a href="javascript:void(0)" class="sub-nav-item-mobile">
+                        <i data-lucide="file-down" style="width: 16px; height: 16px;"></i>
+                        <span>Download Salary Slip <small style="opacity: 0.6;">(Soon)</small></span>
+                    </a>
+                </div>
+            </div>
+
             <!-- Dynamic Policy Dropdown for Mobile -->
             <div class="nav-group-mobile">
                 <?php
