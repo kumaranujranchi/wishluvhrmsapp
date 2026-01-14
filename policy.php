@@ -117,8 +117,9 @@ if (isset($_GET['edit'])) {
     <?php endif; ?>
 </script>
 
-<!-- TinyMCE Editor CDN -->
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- Quill Editor CDN (Robust & Free) -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
 <style>
     .policy-grid {
@@ -322,8 +323,12 @@ if (isset($_GET['edit'])) {
                 <div class="form-group" style="margin-bottom: 1.5rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #475569;">Full
                         Content</label>
-                    <textarea name="content" id="policyEditor" class="form-control" required
-                        placeholder="Enter policy content..."><?= $edit_policy ? htmlspecialchars($edit_policy['content']) : '' ?></textarea>
+                    <!-- Quill Editor Container -->
+                    <div id="quillEditor" style="height: 400px; background: white;">
+                        <?= $edit_policy ? $edit_policy['content'] : '' ?></div>
+                    <!-- Hidden textarea for form submission -->
+                    <textarea name="content" id="policyEditor" style="display:none;"
+                        required><?= $edit_policy ? htmlspecialchars($edit_policy['content']) : '' ?></textarea>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -349,27 +354,36 @@ if (isset($_GET['edit'])) {
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize TinyMCE
-        tinymce.init({
-            selector: '#policyEditor',
-            height: 500,
-            menubar: false,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | bold italic underline strikethrough | ' +
-                'fontsize forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
-                'bullist numlist outdent indent | removeformat | code fullscreen | help',
-            font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt 48pt',
-            content_style: 'body { font-family: Arial, sans-serif; font-size: 14pt; }',
-            setup: function (editor) {
-                editor.on('init', function () {
-                    console.log('TinyMCE Editor initialized successfully');
-                });
-            }
+        // Initialize Quill Editor
+        var quill = new Quill('#quillEditor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Enter policy content here...'
         });
+
+        console.log('Quill Editor initialized successfully');
+
+        // Sync Quill content to hidden textarea on form submit
+        const policyForm = document.querySelector('form');
+        if (policyForm) {
+            policyForm.addEventListener('submit', function(e) {
+                const content = quill.root.innerHTML;
+                document.getElementById('policyEditor').value = content;
+                console.log('Synced content length:', content.length);
+            });
+        }
 
         // Handle Title to Slug auto-fill
         const titleInput = document.querySelector('input[name="title"]');
