@@ -45,6 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
+// Handle Deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_leave') {
+    $request_id = $_POST['request_id'];
+    try {
+        $stmt = $conn->prepare("DELETE FROM leave_requests WHERE id = :id");
+        $stmt->execute(['id' => $request_id]);
+        $action_message = "<div class='alert success'>Leave Request deleted successfully! Balance restored.</div>";
+    } catch (PDOException $e) {
+        $action_message = "<div class='alert error'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+
 // Export Report Logic
 if (isset($_GET['export']) && $_GET['export'] == 'csv') {
     header('Content-Type: text/csv');
@@ -358,18 +370,27 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
                                         </span>
                                     </td>
                                     <td style="text-align: right; padding-right: 1.5rem;">
-                                        <?php if ($req['admin_status'] == 'Pending' || $req['admin_status'] == 'Clarification'): ?>
-                                            <button onclick="openActionModal(<?= $req['id'] ?>)" class="btn-primary"
-                                                style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Review</button>
-                                        <?php else: ?>
-                                            <span style="font-size: 0.85rem; color: #64748b; font-style: italic;">Closed</span>
-                                            <?php if ($req['admin_remarks']): ?>
-                                                <div style="font-size: 0.7rem; color: #64748b; max-width: 150px; margin-left: auto;">
-                                                    Rem:
-                                                    <?= htmlspecialchars($req['admin_remarks']) ?>
+                                        <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                                            <button onclick="openDeleteModal(<?= $req['id'] ?>)" class="btn-icon"
+                                                style="color: #64748b; background: #f1f5f9; padding: 0.4rem;" title="Delete">
+                                                <i data-lucide="trash-2" style="width: 14px;"></i>
+                                            </button>
+                                            <?php if ($req['admin_status'] == 'Pending' || $req['admin_status'] == 'Clarification'): ?>
+                                                <button onclick="openActionModal(<?= $req['id'] ?>)" class="btn-primary"
+                                                    style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Review</button>
+                                            <?php else: ?>
+                                                <div style="text-align: right;">
+                                                    <span
+                                                        style="font-size: 0.85rem; color: #64748b; font-style: italic;">Closed</span>
+                                                    <?php if ($req['admin_remarks']): ?>
+                                                        <div
+                                                            style="font-size: 0.7rem; color: #64748b; max-width: 150px; margin-left: auto;">
+                                                            Rem: <?= htmlspecialchars($req['admin_remarks']) ?>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 </div>
                                             <?php endif; ?>
-                                        <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -448,16 +469,26 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
                                     </span>
                                 </div>
                                 <?php if ($req['admin_status'] == 'Pending' || $req['admin_status'] == 'Clarification'): ?>
-                                    <div style="margin-top: 1.5rem;">
-                                        <button class="btn-primary" style="width: 100%; justify-content: center;"
+                                    <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
+                                        <button class="btn-primary" style="flex: 2; justify-content: center;"
                                             onclick="openActionModal(<?= $req['id'] ?>)">Review Request</button>
+                                        <button class="btn-secondary"
+                                            style="flex: 1; justify-content: center; background: #f1f5f9; color: #ef4444;"
+                                            onclick="openDeleteModal(<?= $req['id'] ?>)">Delete</button>
                                     </div>
-                                <?php elseif ($req['admin_remarks']): ?>
-                                    <div class="mobile-field">
-                                        <span class="mobile-label">Admin Remarks</span>
-                                        <span class="mobile-value"
-                                            style="font-style: italic; color: #64748b;"><?= htmlspecialchars($req['admin_remarks']) ?></span>
+                                <?php else: ?>
+                                    <div style="margin-top: 1.5rem;">
+                                        <button class="btn-secondary"
+                                            style="width: 100%; justify-content: center; background: #f1f5f9; color: #64748b; margin-bottom: 1rem;"
+                                            onclick="openDeleteModal(<?= $req['id'] ?>)">Delete Record</button>
                                     </div>
+                                    <?php if ($req['admin_remarks']): ?>
+                                        <div class="mobile-field">
+                                            <span class="mobile-label">Admin Remarks</span>
+                                            <span class="mobile-value"
+                                                style="font-style: italic; color: #64748b;"><?= htmlspecialchars($req['admin_remarks']) ?></span>
+                                        </div>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -529,6 +560,20 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
     function closeModal() {
         document.getElementById('actionModal').style.display = 'none';
     }
+
+    function openDeleteModal(id) {
+        if (confirm("Are you sure you want to delete this leave request? This will remove it from all dashboards and restore the employee balance.")) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.innerHTML = `
+                <input type="hidden" name="request_id" value="${id}">
+                <input type="hidden" name="action" value="delete_leave">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
     // Close on click outside
     window.onclick = function (event) {
         if (event.target == document.getElementById('actionModal')) {
