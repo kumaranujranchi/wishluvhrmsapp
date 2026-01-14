@@ -117,9 +117,8 @@ if (isset($_GET['edit'])) {
     <?php endif; ?>
 </script>
 
-<!-- Jodit Editor CDN (Stable) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jodit/3.24.2/jodit.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jodit/3.24.2/jodit.min.js"></script>
+<!-- TinyMCE Editor CDN -->
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 
 <style>
     .policy-grid {
@@ -350,41 +349,27 @@ if (isset($_GET['edit'])) {
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        let editorInstance = null;
-
-        if (typeof Jodit !== 'undefined') {
-            editorInstance = new Jodit('#policyEditor', {
-                height: 500,
-                toolbarSticky: false,
-                toolbarAdaptive: false,
-                buttons: [
-                    'source', '|',
-                    'bold', 'italic', 'underline', 'strikethrough', '|',
-                    'fontsize', 'brush', '|',
-                    'eraser', '|',
-                    'paragraph', '|',
-                    'left', 'center', 'right', 'justify', '|',
-                    'ul', 'ol', '|',
-                    'blockquote', 'link', 'image', 'table', '|',
-                    'fullsize', '|',
-                    'undo', 'redo'
-                ],
-                uploader: {
-                    insertImageAsBase64URI: true
-                }
-            });
-        }
-
-        // CRITICAL: Sync editor content to textarea before form submit
-        const policyForm = document.querySelector('form');
-        if (policyForm && editorInstance) {
-            policyForm.addEventListener('submit', function (e) {
-                // Force sync Jodit content to the underlying textarea
-                const content = editorInstance.value;
-                document.getElementById('policyEditor').value = content;
-                console.log('Synced content length:', content.length);
-            });
-        }
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#policyEditor',
+            height: 500,
+            menubar: false,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic underline strikethrough | ' +
+                'fontsize forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | removeformat | code fullscreen | help',
+            font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt 48pt',
+            content_style: 'body { font-family: Arial, sans-serif; font-size: 14pt; }',
+            setup: function (editor) {
+                editor.on('init', function () {
+                    console.log('TinyMCE Editor initialized successfully');
+                });
+            }
+        });
 
         // Handle Title to Slug auto-fill
         const titleInput = document.querySelector('input[name="title"]');
