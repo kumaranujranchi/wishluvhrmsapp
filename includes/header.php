@@ -1,47 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PWA Meta Tags -->
-<meta name="theme-color" content="#6366f1">
-<meta name="description" content="Myworld HRMS - Attendance, Leave, Payroll Management System">
-<link rel="manifest" href="/manifest.json">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
 
-<!-- Apple Touch Icons -->
-<link rel="apple-touch-icon" href="/assets/images/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="HRMS">
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="Myworld HRMS - Attendance, Leave, Payroll Management System">
+    <link rel="manifest" href="manifest.json">
 
-<title>Myworld Admin</title>
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
-}
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HRMS">
 
-// Prevent caching of pages with user-specific data
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-?>
+    <!-- Social Share (Open Graph / Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Myworld HRMS">
+    <meta property="og:description" content="Human Resource Management System - Attendance, Leave, Payroll">
+    <meta property="og:image" content="assets/logo.png">
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Delius&family=Outfit:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet">
+    <!-- Social Share (Twitter) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Myworld HRMS">
+    <meta name="twitter:description" content="Human Resource Management System - Attendance, Leave, Payroll">
+    <meta name="twitter:image" content="assets/logo.png">
 
-<!-- Main CSS -->
-<link rel="stylesheet" href="assets/css/style.css?v=1.2">
+    <title>Myworld Admin</title>
+    <?php
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: login.php");
+        exit;
+    }
 
-<!-- Lucide Icons -->
-<script src="https://unpkg.com/lucide@latest"></script>
+    // Prevent caching of pages with user-specific data
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);
+    header("Pragma: no-cache");
+    ?>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Delius&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="assets/css/style.css?v=1.2">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>

@@ -52,7 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Myworld</title>
+    <title>Login - Myworld HRMS</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,8 +65,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#6366f1">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+
+    <!-- Social Share (Open Graph / Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Login - Myworld HRMS">
+    <meta property="og:description" content="Sign in to your Myworld HRMS account">
+    <meta property="og:image" content="assets/logo.png">
+
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
