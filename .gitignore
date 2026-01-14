@@ -4,3 +4,4 @@ config/db_local.php
 # vendor/ - Temporarily allowing vendor/PHPMailer for deployment
 uploads/
 config/email_credentials.php
+.env
