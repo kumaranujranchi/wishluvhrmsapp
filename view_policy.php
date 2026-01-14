@@ -163,7 +163,10 @@ include 'includes/header.php';
                     <div>
                         <i data-lucide="calendar" style="width: 14px; vertical-align: middle;"></i>
                         Last Updated:
-                        <?= date('d M Y', strtotime($policy['updated_at'])) ?>
+                        <?php
+                        $update_date = !empty($policy['updated_at']) ? $policy['updated_at'] : $policy['created_at'];
+                        echo date('d M Y', strtotime($update_date));
+                        ?>
                     </div>
                 </div>
 

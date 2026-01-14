@@ -24,7 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id) {
             // Update existing policy
             $sql = "UPDATE policies SET title = :title, slug = :slug, content = :content, 
-                    icon = :icon, display_order = :order, is_active = :active WHERE id = :id";
+                    icon = :icon, display_order = :order, is_active = :active,
+                    updated_at = NOW() WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 'title' => $title,
