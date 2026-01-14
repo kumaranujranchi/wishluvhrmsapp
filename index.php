@@ -1,13 +1,14 @@
 <?php
-// Include necessary files
-require_once 'config/db.php';
-include 'includes/header.php';
-
-// Redirect if Employee
-if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Employee') {
+session_start();
+// Redirect if Employee (Must be before any output)
+if (isset($_SESSION['user_role']) && strcasecmp(trim($_SESSION['user_role']), 'Employee') === 0) {
     header("Location: employee_dashboard.php");
     exit;
 }
+
+// Include necessary files
+require_once 'config/db.php';
+include 'includes/header.php';
 
 // --- STATS CALCULATION ---
 
