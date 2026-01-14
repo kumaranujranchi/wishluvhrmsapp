@@ -350,8 +350,10 @@ if (isset($_GET['edit'])) {
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        let editorInstance = null;
+
         if (typeof Jodit !== 'undefined') {
-            const editor = new Jodit('#policyEditor', {
+            editorInstance = new Jodit('#policyEditor', {
                 height: 500,
                 toolbarSticky: false,
                 toolbarAdaptive: false,
@@ -370,6 +372,17 @@ if (isset($_GET['edit'])) {
                 uploader: {
                     insertImageAsBase64URI: true
                 }
+            });
+        }
+
+        // CRITICAL: Sync editor content to textarea before form submit
+        const policyForm = document.querySelector('form');
+        if (policyForm && editorInstance) {
+            policyForm.addEventListener('submit', function (e) {
+                // Force sync Jodit content to the underlying textarea
+                const content = editorInstance.value;
+                document.getElementById('policyEditor').value = content;
+                console.log('Synced content length:', content.length);
             });
         }
 
