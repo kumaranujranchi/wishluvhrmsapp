@@ -54,10 +54,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter') sendMessage();
     });
 
+    function formatMessage(text) {
+        // 1. Escape basic HTML for security (XSS prevention)
+        let formatted = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        // 2. Bold: **text** -> <b>text</b>
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+        // 3. Italic: _text_ or *text* -> <i>text</i>
+        formatted = formatted.replace(/\*(.*?)\*/g, '<i>$1</i>');
+        formatted = formatted.replace(/_(.*?)_/g, '<i>$1</i>');
+
+        // 4. Bullet points: Start of line with - or *
+        formatted = formatted.replace(/^[-*] (.*)/gm, '• $1');
+
+        return formatted;
+    }
+
     function addMessage(type, text) {
         const div = document.createElement('div');
         div.className = `message ${type}-msg`;
-        div.innerText = text;
+        div.innerHTML = formatMessage(text);
         body.appendChild(div);
         body.scrollTop = body.scrollHeight;
     }
