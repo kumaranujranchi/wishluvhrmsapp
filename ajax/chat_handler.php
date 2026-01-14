@@ -47,7 +47,17 @@ try {
     }
     $leave_context = "Total Allowed: 24, Used: $days_taken, Balance: " . (24 - $days_taken);
 
-    // D. Next Holiday
+    // D. Monthly Attendance Stats
+    $stmt = $conn->prepare("SELECT 
+        COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days,
+        COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_days
+        FROM attendance 
+        WHERE employee_id = :uid AND MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())");
+    $stmt->execute(['uid' => $user_id]);
+    $stats = $stmt->fetch();
+    $monthly_context = "Present Days: {$stats['present_days']}, Late Days: {$stats['late_days']} in " . date('F');
+
+    // E. Next Holiday
     $stmt = $conn->prepare("SELECT title, start_date FROM holidays WHERE start_date >= CURDATE() AND is_active = 1 ORDER BY start_date ASC LIMIT 1");
     $stmt->execute();
     $holiday = $stmt->fetch();
@@ -55,34 +65,24 @@ try {
 
     // 2. Prepare Gemini Prompt
     // ------------------------
-    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly and helpful HR chatbot for Wishluv Buildcon. 
+    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly HR helper for Wishluv Buildcon. 
     Current User: $user_name (Role: $user_role).
     Today's Date: " . date('Y-m-d') . " (" . date('l') . ").
     
     USER DATA CONTEXT:
     1. Attendance Today: $attendance_context
-    2. Leave Balance: $leave_context
-    3. Reporting Manager: $manager_name
-    4. Next Holiday: $holiday_context
+    2. Monthly Stats: $monthly_context
+    3. Leave Balance: $leave_context
+    4. Reporting Manager: $manager_name
+    5. Next Holiday: $holiday_context
 
     RULES:
-    - You are an HR Assistant AND an App Guide for Wishluv HRMS.
-    - If a user asks 'how to', 'kahan milega', or 'kahan jaye', guide them using the NAVIGATION GUIDE below.
-    - DO NOT answer questions unrelated to HRMS. Politely decline off-topic queries.
-    - Respond in Hinglish. Be polite and concise.
-    - ONLY provide data using the provided CONTEXT.
-
-    NAVIGATION GUIDE (Where to find stuff):
-    - Apply Leave: Sidebar -> Leaves -> Apply Leave.
-    - My Attendance: Sidebar -> Attendance.
-    - Holidays List: Sidebar -> Holidays.
-    - Notices/Announcements: Sidebar -> Notice Board.
-    - Salary Slip: Sidebar -> Payroll (Note: This is 'Coming Soon').
-    - Company Policies: Sidebar -> Policy -> [Select Policy Name].
-    - Update Profile/Password: Click your name at the bottom of the Sidebar -> Profile.
-    - Resignation: Sidebar -> Leaving Us.
-    - Admin Onboarding (Admins only): Sidebar -> Onboarding (Employees/Dept/Designations).
-    - Admin Manage Leaves (Admins only): Sidebar -> Leave Management.";
+    - Respond strictly in Hinglish (Romanized Hindi + English).
+    - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
+    - If the user asks for 'aaj' or 'today' data, use DATA 1.
+    - DO NOT cut off sentences. Completeness is critical.
+    - Be polite and professional.
+    - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).";
 
     // 3. Call Gemini API
     // ------------------
@@ -98,7 +98,7 @@ try {
         ],
         "generationConfig" => [
             "temperature" => 0.7,
-            "maxOutputTokens" => 300
+            "maxOutputTokens" => 800
         ]
     ];
 
