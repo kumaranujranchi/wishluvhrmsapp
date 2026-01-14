@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.classList.contains('active')) {
             input.focus();
             if (body.children.length === 0) {
-                addMessage('bot', "Hello! I am your HR Smart Assistant. How can I help you today? You can ask about your leave balance, attendance, or holidays.");
+                addMessage('bot', "Hello! main Wishluv Smart Assistant hoon. Aapki HR se judi help kaise kar sakti hoon? Aap mujhse apni leave balance, attendance, ya holidays ke baare mein pooch sakte hain.");
             }
         }
     });

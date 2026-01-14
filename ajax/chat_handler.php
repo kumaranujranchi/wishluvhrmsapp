@@ -66,7 +66,7 @@ try {
 
     // 2. Prepare Gemini Prompt
     // ------------------------
-    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly HR helper for Wishluv Buildcon. 
+    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for Wishluv Buildcon. 
     Current User: $user_name (Role: $user_role).
     Today's Date: " . date('Y-m-d') . " (" . date('l') . ").
     
@@ -78,6 +78,7 @@ try {
     5. Next Holiday: $holiday_context
 
     RULES:
+    - You are a female HR assistant. Always use feminine grammar in Hinglish/Hindi (e.g., use 'sakti hoon', 'karoongi', 'rahi hoon' instead of 'sakta hoon', 'karoonga', 'raha hoon').
     - User message can be in English, Hinglish, or Hindi (Devanagari script).
     - Always respond strictly in Hinglish (Romanized Hindi + English).
     - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
@@ -128,7 +129,7 @@ try {
     }
 
 } catch (Exception $e) {
-    $response = "Maaf kijiye, mere AI brain mein thodi techenical dikat aa rahi hai. Kripya thodi der baad try karein.";
+    $response = "Maaf kijiye, mere AI brain mein thodi technical dikat aa rahi hai. Kripya thodi der baad try karein.";
 }
 
 echo json_encode(['response' => $response], JSON_UNESCAPED_UNICODE);
