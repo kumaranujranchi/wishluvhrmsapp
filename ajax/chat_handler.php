@@ -38,15 +38,17 @@ try {
     }
 
     // 2. Today's Punch/Attendance Intent
-    else if (has($message, ['intime', 'punch', 'in time', 'out time', 'clock', 'aaj', 'today', 'in-time', 'punching'])) {
-        $stmt = $conn->prepare("SELECT clock_in, clock_out, status FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
+    else if (has($message, ['intime', 'punch', 'in time', 'out time', 'clock', 'aaj', 'today', 'in-time', 'punching', 'work hour', 'der kaam', 'working time', 'ghante', 'duration'])) {
+        $stmt = $conn->prepare("SELECT clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
         $stmt->execute(['uid' => $user_id]);
         $today = $stmt->fetch();
 
         if ($today) {
             $in = $today['clock_in'] ? date('h:i A', strtotime($today['clock_in'])) : "N/A";
             $out = $today['clock_out'] ? date('h:i A', strtotime($today['clock_out'])) : "Not yet";
-            $response = "Aaj ka apka status '" . $today['status'] . "' hai. Clock-In: " . $in . ", Clock-Out: " . $out . ".";
+            $hrs = $today['total_hours'] ?: "0";
+
+            $response = "Aaj ka apka status '" . $today['status'] . "' hai. \nClock-In: " . $in . ", Clock-Out: " . $out . ". \nTotal Work Hours: " . $hrs . " hrs.";
         } else {
             $response = "Aaj ki attendance record nahi mili. Kya aapne punch-in kiya hai?";
         }
