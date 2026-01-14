@@ -82,8 +82,8 @@ try {
     - Always respond strictly in Hinglish (Romanized Hindi + English).
     - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
     - If the user asks for 'aaj' or 'today' data, use DATA 1.
-    - DO NOT cut off sentences. Completeness is critical.
-    - Be polite and professional.
+    - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
+    - Be concise but friendly.
     - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).";
 
     // 3. Call Gemini API
@@ -99,8 +99,8 @@ try {
             ]
         ],
         "generationConfig" => [
-            "temperature" => 0.7,
-            "maxOutputTokens" => 800
+            "temperature" => 0.4,
+            "maxOutputTokens" => 1024
         ]
     ];
 
@@ -131,4 +131,4 @@ try {
     $response = "Maaf kijiye, mere AI brain mein thodi techenical dikat aa rahi hai. Kripya thodi der baad try karein.";
 }
 
-echo json_encode(['response' => $response]);
+echo json_encode(['response' => $response], JSON_UNESCAPED_UNICODE);
