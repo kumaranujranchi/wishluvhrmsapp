@@ -138,7 +138,7 @@ try {
 
 } catch (Exception $e) {
     file_put_contents('debug_log.txt', date('Y-m-d H:i:s') . " - Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $response = "DEBUG ERROR: " . $e->getMessage();
+    $response = "Maaf kijiye, mere AI brain mein thodi technical dikat aa rahi hai. Kripya thodi der baad try karein.";
 }
 
 echo json_encode(['response' => $response], JSON_UNESCAPED_UNICODE);
