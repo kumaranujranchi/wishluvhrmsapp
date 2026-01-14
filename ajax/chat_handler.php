@@ -1,5 +1,6 @@
 <?php
 require_once '../config/db.php';
+require_once '../config/ai_config.php';
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -9,150 +10,108 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'Employee';
-$message = strtolower(trim($_POST['message'] ?? ''));
+$message = trim($_POST['message'] ?? '');
 
-$response = "";
-
-// Helper to check keywords
-function has($msg, $keywords)
-{
-    foreach ($keywords as $kw) {
-        if (strpos($msg, $kw) !== false)
-            return true;
-    }
-    return false;
+if (empty($message)) {
+    echo json_encode(['response' => 'Aapne kuch likha nahi.']);
+    exit;
 }
 
 try {
-    // 1. Holiday Intent (Prioritized)
-    if (has($message, ['holiday', 'chuttiyan', 'chhutti', 'vacation', 'festival'])) {
-        $stmt = $conn->prepare("SELECT title, start_date FROM holidays WHERE start_date >= CURDATE() AND is_active = 1 ORDER BY start_date ASC LIMIT 1");
-        $stmt->execute();
-        $holiday = $stmt->fetch();
+    // 1. Fetch ALL relevant context for this user to feed the AI
+    // ---------------------------------------------------------
 
-        if ($holiday) {
-            $response = "Agli chutti '" . $holiday['title'] . "' hai, jo " . date('d M Y', strtotime($holiday['start_date'])) . " ko pad rahi hai.";
-        } else {
-            $response = "Filhaal koi upcoming holidays nahi dikh rahe hain.";
-        }
+    // A. Basic Profile & Manager
+    $stmt = $conn->prepare("SELECT e.first_name, e.last_name, m.first_name as mgr_fname, m.last_name as mgr_lname 
+                           FROM employees e LEFT JOIN employees m ON e.reporting_manager_id = m.id WHERE e.id = :uid");
+    $stmt->execute(['uid' => $user_id]);
+    $user = $stmt->fetch();
+    $user_name = $user['first_name'] . ' ' . $user['last_name'];
+    $manager_name = ($user['mgr_fname']) ? $user['mgr_fname'] . ' ' . $user['mgr_lname'] : "None (Super Admin)";
+
+    // B. Today's Attendance
+    $stmt = $conn->prepare("SELECT clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
+    $stmt->execute(['uid' => $user_id]);
+    $today = $stmt->fetch();
+    $attendance_context = $today ?
+        "Status: {$today['status']}, In: {$today['clock_in']}, Out: " . ($today['clock_out'] ?: 'N/A') . ", Hours: {$today['total_hours']}" :
+        "Not punched in yet for today.";
+
+    // C. Leave Balance (Annual)
+    $stmt = $conn->prepare("SELECT start_date, end_date FROM leave_requests WHERE employee_id = :uid AND status = 'Approved' AND YEAR(start_date) = YEAR(CURDATE())");
+    $stmt->execute(['uid' => $user_id]);
+    $approved_list = $stmt->fetchAll();
+    $days_taken = 0;
+    foreach ($approved_list as $l) {
+        $days_taken += (new DateTime($l['end_date']))->diff(new DateTime($l['start_date']))->format("%a") + 1;
     }
+    $leave_context = "Total Allowed: 24, Used: $days_taken, Balance: " . (24 - $days_taken);
 
-    // 2. Today's Punch/Attendance Intent
-    else if (has($message, ['intime', 'punch', 'in time', 'out time', 'clock', 'aaj', 'today', 'in-time', 'punching', 'work hour', 'der kaam', 'working time', 'ghante', 'duration'])) {
-        $stmt = $conn->prepare("SELECT clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
-        $stmt->execute(['uid' => $user_id]);
-        $today = $stmt->fetch();
+    // D. Next Holiday
+    $stmt = $conn->prepare("SELECT title, start_date FROM holidays WHERE start_date >= CURDATE() AND is_active = 1 ORDER BY start_date ASC LIMIT 1");
+    $stmt->execute();
+    $holiday = $stmt->fetch();
+    $holiday_context = $holiday ? "Upcoming: {$holiday['title']} on {$holiday['start_date']}" : "No upcoming holidays.";
 
-        if ($today) {
-            $in = $today['clock_in'] ? date('h:i A', strtotime($today['clock_in'])) : "N/A";
-            $out = $today['clock_out'] ? date('h:i A', strtotime($today['clock_out'])) : "Not yet";
-            $hrs = $today['total_hours'] ?: "0";
+    // 2. Prepare Gemini Prompt
+    // ------------------------
+    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly and helpful HR chatbot for Wishluv Buildcon. 
+    Current User: $user_name (Role: $user_role).
+    Today's Date: " . date('Y-m-d') . " (" . date('l') . ").
+    
+    USER DATA CONTEXT:
+    1. Attendance Today: $attendance_context
+    2. Leave Balance: $leave_context
+    3. Reporting Manager: $manager_name
+    4. Next Holiday: $holiday_context
 
-            $response = "Aaj ka apka status '" . $today['status'] . "' hai. \nClock-In: " . $in . ", Clock-Out: " . $out . ". \nTotal Work Hours: " . $hrs . " hrs.";
-        } else {
-            $response = "Aaj ki attendance record nahi mili. Kya aapne punch-in kiya hai?";
-        }
-    }
+    RULES:
+    - Respond in Hinglish (Mix of Hindi and English) as it's more natural for users.
+    - Be polite and helpful.
+    - If the user greets or asks how you are, respond warmly.
+    - ONLY provide information based on the CONTEXT provided above. 
+    - If you don't have the information in context (like salary or company policies not mentioned), tell them you are still learning and they should contact HR.
+    - Keep responses concise but friendly.";
 
-    // 3. Leave Balance Intent
-    else if (has($message, ['leave', 'chutti', 'balance', 'vacation', 'blance', 'mear', 'bacha'])) {
-        $current_year = date('Y');
-        $total_allowed = 24;
+    // 3. Call Gemini API
+    // ------------------
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
 
-        // Fetch all approved leaves for the current year
-        $stmt = $conn->prepare("SELECT start_date, end_date FROM leave_requests 
-                               WHERE employee_id = :uid AND status = 'Approved' 
-                               AND YEAR(start_date) = :year");
-        $stmt->execute(['uid' => $user_id, 'year' => $current_year]);
-        $approved_list = $stmt->fetchAll();
+    $payload = [
+        "contents" => [
+            [
+                "parts" => [
+                    ["text" => $system_prompt . "\n\nUser Message: " . $message]
+                ]
+            ]
+        ],
+        "generationConfig" => [
+            "temperature" => 0.7,
+            "maxOutputTokens" => 300
+        ]
+    ];
 
-        $days_taken = 0;
-        foreach ($approved_list as $l) {
-            $d1 = new DateTime($l['start_date']);
-            $d2 = new DateTime($l['end_date']);
-            $diff = $d2->diff($d1)->format("%a") + 1;
-            $days_taken += $diff;
-        }
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
-        $balance = $total_allowed - $days_taken;
+    $response_json = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-        // Also fetch pending count
-        $p_stmt = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id = :uid AND status = 'Pending'");
-        $p_stmt->execute(['uid' => $user_id]);
-        $pending_count = $p_stmt->fetchColumn();
-
-        if ($days_taken > 0 || $pending_count > 0) {
-            $response = "Aapka is saal ka total leave balance " . $balance . " days hai (24 mein se " . $days_taken . " used). Abhi " . $pending_count . " requests pending process mein hain.";
-        } else {
-            $response = "Aapka leave balance pura " . $balance . " days (24/24) available hai. Aapne is saal koi approved leave nahi li hai.";
-        }
-    }
-
-    // 4. Attendance/Late Marks Intent (Monthly)
-    else if (has($message, ['attendance', 'late', 'present', 'presents', 'mark', 'punctuality'])) {
-        $month = date('m');
-        $year = date('Y');
-        $stmt = $conn->prepare("SELECT 
-            COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days,
-            COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_days
-            FROM attendance 
-            WHERE employee_id = :uid AND MONTH(date) = :m AND YEAR(date) = :y");
-        $stmt->execute(['uid' => $user_id, 'm' => $month, 'y' => $year]);
-        $stats = $stmt->fetch();
-
-        $response = "Is mahine (" . date('F') . ") aap " . $stats['present_days'] . " din present rahe hain aur " . $stats['late_days'] . " baar late mark laga hai.";
-    }
-
-    // 4. Reporting Manager Intent
-    else if (has($message, ['manager', 'reporting', 'boss', 'kaun hai', 'sir'])) {
-        $stmt = $conn->prepare("SELECT m.first_name, m.last_name FROM employees e 
-                               LEFT JOIN employees m ON e.reporting_manager_id = m.id 
-                               WHERE e.id = :uid");
-        $stmt->execute(['uid' => $user_id]);
-        $mgr = $stmt->fetch();
-
-        if ($mgr && $mgr['first_name']) {
-            $response = "Aapke reporting manager " . $mgr['first_name'] . " " . $mgr['last_name'] . " hain.";
-        } else {
-            $response = "Aapka koi reporting manager assigned nahi hai. Level: Super Admin access.";
-        }
-    }
-
-    // 5. Acknowledgment Intent
-    else if (has($message, ['ok', 'thanks', 'thank you', 'dhanyawad', 'shukriya', 'done', 'accha', 'theek'])) {
-        $responses = [
-            "You're welcome! Aur kuch puchna hai?",
-            "Glad I could help! 😊",
-            "Theek hai! Main yahi hun agar aapko aur kuch help chahiye ho.",
-            "You are welcome! Have a great day ahead."
-        ];
-        $response = $responses[array_rand($responses)];
-    }
-
-    // 6. Admin Only: Employee Lookup
-    else if ($user_role === 'Admin' && has($message, ['search', 'employee', 'details', 'name'])) {
-        // Extract a potential name or code (simplified)
-        $words = explode(' ', $message);
-        $search = end($words);
-
-        $stmt = $conn->prepare("SELECT first_name, last_name, employee_code, status FROM employees WHERE first_name LIKE :s OR last_name LIKE :s OR employee_code = :s LIMIT 1");
-        $stmt->execute(['s' => "%$search%"]);
-        $emp = $stmt->fetch();
-
-        if ($emp) {
-            $response = "Employee Found: " . $emp['first_name'] . " " . $emp['last_name'] . " (" . $emp['employee_code'] . "). Status: " . $emp['status'];
-        } else {
-            $response = "Mujhe us naam ya code ka koi employee nahi mila. Kripya pura naam ya EMP ID likh kar try karein.";
-        }
-    }
-
-    // Default Response
-    else {
-        $response = "Maaf kijiye, main aapki baat samajh nahi paya. Aap mujhse Leave balance, Attendance, Holidays, ya apne Reporting Manager ke baare mein puch sakte hain.";
+    if ($http_code === 200) {
+        $result = json_decode($response_json, true);
+        $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
+        $response = trim($bot_text);
+    } else {
+        throw new Exception("Gemini API Error: " . $response_json);
     }
 
 } catch (Exception $e) {
-    $response = "Backend processing mein error aayi hai. Kripya admin se sampark karein.";
+    // Fallback logic if AI fails
+    $response = "Maaf kijiye, mere AI brain mein thodi techenical dikat aa rahi hai. Par main aapke basic sawalo ka jawab de sakta hun. (Error: API Issue)";
 }
 
 echo json_encode(['response' => $response]);
