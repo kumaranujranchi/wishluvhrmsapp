@@ -139,13 +139,15 @@ body {
     color: #94a3b8;
     text-decoration: none;
     font-weight: 500;
+    font-size: 0.95rem;
     transition: all 0.2s ease;
     background: transparent;
     border: 1px solid transparent;
     cursor: pointer;
-    font-family: inherit;
+    font-family: var(--font-body);
     text-align: left;
     outline: none;
+    width: 100%;
 }
 
 .nav-item:hover {
@@ -167,7 +169,12 @@ body {
 
 /* Dropdown in Sidebar */
 .dropdown-btn {
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 0.85rem;
+}
+
+.dropdown-btn .chevron-icon {
+    margin-left: auto;
 }
 
 .sub-nav {

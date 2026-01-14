@@ -53,10 +53,8 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 $leaveState = isGroupOpen($leavePages);
                 ?>
                 <button class="nav-item dropdown-btn <?= $leaveState ?>" onclick="toggleSubNav('leaveSubNav', this)">
-                    <div style="display:flex; align-items:center; gap:0.85rem;">
-                        <i data-lucide="palm-tree" class="icon"></i>
-                        <span>Leaves</span>
-                    </div>
+                    <i data-lucide="palmtree" class="icon"></i>
+                    <span>Leaves</span>
                     <i data-lucide="chevron-right" class="icon chevron-icon"
                         style="transition: transform 0.2s; transform: <?= strpos($leaveState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                 </button>
@@ -102,10 +100,8 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 $groupState = isGroupOpen($policyPages, true);
                 ?>
                 <button class="nav-item dropdown-btn <?= $groupState ?>" onclick="toggleSubNav('policySubNav', this)">
-                    <div style="display:flex; align-items:center; gap:0.85rem;">
-                        <i data-lucide="book-open" class="icon"></i>
-                        <span>Policy</span>
-                    </div>
+                    <i data-lucide="book-open" class="icon"></i>
+                    <span>Policy</span>
                     <i data-lucide="chevron-right" class="icon chevron-icon"
                         style="transition: transform 0.2s; transform: <?= strpos($groupState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                 </button>
@@ -143,10 +139,8 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 ?>
                 <button class="nav-item dropdown-btn <?= $adminLeaveState ?>"
                     onclick="toggleSubNav('adminLeaveSubNav', this)">
-                    <div style="display:flex; align-items:center; gap:0.85rem;">
-                        <i data-lucide="palm-tree" class="icon"></i>
-                        <span>Leave Management</span>
-                    </div>
+                    <i data-lucide="palmtree" class="icon"></i>
+                    <span>Leave Management</span>
                     <i data-lucide="chevron-right" class="icon chevron-icon"
                         style="transition: transform 0.2s; transform: <?= strpos($adminLeaveState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                 </button>
@@ -175,10 +169,8 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 ?>
                 <button class="nav-item dropdown-btn <?= $onboardingState ?>"
                     onclick="toggleSubNav('employeeSubNav', this)">
-                    <div style="display:flex; align-items:center; gap:0.85rem;">
-                        <i data-lucide="users" class="icon"></i>
-                        <span>Onboarding</span>
-                    </div>
+                    <i data-lucide="users" class="icon"></i>
+                    <span>Onboarding</span>
                     <i data-lucide="chevron-right" class="icon chevron-icon"
                         style="transition: transform 0.2s; transform: <?= strpos($onboardingState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                 </button>
