@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json; charset=utf-8');
 require_once '../config/db.php';
 require_once '../config/ai_config.php';
 session_start();
