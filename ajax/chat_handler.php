@@ -109,6 +109,11 @@ try {
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
     $response_json = curl_exec($ch);
+    if ($response_json === false) {
+        $err = curl_error($ch);
+        curl_close($ch);
+        throw new Exception("CURL Error: " . $err);
+    }
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
@@ -121,8 +126,8 @@ try {
     }
 
 } catch (Exception $e) {
-    // Fallback logic if AI fails
-    $response = "Maaf kijiye, mere AI brain mein thodi techenical dikat aa rahi hai. Par main aapke basic sawalo ka jawab de sakta hun. (Error: API Issue)";
+    // Debugging: show real error
+    $response = "Maaf kijiye, error aaya hai: " . $e->getMessage();
 }
 
 echo json_encode(['response' => $response]);
