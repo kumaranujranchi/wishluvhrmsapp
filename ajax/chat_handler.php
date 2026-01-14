@@ -23,11 +23,12 @@ try {
     // ---------------------------------------------------------
 
     // A. Basic Profile & Manager
-    $stmt = $conn->prepare("SELECT e.first_name, e.last_name, m.first_name as mgr_fname, m.last_name as mgr_lname 
+    $stmt = $conn->prepare("SELECT e.*, m.first_name as mgr_fname, m.last_name as mgr_lname 
                            FROM employees e LEFT JOIN employees m ON e.reporting_manager_id = m.id WHERE e.id = :uid");
     $stmt->execute(['uid' => $user_id]);
     $user = $stmt->fetch();
     $user_name = $user['first_name'] . ' ' . $user['last_name'];
+    $user_gender = $user['gender'] ?? 'Male'; // Default to Male if not set
     $manager_name = ($user['mgr_fname']) ? $user['mgr_fname'] . ' ' . $user['mgr_lname'] : "None (Super Admin)";
 
     // B. Today's Attendance
@@ -100,7 +101,7 @@ try {
     // 2. Prepare Gemini Prompt
     // ------------------------
     $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for Wishluv Buildcon. 
-    Current User: $user_name (Role: $user_role).
+    Current User: $user_name (Gender: $user_gender, Role: $user_role).
     Today's Date: " . date('Y-m-d') . " (" . date('l') . ").
     
     USER DATA CONTEXT:
@@ -118,7 +119,10 @@ try {
     - Note: Winter mein thanda ki wajah se half hour pahle chutti hoti hai.
 
     RULES:
-    - You are a female HR assistant. Always use feminine grammar in Hinglish/Hindi (e.g., use 'sakti hoon', 'karoongi', 'rahi hoon' instead of 'sakta hoon', 'karoonga', 'raha hoon').
+    - You are a female HR assistant. Always use feminine grammar for yourself (e.g., 'main karti hoon', 'bataungi').
+    - User Grammar: The user is $user_gender. 
+      - If Male: Address as 'Sir' (optional) and use masculine grammar for them (e.g., 'aap kaise hain', 'aap kar sakte hain', 'chahte hain').
+      - If Female: Address as 'Ma\'am' (optional) and use feminine grammar for them (e.g., 'aap kaisi hain', 'aap kar sakti hain', 'chahti hain').
     - User message can be in English, Hinglish, or Hindi (Devanagari script).
     - Always respond strictly in Hinglish (Romanized Hindi + English).
     - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
