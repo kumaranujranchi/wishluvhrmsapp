@@ -1,4 +1,4 @@
 <?php
 // Gemini AI API Configuration
 define('GEMINI_API_KEY', 'AIzaSyBruHDvC3VK3uXopfi-t-MAkqsCRYn-FiM');
-define('GEMINI_MODEL', 'gemini-1.5-flash');
+define('GEMINI_MODEL', 'gemini-pro');
