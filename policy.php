@@ -334,7 +334,7 @@ if (isset($_GET['edit'])) {
                         <?= $edit_policy ? $edit_policy['content'] : '' ?>
                     </div>
                     <!-- Hidden textarea for form submission -->
-                    <textarea name="content" id="policyEditor" style="display:none;"
+                    <textarea name="content" id="policyEditor" style="visibility:hidden; height:0; position:absolute;"
                         required><?= $edit_policy ? htmlspecialchars($edit_policy['content']) : '' ?></textarea>
                 </div>
 
@@ -380,20 +380,26 @@ if (isset($_GET['edit'])) {
             placeholder: 'Enter policy content here...'
         });
 
-        console.log('Quill Editor initialized successfully');
+        // Initial Sync on load
+        document.getElementById('policyEditor').value = quill.root.innerHTML;
 
-        // Sync Quill content to hidden textarea on every change (Active Sync)
+        // Active Sync on every keystroke/change
         quill.on('text-change', function () {
             document.getElementById('policyEditor').value = quill.root.innerHTML;
         });
 
-        // Also sync on form submit as a final check
+        // Periodic Health Check (Sync every 500ms just in case)
+        setInterval(function () {
+            document.getElementById('policyEditor').value = quill.root.innerHTML;
+        }, 500);
+
+        // Final Sync on form submit
         const policyForm = document.querySelector('form');
         if (policyForm) {
             policyForm.addEventListener('submit', function (e) {
                 const content = quill.root.innerHTML;
                 document.getElementById('policyEditor').value = content;
-                console.log('Final sync content length:', content.length);
+                console.log('Final saved content length:', content.length);
             });
         }
 

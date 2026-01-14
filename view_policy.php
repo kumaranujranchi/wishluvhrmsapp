@@ -174,7 +174,7 @@ include 'includes/header.php';
                 </div>
 
                 <div class="policy-body">
-                    <?= !empty($policy['content']) ? $policy['content'] : '<p style="color:#94a3b8; font-style:italic;">No content found for this policy. Please add content from the Admin panel.</p>' ?>
+                    <?= $policy['content'] ?>
                 </div>
             <?php else: ?>
                 <div style="text-align:center; padding:5rem 0; color:#64748b;">
