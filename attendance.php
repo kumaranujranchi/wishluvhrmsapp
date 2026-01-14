@@ -126,219 +126,230 @@ if (isset($_POST['export_csv'])) {
     </div>
 
     <!-- Filters & List -->
-    <div class="card-header page-header-flex" style="border-bottom: 1px solid #f1f5f9; padding: 1.25rem 1.5rem;">
-        <div class="page-header-info">
-            <h3 style="margin:0; font-size: 1.1rem; color: #1e293b;">Daily Attendance</h3>
+    <div class="card" style="padding: 0; margin-top: 2rem;">
+        <div class="card-header page-header-flex" style="border-bottom: 1px solid #f1f5f9; padding: 1.25rem 1.5rem;">
+            <div class="page-header-info">
+                <h3 style="margin:0; font-size: 1.1rem; color: #1e293b;">Daily Attendance</h3>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <form method="GET" class="filter-form" style="display:flex; gap:8px; align-items:center;">
+                    <div style="position:relative; display:flex; align-items:center;">
+                        <input type="date" name="date" class="form-control" value="<?= $filter_date ?>"
+                            onchange="this.form.submit()"
+                            style="padding: 0.6rem 0.8rem; height: 42px; font-size: 0.9rem; border-radius: 10px; width: 180px;">
+                    </div>
+                    <button type="submit" class="btn-primary header-action-btn"
+                        style="height: 42px; padding: 0 1.5rem; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);">
+                        Filter
+                    </button>
+                </form>
+                <form method="POST">
+                    <button type="submit" name="export_csv" class="btn-primary header-action-btn"
+                        style="height: 42px; padding: 0 1.25rem; background: #0f172a; border-radius: 10px;">
+                        <i data-lucide="download" style="width:18px;"></i>
+                        <span class="desktop-only" style="margin-left: 6px;">Export CSV</span>
+                    </button>
+                </form>
+            </div>
         </div>
-        <div style="display:flex; gap:12px; align-items:center;">
-            <form method="GET" class="filter-form" style="display:flex; gap:8px; align-items:center;">
-                <div style="position:relative; display:flex; align-items:center;">
-                    <input type="date" name="date" class="form-control" value="<?= $filter_date ?>"
-                        onchange="this.form.submit()"
-                        style="padding: 0.6rem 0.8rem; height: 42px; font-size: 0.9rem; border-radius: 10px; width: 180px;">
-                </div>
-                <button type="submit" class="btn-primary header-action-btn"
-                    style="height: 42px; padding: 0 1.5rem; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);">
-                    Filter
-                </button>
-            </form>
-            <form method="POST">
-                <button type="submit" name="export_csv" class="btn-primary header-action-btn"
-                    style="height: 42px; padding: 0 1.25rem; background: #0f172a; border-radius: 10px;">
-                    <i data-lucide="download" style="width:18px;"></i>
-                    <span class="desktop-only" style="margin-left: 6px;">Export CSV</span>
-                </button>
-            </form>
-        </div>
-    </div>
 
-    <!-- Desktop View -->
-    <div class="desktop-only">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Status</th>
-                        <th>Clock In</th>
-                        <th>In Location</th>
-                        <th>Clock Out</th>
-                        <th>Out Location</th>
-                        <th>Duration</th>
-                        <th style="text-align:right;">Map</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($attendance_records as $row): ?>
+        <!-- Desktop View -->
+        <div class="desktop-only">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
+                            <th>Employee</th>
+                            <th>Status</th>
+                            <th>Clock In</th>
+                            <th>In Location</th>
+                            <th>Clock Out</th>
+                            <th>Out Location</th>
+                            <th>Duration</th>
+                            <th style="text-align:right;">Map</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($attendance_records as $row): ?>
+                            <tr>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <div
+                                            style="width:32px; height:32px; border-radius:8px; background:#e2e8f0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#64748b; font-size:0.8rem;">
+                                            <?php if ($row['avatar']): ?>
+                                                <img src="<?= $row['avatar'] ?>"
+                                                    style="width:100%; height:100%; object-fit:cover;">
+                                            <?php else: ?>
+                                                <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight:600; font-size:0.9rem; color:#1e293b;">
+                                                <?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?>
+                                            </div>
+                                            <div style="font-size:0.75rem; color:#64748b;"><?= $row['employee_code'] ?>
+                                                &bull;
+                                                <?= $row['dept_name'] ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php
+                                    $sColor = match ($row['status']) {
+                                        'Present' => 'background:#dcfce7; color:#166534;',
+                                        'Late' => 'background:#fef9c3; color:#854d0e;',
+                                        'Half Day' => 'background:#ffedd5; color:#9a3412;',
+                                        'Absent' => 'background:#fee2e2; color:#991b1b;',
+                                        default => 'background:#f1f5f9; color:#475569;'
+                                    };
+                                    ?>
+                                    <span class="badge" style="<?= $sColor ?>"><?= $row['status'] ?></span>
+                                </td>
+                                <td style="font-weight:500;"><?= date('h:i A', strtotime($row['clock_in'])) ?></td>
+                                <td>
+                                    <div style="font-size:0.8rem; min-width:180px;"
+                                        title="<?= htmlspecialchars($row['clock_in_address']) ?>">
+                                        <i data-lucide="map-pin"
+                                            style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                        <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                                    </div>
+                                </td>
+                                <td style="font-weight:500;">
+                                    <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '<span style="color:#cbd5e1;">--:--</span>' ?>
+                                </td>
+                                <td>
+                                    <div style="font-size:0.8rem; min-width:180px;"
+                                        title="<?= htmlspecialchars($row['clock_out_address']) ?>">
+                                        <?php if ($row['clock_out_address']): ?>
+                                            <i data-lucide="map-pin"
+                                                style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                            <?= htmlspecialchars($row['clock_out_address']) ?>
+                                        <?php else: ?>
+                                            <span style="color:#cbd5e1;">-</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td style="font-weight:600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?>
+                                </td>
+                                <td style="text-align:right;">
+                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
+                                        target="_blank" class="btn-icon" title="View Map"
+                                        style="display:inline-flex; align-items:center; justify-content:center;">
+                                        <i data-lucide="map" style="width:16px;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+
+                        <?php if (empty($attendance_records)): ?>
+                            <tr>
+                                <td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No attendance
+                                    records
+                                    for this date.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile View -->
+        <div class="mobile-only">
+            <div class="mobile-card-list">
+                <?php if (empty($attendance_records)): ?>
+                    <div
+                        style="text-align:center; padding:2.5rem; color:#64748b; background:#f8fafc; border-radius:1rem; margin:1rem;">
+                        <i data-lucide="calendar-x" style="width:32px; margin-bottom:10px; opacity:0.5;"></i>
+                        <p>No records for this date.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($attendance_records as $row): ?>
+                        <div class="mobile-card" style="margin-bottom:0.75rem;">
+                            <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')"
+                                style="padding:1rem;">
+                                <div style="display:flex; align-items:center; gap:12px; flex:1;">
                                     <div
-                                        style="width:32px; height:32px; border-radius:8px; background:#e2e8f0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#64748b; font-size:0.8rem;">
+                                        style="width:40px; height:40px; background:#e0e7ff; border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:700; color:#4f46e5; font-size:0.9rem;">
                                         <?php if ($row['avatar']): ?>
                                             <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
                                         <?php else: ?>
                                             <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
                                         <?php endif; ?>
                                     </div>
-                                    <div>
-                                        <div style="font-weight:600; font-size:0.9rem; color:#1e293b;">
-                                            <?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
-                                        <div style="font-size:0.75rem; color:#64748b;"><?= $row['employee_code'] ?> &bull;
-                                            <?= $row['dept_name'] ?></div>
+                                    <div style="overflow:hidden;">
+                                        <div
+                                            style="font-weight:700; font-size:0.95rem; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                            <?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?>
+                                        </div>
+                                        <div
+                                            style="font-size:0.75rem; color:#64748b; display:flex; align-items:center; gap:4px;">
+                                            <i data-lucide="clock" style="width:12px;"></i>
+                                            <?= date('h:i A', strtotime($row['clock_in'])) ?> -
+                                            <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Active' ?>
+                                        </div>
                                     </div>
                                 </div>
-                            </td>
-                            <td>
-                                <?php
-                                $sColor = match ($row['status']) {
-                                    'Present' => 'background:#dcfce7; color:#166534;',
-                                    'Late' => 'background:#fef9c3; color:#854d0e;',
-                                    'Half Day' => 'background:#ffedd5; color:#9a3412;',
-                                    'Absent' => 'background:#fee2e2; color:#991b1b;',
-                                    default => 'background:#f1f5f9; color:#475569;'
-                                };
-                                ?>
-                                <span class="badge" style="<?= $sColor ?>"><?= $row['status'] ?></span>
-                            </td>
-                            <td style="font-weight:500;"><?= date('h:i A', strtotime($row['clock_in'])) ?></td>
-                            <td>
-                                <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
-                                    title="<?= htmlspecialchars($row['clock_in_address']) ?>">
-                                    <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
-                                    <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <?php
+                                    $sColorMobile = match ($row['status']) {
+                                        'Present' => 'background:#dcfce7; color:#166534;',
+                                        'Late' => 'background:#fef9c3; color:#854d0e;',
+                                        'Half Day' => 'background:#ffedd5; color:#9a3412;',
+                                        'Absent' => 'background:#fee2e2; color:#991b1b;',
+                                        default => 'background:#f1f5f9; color:#475569;'
+                                    };
+                                    ?>
+                                    <span class="badge"
+                                        style="<?= $sColorMobile ?> font-size:0.65rem; padding:2px 8px; border-radius:50px;"><?= $row['status'] ?></span>
+                                    <i data-lucide="chevron-down" class="toggle-icon" style="width:18px;"></i>
                                 </div>
-                            </td>
-                            <td style="font-weight:500;">
-                                <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '<span style="color:#cbd5e1;">--:--</span>' ?>
-                            </td>
-                            <td>
-                                <div style="font-size:0.8rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
-                                    title="<?= htmlspecialchars($row['clock_out_address']) ?>">
-                                    <?php if ($row['clock_out_address']): ?>
-                                        <i data-lucide="map-pin" style="width:12px; vertical-align:middle; color:#64748b;"></i>
-                                        <?= htmlspecialchars($row['clock_out_address']) ?>
-                                    <?php else: ?>
-                                        <span style="color:#cbd5e1;">-</span>
-                                    <?php endif; ?>
+                            </div>
+                            <div class="mobile-card-body"
+                                style="padding:1.25rem; background:#f8fafc; border-top:1px solid #f1f5f9;">
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+                                    <div class="mobile-field">
+                                        <span class="mobile-label">In Time</span>
+                                        <span class="mobile-value"><i data-lucide="log-in"
+                                                style="width:14px; vertical-align:middle; color:#10b981; margin-right:4px;"></i>
+                                            <?= date('h:i A', strtotime($row['clock_in'])) ?></span>
+                                        <?php if ($row['clock_in_address']): ?>
+                                            <small
+                                                style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_in_address']) ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="mobile-field">
+                                        <span class="mobile-label">Out Time</span>
+                                        <span class="mobile-value"><i data-lucide="log-out"
+                                                style="width:14px; vertical-align:middle; color:#ef4444; margin-right:4px;"></i>
+                                            <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working' ?></span>
+                                        <?php if ($row['clock_out_address']): ?>
+                                            <small
+                                                style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_out_address']) ?></small>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                            </td>
-                            <td style="font-weight:600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></td>
-                            <td style="text-align:right;">
-                                <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
-                                    target="_blank" class="btn-icon" title="View Map"
-                                    style="display:inline-flex; align-items:center; justify-content:center;">
-                                    <i data-lucide="map" style="width:16px;"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-
-                    <?php if (empty($attendance_records)): ?>
-                        <tr>
-                            <td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No attendance records
-                                for this date.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Mobile View -->
-    <div class="mobile-only">
-        <div class="mobile-card-list">
-            <?php if (empty($attendance_records)): ?>
-                <div
-                    style="text-align:center; padding:2.5rem; color:#64748b; background:#f8fafc; border-radius:1rem; margin:1rem;">
-                    <i data-lucide="calendar-x" style="width:32px; margin-bottom:10px; opacity:0.5;"></i>
-                    <p>No records for this date.</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($attendance_records as $row): ?>
-                    <div class="mobile-card" style="margin-bottom:0.75rem;">
-                        <div class="mobile-card-header" onclick="this.parentElement.classList.toggle('expanded')"
-                            style="padding:1rem;">
-                            <div style="display:flex; align-items:center; gap:12px; flex:1;">
                                 <div
-                                    style="width:40px; height:40px; background:#e0e7ff; border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:700; color:#4f46e5; font-size:0.9rem;">
-                                    <?php if ($row['avatar']): ?>
-                                        <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
-                                    <?php else: ?>
-                                        <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
-                                    <?php endif; ?>
-                                </div>
-                                <div style="overflow:hidden;">
-                                    <div
-                                        style="font-weight:700; font-size:0.95rem; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                        <?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
-                                    <div style="font-size:0.75rem; color:#64748b; display:flex; align-items:center; gap:4px;">
-                                        <i data-lucide="clock" style="width:12px;"></i>
-                                        <?= date('h:i A', strtotime($row['clock_in'])) ?> -
-                                        <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Active' ?>
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e2e8f0;">
+                                    <div class="mobile-field" style="margin:0;">
+                                        <span class="mobile-label">Working Hours</span>
+                                        <span class="mobile-value"
+                                            style="color:#6366f1; font-weight:700; font-size:1.1rem;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></span>
                                     </div>
+                                    <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
+                                        target="_blank" class="btn-primary"
+                                        style="padding:0.4rem 0.85rem; font-size:0.8rem; border-radius:10px;">
+                                        <i data-lucide="map" style="width:14px; margin-right:5px;"></i> View Map
+                                    </a>
                                 </div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <?php
-                                $sColorMobile = match ($row['status']) {
-                                    'Present' => 'background:#dcfce7; color:#166534;',
-                                    'Late' => 'background:#fef9c3; color:#854d0e;',
-                                    'Half Day' => 'background:#ffedd5; color:#9a3412;',
-                                    'Absent' => 'background:#fee2e2; color:#991b1b;',
-                                    default => 'background:#f1f5f9; color:#475569;'
-                                };
-                                ?>
-                                <span class="badge"
-                                    style="<?= $sColorMobile ?> font-size:0.65rem; padding:2px 8px; border-radius:50px;"><?= $row['status'] ?></span>
-                                <i data-lucide="chevron-down" class="toggle-icon" style="width:18px;"></i>
                             </div>
                         </div>
-                        <div class="mobile-card-body"
-                            style="padding:1.25rem; background:#f8fafc; border-top:1px solid #f1f5f9;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
-                                <div class="mobile-field">
-                                    <span class="mobile-label">In Time</span>
-                                    <span class="mobile-value"><i data-lucide="log-in"
-                                            style="width:14px; vertical-align:middle; color:#10b981; margin-right:4px;"></i>
-                                        <?= date('h:i A', strtotime($row['clock_in'])) ?></span>
-                                    <?php if ($row['clock_in_address']): ?>
-                                        <small
-                                            style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_in_address']) ?></small>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="mobile-field">
-                                    <span class="mobile-label">Out Time</span>
-                                    <span class="mobile-value"><i data-lucide="log-out"
-                                            style="width:14px; vertical-align:middle; color:#ef4444; margin-right:4px;"></i>
-                                        <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working' ?></span>
-                                    <?php if ($row['clock_out_address']): ?>
-                                        <small
-                                            style="font-size:0.7rem; color:#94a3b8; display:block; margin-top:4px; line-height:1.3;"><?= htmlspecialchars($row['clock_out_address']) ?></small>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <div
-                                style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e2e8f0;">
-                                <div class="mobile-field" style="margin:0;">
-                                    <span class="mobile-label">Working Hours</span>
-                                    <span class="mobile-value"
-                                        style="color:#6366f1; font-weight:700; font-size:1.1rem;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></span>
-                                </div>
-                                <a href="https://www.google.com/maps/search/?api=1&query=<?= $row['clock_in_lat'] ?>,<?= $row['clock_in_lng'] ?>"
-                                    target="_blank" class="btn-primary"
-                                    style="padding:0.4rem 0.85rem; font-size:0.8rem; border-radius:10px;">
-                                    <i data-lucide="map" style="width:14px; margin-right:5px;"></i> View Map
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
-    </div>
 
-</div> <!-- Close .card -->
+    </div> <!-- Close .card -->
 </div> <!-- Close .page-content -->
 
 
