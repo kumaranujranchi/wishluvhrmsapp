@@ -116,9 +116,9 @@ if (isset($_GET['edit'])) {
     <?php endif; ?>
 </script>
 
-<!-- Jodit Editor CDN -->
-<link rel="stylesheet" href="https://unpkg.com/jodit@4.1.16/build/jodit.min.css" />
-<script src="https://unpkg.com/jodit@4.1.16/build/jodit.min.js"></script>
+<!-- Jodit Editor CDN (Stable) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jodit/3.24.2/jodit.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jodit/3.24.2/jodit.min.js"></script>
 
 <style>
     .policy-grid {
@@ -348,33 +348,42 @@ if (isset($_GET['edit'])) {
 </div>
 
 <script>
-    const editor = new Jodit('#policyEditor', {
-        height: 500,
-        toolbarSticky: false,
-        toolbarAdaptive: false, // Prevents buttons from grouping into "..." (more) menu
-        buttons: [
-            'source', '|',
-            'bold', 'italic', 'underline', 'strikethrough', '|',
-            'eraser', '|',
-            'paragraph', '|',
-            'left', 'center', 'right', 'justify', '|',
-            'ul', 'ol', '|',
-            'blockquote', 'link', 'image', 'table', '|',
-            'undo', 'redo'
-        ],
-        uploader: {
-            insertImageAsBase64URI: true
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof Jodit !== 'undefined') {
+            const editor = new Jodit('#policyEditor', {
+                height: 500,
+                toolbarSticky: false,
+                toolbarAdaptive: false,
+                buttons: [
+                    'source', '|',
+                    'bold', 'italic', 'underline', 'strikethrough', '|',
+                    'eraser', '|',
+                    'paragraph', '|',
+                    'left', 'center', 'right', 'justify', '|',
+                    'ul', 'ol', '|',
+                    'blockquote', 'link', 'image', 'table', '|',
+                    'undo', 'redo'
+                ],
+                uploader: {
+                    insertImageAsBase64URI: true
+                }
+            });
         }
-    });
 
-    // Handle Title to Slug auto-fill
-    document.querySelector('input[name="title"]').addEventListener('input', function (e) {
-        if (!document.querySelector('input[name="id"]')) { // Only for new policies
-            const slugInput = document.querySelector('input[name="slug"]');
-            slugInput.value = e.target.value
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '_')
-                .replace(/^_+|_+$/g, '');
+        // Handle Title to Slug auto-fill
+        const titleInput = document.querySelector('input[name="title"]');
+        if (titleInput) {
+            titleInput.addEventListener('input', function (e) {
+                if (!document.querySelector('input[name="id"]')) { // Only for new policies
+                    const slugInput = document.querySelector('input[name="slug"]');
+                    if (slugInput) {
+                        slugInput.value = e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '_')
+                            .replace(/^_+|_+$/g, '');
+                    }
+                }
+            });
         }
     });
 </script>
