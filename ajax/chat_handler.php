@@ -64,6 +64,39 @@ try {
     $holiday = $stmt->fetch();
     $holiday_context = $holiday ? "Upcoming: {$holiday['title']} on {$holiday['start_date']}" : "No upcoming holidays.";
 
+    // F. (ADMIN ONLY) Global Context
+    $admin_context = "";
+    if ($user_role === 'Admin') {
+        // 1. Who is Present Today?
+        $stmt = $conn->prepare("
+            SELECT e.first_name, e.last_name, a.clock_in 
+            FROM attendance a 
+            JOIN employees e ON a.employee_id = e.id 
+            WHERE a.date = CURDATE()
+        ");
+        $stmt->execute();
+        $present_employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $present_list = [];
+        foreach ($present_employees as $emp) {
+            $present_list[] = $emp['first_name'] . " (" . date('H:i', strtotime($emp['clock_in'])) . ")";
+        }
+        $present_count = count($present_list);
+        $present_names = implode(", ", $present_list);
+
+        // 2. Pending Leaves
+        $stmt = $conn->prepare("SELECT COUNT(*) as pending FROM leave_requests WHERE status = 'Pending'");
+        $stmt->execute();
+        $pending_leaves = $stmt->fetch()['pending'];
+
+        $admin_context = "
+        ADMIN DATA (Only for you):
+        - Total Employees Present Today: $present_count
+        - Who is Present: $present_names
+        - Pending Leave Requests: $pending_leaves
+        ";
+    }
+
     // 2. Prepare Gemini Prompt
     // ------------------------
     $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for Wishluv Buildcon. 
@@ -76,6 +109,7 @@ try {
     3. Leave Balance: $leave_context
     4. Reporting Manager: $manager_name
     5. Next Holiday: $holiday_context
+    $admin_context
 
     COMPANY POLICIES:
     - Office Timings (Current - Winter): 10:00 AM to 5:30 PM
