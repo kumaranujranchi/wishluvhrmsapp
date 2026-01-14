@@ -40,15 +40,37 @@ try {
     }
 
     // 2. Leave Balance Intent
-    else if (has($message, ['leave', 'chutti', 'balance', 'vacation'])) {
-        $stmt = $conn->prepare("SELECT 
-            COUNT(CASE WHEN status = 'Approved' THEN 1 END) as approved,
-            COUNT(CASE WHEN status = 'Pending' THEN 1 END) as pending
-            FROM leave_requests WHERE employee_id = :uid");
-        $stmt->execute(['uid' => $user_id]);
-        $leaves = $stmt->fetch();
+    else if (has($message, ['leave', 'chutti', 'balance', 'vacation', 'blance', 'mear', 'bacha'])) {
+        $current_year = date('Y');
+        $total_allowed = 24;
 
-        $response = "Aapke is saal ke total " . $leaves['approved'] . " leaves approved hain, aur " . $leaves['pending'] . " requests abhi pending hain.";
+        // Fetch all approved leaves for the current year
+        $stmt = $conn->prepare("SELECT start_date, end_date FROM leave_requests 
+                               WHERE employee_id = :uid AND status = 'Approved' 
+                               AND YEAR(start_date) = :year");
+        $stmt->execute(['uid' => $user_id, 'year' => $current_year]);
+        $approved_list = $stmt->fetchAll();
+
+        $days_taken = 0;
+        foreach ($approved_list as $l) {
+            $d1 = new DateTime($l['start_date']);
+            $d2 = new DateTime($l['end_date']);
+            $diff = $d2->diff($d1)->format("%a") + 1;
+            $days_taken += $diff;
+        }
+
+        $balance = $total_allowed - $days_taken;
+
+        // Also fetch pending count
+        $p_stmt = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id = :uid AND status = 'Pending'");
+        $p_stmt->execute(['uid' => $user_id]);
+        $pending_count = $p_stmt->fetchColumn();
+
+        if ($days_taken > 0 || $pending_count > 0) {
+            $response = "Aapka is saal ka total leave balance " . $balance . " days hai (24 mein se " . $days_taken . " used). Abhi " . $pending_count . " requests pending process mein hain.";
+        } else {
+            $response = "Aapka leave balance pura " . $balance . " days (24/24) available hai. Aapne is saal koi approved leave nahi li hai.";
+        }
     }
 
     // 3. Attendance/Late Marks Intent (Monthly)
