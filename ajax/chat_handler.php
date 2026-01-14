@@ -126,8 +126,7 @@ try {
     }
 
 } catch (Exception $e) {
-    // Debugging: show real error
-    $response = "Maaf kijiye, error aaya hai: " . $e->getMessage();
+    $response = "Maaf kijiye, mere AI brain mein thodi techenical dikat aa rahi hai. Kripya thodi der baad try karein.";
 }
 
 echo json_encode(['response' => $response]);
