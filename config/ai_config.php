@@ -1,8 +1,22 @@
 <?php
-// Load .env file manually (to avoid adding composer dependencies)
-$envFile = __DIR__ . '/../.env';
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+// Load .env file manually
+// Try multiple paths to find .env
+$possiblePaths = [
+    __DIR__ . '/../.env',       // Standard: config/../.env
+    $_SERVER['DOCUMENT_ROOT'] . '/.env',  // Web root
+    dirname(__DIR__) . '/.env'  // Project root
+];
+
+$envPath = '';
+foreach ($possiblePaths as $path) {
+    if (file_exists($path)) {
+        $envPath = $path;
+        break;
+    }
+}
+
+if ($envPath) {
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
         if (strpos(trim($line), '#') === 0)
             continue;
