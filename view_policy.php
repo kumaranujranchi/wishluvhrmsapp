@@ -164,14 +164,17 @@ include 'includes/header.php';
                         <i data-lucide="calendar" style="width: 14px; vertical-align: middle;"></i>
                         Last Updated:
                         <?php
-                        $update_date = !empty($policy['updated_at']) ? $policy['updated_at'] : $policy['created_at'];
-                        echo date('d M Y', strtotime($update_date));
+                        $update_ts = strtotime($policy['updated_at'] ?? '');
+                        if (!$update_ts || $update_ts < 0) {
+                            $update_ts = strtotime($policy['created_at'] ?? '') ?: time();
+                        }
+                        echo date('d M Y', $update_ts);
                         ?>
                     </div>
                 </div>
 
-                <div>
-                    <?= $policy['content'] ?>
+                <div class="policy-body">
+                    <?= !empty($policy['content']) ? $policy['content'] : '<p style="color:#94a3b8; font-style:italic;">No content found for this policy. Please add content from the Admin panel.</p>' ?>
                 </div>
             <?php else: ?>
                 <div style="text-align:center; padding:5rem 0; color:#64748b;">

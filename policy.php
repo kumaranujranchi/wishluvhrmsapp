@@ -50,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "<div class='alert success'>Policy updated and notification published!</div>";
         } else {
             // Add new policy
-            $sql = "INSERT INTO policies (title, slug, content, icon, display_order, is_active) 
-                    VALUES (:title, :slug, :content, :icon, :order, :active)";
+            $sql = "INSERT INTO policies (title, slug, content, icon, display_order, is_active, created_at, updated_at) 
+                    VALUES (:title, :slug, :content, :icon, :order, :active, NOW(), NOW())";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 'title' => $title,
@@ -325,7 +325,8 @@ if (isset($_GET['edit'])) {
                         Content</label>
                     <!-- Quill Editor Container -->
                     <div id="quillEditor" style="height: 400px; background: white;">
-                        <?= $edit_policy ? $edit_policy['content'] : '' ?></div>
+                        <?= $edit_policy ? $edit_policy['content'] : '' ?>
+                    </div>
                     <!-- Hidden textarea for form submission -->
                     <textarea name="content" id="policyEditor" style="display:none;"
                         required><?= $edit_policy ? htmlspecialchars($edit_policy['content']) : '' ?></textarea>
@@ -364,7 +365,7 @@ if (isset($_GET['edit'])) {
                     ['bold', 'italic', 'underline', 'strike'],
                     [{ 'color': [] }, { 'background': [] }],
                     [{ 'align': [] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                     ['blockquote', 'code-block'],
                     ['link', 'image'],
                     ['clean']
@@ -378,7 +379,7 @@ if (isset($_GET['edit'])) {
         // Sync Quill content to hidden textarea on form submit
         const policyForm = document.querySelector('form');
         if (policyForm) {
-            policyForm.addEventListener('submit', function(e) {
+            policyForm.addEventListener('submit', function (e) {
                 const content = quill.root.innerHTML;
                 document.getElementById('policyEditor').value = content;
                 console.log('Synced content length:', content.length);
