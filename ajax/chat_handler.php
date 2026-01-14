@@ -101,7 +101,22 @@ try {
         }
     }
 
-    // 4. Admin Only: Employee Lookup
+    // 4. Reporting Manager Intent
+    else if (has($message, ['manager', 'reporting', 'boss', 'kaun hai', 'sir'])) {
+        $stmt = $conn->prepare("SELECT m.first_name, m.last_name FROM employees e 
+                               LEFT JOIN employees m ON e.reporting_manager_id = m.id 
+                               WHERE e.id = :uid");
+        $stmt->execute(['uid' => $user_id]);
+        $mgr = $stmt->fetch();
+
+        if ($mgr && $mgr['first_name']) {
+            $response = "Aapke reporting manager " . $mgr['first_name'] . " " . $mgr['last_name'] . " hain.";
+        } else {
+            $response = "Aapka koi reporting manager assigned nahi hai. Level: Super Admin access.";
+        }
+    }
+
+    // 5. Admin Only: Employee Lookup
     else if ($user_role === 'Admin' && has($message, ['search', 'employee', 'details', 'name'])) {
         // Extract a potential name or code (simplified)
         $words = explode(' ', $message);
@@ -120,7 +135,7 @@ try {
 
     // Default Response
     else {
-        $response = "Maaf kijiye, main aapki baat samajh nahi paya. Aap mujhse Leave balance, Attendance, ya Holidays ke baare mein puch sakte hain.";
+        $response = "Maaf kijiye, main aapki baat samajh nahi paya. Aap mujhse Leave balance, Attendance, Holidays, ya apne Reporting Manager ke baare mein puch sakte hain.";
     }
 
 } catch (Exception $e) {
