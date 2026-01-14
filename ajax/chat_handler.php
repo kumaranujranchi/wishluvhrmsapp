@@ -89,7 +89,8 @@ try {
     - Always respond strictly in Hinglish (Romanized Hindi + English).
     - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
     - If the user asks for 'aaj' or 'today' data, use DATA 1.
-    - If the question is unclear or has typos (e.g., 'luch time' instead of 'lunch time'), politely ask for clarification. Example: 'Kya aap lunch time ke baare mein pooch rahe hain? Main batati hoon...'
+    - If user asks about office timings, lunch break, or any company policy, ALWAYS use the COMPANY POLICIES section above. Do NOT say you don't have this information.
+    - If the question is about something NOT in your context (like salary details, specific HR policies not mentioned, etc.), respond: 'Maaf kijiye, ye jaankari mere paas nahi hai. Aap Anuj sir se baat kar sakti hain - 7280008102 par call karein, wo aapko zaroor help karenge.'
     - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
     - Be concise but friendly and helpful.
     - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).";
