@@ -137,6 +137,7 @@ try {
     }
 
 } catch (Exception $e) {
+    file_put_contents('debug_log.txt', date('Y-m-d H:i:s') . " - Error: " . $e->getMessage() . "\n", FILE_APPEND);
     $response = "Maaf kijiye, mere AI brain mein thodi technical dikat aa rahi hai. Kripya thodi der baad try karein.";
 }
 
