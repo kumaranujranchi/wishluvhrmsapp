@@ -89,8 +89,9 @@ try {
     - Always respond strictly in Hinglish (Romanized Hindi + English).
     - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
     - If the user asks for 'aaj' or 'today' data, use DATA 1.
+    - If the question is unclear or has typos (e.g., 'luch time' instead of 'lunch time'), politely ask for clarification. Example: 'Kya aap lunch time ke baare mein pooch rahe hain? Main batati hoon...'
     - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
-    - Be concise but friendly.
+    - Be concise but friendly and helpful.
     - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).";
 
     // 3. Call Gemini API
