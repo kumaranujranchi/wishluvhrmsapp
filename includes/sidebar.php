@@ -46,10 +46,40 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Attendance</span>
             </a>
 
-            <a href="leave_apply.php" class="nav-item <?php echo isActive('leave_apply'); ?>">
-                <i data-lucide="coffee" class="icon"></i>
-                <span>Leave</span>
-            </a>
+            <!-- Leave Management Group -->
+            <div class="nav-group">
+                <?php
+                $leavePages = ['leave_apply', 'leave_manager_approval'];
+                $leaveState = isGroupOpen($leavePages);
+                ?>
+                <button class="nav-item dropdown-btn <?= $leaveState ?>" onclick="toggleSubNav('leaveSubNav', this)">
+                    <div style="display:flex; align-items:center; gap:0.85rem;">
+                        <i data-lucide="palm-tree" class="icon"></i>
+                        <span>Leaves</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="icon chevron-icon"
+                        style="transition: transform 0.2s; transform: <?= strpos($leaveState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                </button>
+                <div id="leaveSubNav" class="sub-nav <?= strpos($leaveState, 'open') !== false ? 'open' : '' ?>">
+                    <a href="leave_apply.php" class="sub-nav-item <?php echo isActive('leave_apply'); ?>">
+                        <i data-lucide="file-text" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Apply Leave</span>
+                    </a>
+                    <?php
+                    // Optional: Only show if manager, but user asked to keep together
+                    // Check if user is a manager for anyone
+                    $isManager = $conn->prepare("SELECT id FROM employees WHERE reporting_manager_id = :uid LIMIT 1");
+                    $isManager->execute(['uid' => $_SESSION['user_id']]);
+                    if ($isManager->fetch()):
+                        ?>
+                        <a href="leave_manager_approval.php"
+                            class="sub-nav-item <?php echo isActive('leave_manager_approval'); ?>">
+                            <i data-lucide="users" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Team Requests</span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <a href="view_holidays.php" class="nav-item <?php echo isActive('view_holidays'); ?>">
                 <i data-lucide="calendar-days" class="icon"></i>
@@ -96,10 +126,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Leaving Us</span>
             </a>
 
-            <a href="leave_manager_approval.php" class="nav-item <?php echo isActive('leave_manager_approval'); ?>">
-                <i data-lucide="users" class="icon"></i>
-                <span>Team Requests</span>
-            </a>
+
 
         <?php else: ?>
             <!-- ADMIN MENU (Existing) -->
@@ -108,10 +135,32 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Dashboard</span>
             </a>
 
-            <a href="leave_admin.php" class="nav-item <?php echo isActive('leave_admin'); ?>">
-                <i data-lucide="shield-check" class="icon"></i>
-                <span>Leave Approvals</span>
-            </a>
+            <!-- Admin Leave Group -->
+            <div class="nav-group">
+                <?php
+                $adminLeavePages = ['leave_admin', 'leave'];
+                $adminLeaveState = isGroupOpen($adminLeavePages);
+                ?>
+                <button class="nav-item dropdown-btn <?= $adminLeaveState ?>"
+                    onclick="toggleSubNav('adminLeaveSubNav', this)">
+                    <div style="display:flex; align-items:center; gap:0.85rem;">
+                        <i data-lucide="palm-tree" class="icon"></i>
+                        <span>Leave Management</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="icon chevron-icon"
+                        style="transition: transform 0.2s; transform: <?= strpos($adminLeaveState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                </button>
+                <div id="adminLeaveSubNav" class="sub-nav <?= strpos($adminLeaveState, 'open') !== false ? 'open' : '' ?>">
+                    <a href="leave_admin.php" class="sub-nav-item <?php echo isActive('leave_admin'); ?>">
+                        <i data-lucide="shield-check" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Pending Approvals</span>
+                    </a>
+                    <a href="leave.php" class="sub-nav-item <?php echo isActive('leave'); ?>">
+                        <i data-lucide="history" class="icon" style="width:16px;height:16px;"></i>
+                        <span>Leave History</span>
+                    </a>
+                </div>
+            </div>
 
             <a href="admin_resignations.php" class="nav-item <?php echo isActive('admin_resignations'); ?>">
                 <i data-lucide="user-x" class="icon"></i>
@@ -155,10 +204,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <span>Attendance</span>
             </a>
 
-            <a href="leave.php" class="nav-item <?php echo isActive('leave'); ?>">
-                <i data-lucide="coffee" class="icon"></i>
-                <span>Leaves</span>
-            </a>
+
 
             <a href="holidays.php" class="nav-item <?php echo isActive('holidays'); ?>">
                 <i data-lucide="calendar-days" class="icon"></i>
