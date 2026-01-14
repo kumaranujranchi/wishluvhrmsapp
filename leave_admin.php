@@ -62,6 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             sendEmail($reqData['email'], "Leave Status: $action", $body);
         }
     }
+
+    // Handle Deletion
+    if (isset($_POST['action']) && $_POST['action'] === 'delete_leave') {
+        $request_id = $_POST['request_id'];
+        $stmt = $conn->prepare("DELETE FROM leave_requests WHERE id = :id");
+        $stmt->execute(['id' => $request_id]);
+        $message = "<div class='alert success'>Leave Request deleted successfully! Consumed leave balance restored.</div>";
+    }
 }
 
 // 2. Fetch Employees for Filter
@@ -254,7 +262,11 @@ $requests = $stmt->fetchAll();
                                             <?= htmlspecialchars($req['reason']) ?>
                                         </p>
                                     </td>
-                                    <td style="text-align:right;">
+                                    <td style="text-align:right; display: flex; gap: 5px; justify-content: flex-end;">
+                                        <button class="btn-icon" style="color:#64748b; background:#f1f5f9;"
+                                            onclick="openDeleteModal(<?= $req['id'] ?>)" title="Delete Request">
+                                            <i data-lucide="trash-2"></i>
+                                        </button>
                                         <button class="btn-icon" style="color:#10b981; background:#dcfce7;"
                                             onclick="openActionModal(<?= $req['id'] ?>, 'Approved')">
                                             <i data-lucide="check-circle"></i>
@@ -316,13 +328,16 @@ $requests = $stmt->fetchAll();
                                         <?php endif; ?>
                                     </span>
                                 </div>
-                                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                                <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
                                     <button class="btn-primary"
-                                        style="flex: 1; justify-content: center; background: #10b981; border-color: #10b981;"
+                                        style="flex: 1; min-width: 100px; justify-content: center; background: #10b981; border-color: #10b981;"
                                         onclick="openActionModal(<?= $req['id'] ?>, 'Approved')">Approve</button>
                                     <button class="btn-primary"
-                                        style="flex: 1; justify-content: center; background: #ef4444; border-color: #ef4444;"
+                                        style="flex: 1; min-width: 100px; justify-content: center; background: #ef4444; border-color: #ef4444;"
                                         onclick="openActionModal(<?= $req['id'] ?>, 'Rejected')">Reject</button>
+                                    <button class="btn-secondary"
+                                        style="flex: 1; min-width: 100px; justify-content: center; background: #f1f5f9; color: #64748b;"
+                                        onclick="openDeleteModal(<?= $req['id'] ?>)">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -377,6 +392,19 @@ $requests = $stmt->fetchAll();
         document.getElementById('modalSubmitBtn').innerText = btnText;
         document.getElementById('modalSubmitBtn').style.background = btnColor;
         document.getElementById('modalSubmitBtn').style.borderColor = btnColor;
+    }
+
+    function openDeleteModal(id) {
+        if (confirm("Are you sure you want to delete this leave request? This action cannot be undone and will restore the employee's leave balance.")) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.innerHTML = `
+                <input type="hidden" name="request_id" value="${id}">
+                <input type="hidden" name="action" value="delete_leave">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
     }
 </script>
 
