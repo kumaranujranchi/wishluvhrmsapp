@@ -351,13 +351,16 @@ if (isset($_GET['edit'])) {
     const editor = new Jodit('#policyEditor', {
         height: 500,
         toolbarSticky: false,
+        toolbarAdaptive: false, // Prevents buttons from grouping into "..." (more) menu
         buttons: [
-            'bold', 'italic', 'underline', 'strikethrough', 'eraser', '|',
-            'h1', 'h2', 'h3', '|',
-            'align', 'ul', 'ol', '|',
+            'source', '|',
+            'bold', 'italic', 'underline', 'strikethrough', '|',
+            'eraser', '|',
+            'paragraph', '|',
+            'left', 'center', 'right', 'justify', '|',
+            'ul', 'ol', '|',
             'blockquote', 'link', 'image', 'table', '|',
-            'undo', 'redo', '|',
-            'source'
+            'undo', 'redo'
         ],
         uploader: {
             insertImageAsBase64URI: true
