@@ -72,12 +72,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
             style="position: relative;">
             <i data-lucide="calendar-days" style="width: 24px;"></i>
             <span class="m-nav-label">Leaves</span>
-            <!-- Red dot for notifications/updates can be dynamic later -->
-            <!-- <span style="position: absolute; top: -2px; right: 18px; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span> -->
         </a>
-        <a href="payroll.php" class="m-nav-item <?= $current_page == 'payroll.php' ? 'active' : '' ?>">
-            <i data-lucide="wallet" style="width: 24px;"></i>
-            <span class="m-nav-label">Payroll</span>
+        <a href="view_policy.php" class="m-nav-item <?= $current_page == 'view_policy.php' ? 'active' : '' ?>">
+            <i data-lucide="book-open" style="width: 24px;"></i>
+            <span class="m-nav-label">Policy</span>
         </a>
         <a href="javascript:void(0)" onclick="toggleMobileDrawer()" class="m-nav-item">
             <i data-lucide="menu" style="width: 24px;"></i>
@@ -123,6 +121,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="payroll.php" class="drawer-item <?= $current_page == 'payroll.php' ? 'active' : '' ?>">
                 <i data-lucide="banknote"></i> Payroll
             </a>
+            <a href="view_policy.php" class="drawer-item <?= $current_page == 'view_policy.php' ? 'active' : '' ?>">
+                <i data-lucide="book-open"></i> Policies
+            </a>
         </div>
 
         <div class="drawer-section">
@@ -139,10 +140,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <script>
     function toggleMobileDrawer() {
+        console.log('toggleMobileDrawer called');
         const drawer = document.getElementById('mobileDrawer');
         const overlay = document.getElementById('drawerOverlay');
-        drawer.classList.toggle('active');
-        overlay.classList.toggle('active');
+        console.log('Drawer:', drawer);
+        console.log('Overlay:', overlay);
+        if (drawer && overlay) {
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
+            console.log('Toggled active class');
+        } else {
+            console.error('Drawer or overlay not found!');
+        }
     }
 </script>
 
