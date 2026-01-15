@@ -77,7 +77,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i data-lucide="book-open" style="width: 24px;"></i>
             <span class="m-nav-label">Policy</span>
         </a>
-        <a href="javascript:void(0)" onclick="toggleMobileDrawer()" id="mobileMenuBtn" class="m-nav-item">
+        <a href="javascript:void(0)" id="mobileMenuBtn" class="m-nav-item">
             <i data-lucide="menu" style="width: 24px;"></i>
             <span class="m-nav-label">Menu</span>
         </a>
@@ -139,38 +139,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
 </div>
 
-<script>
-    // Make function globally accessible
-    window.toggleMobileDrawer = function () {
-        console.log('🔧 toggleMobileDrawer called');
-
-        const drawer = document.getElementById('mobileDrawer');
-        const overlay = document.getElementById('drawerOverlay');
-
-        console.log('📦 Drawer element:', drawer);
-        console.log('🎭 Overlay element:', overlay);
-
-        if (!drawer) {
-            console.error('❌ Drawer element not found!');
-            return;
-        }
-
-        if (!overlay) {
-            console.error('❌ Overlay element not found!');
-            return;
-        }
-
-        // Toggle classes
-        drawer.classList.toggle('active');
-        overlay.classList.toggle('active');
-
-        console.log('✅ Drawer active:', drawer.classList.contains('active'));
-        console.log('✅ Overlay active:', overlay.classList.contains('active'));
-    };
-
-    // Test on load
-    console.log('🚀 toggleMobileDrawer function loaded');
-</script>
 
 <style>
     /* Drawer Styles */
