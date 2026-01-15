@@ -1,0 +1,129 @@
+    <!-- ============================================== -->
+    <!-- DESKTOP VIEW (Original) -->
+    <!-- ============================================== -->
+    <div class="desktop-view-container">
+        <!-- Original Welcome Banner -->
+        <div class="welcome-banner">
+            <h2 style="margin:0; color:#1e293b; font-size:1.5rem;">Hello, <?= $_SESSION['first_name'] ?>!</h2>
+            <p style="margin:0.5rem 0 0; color:#64748b;">Here's what's happening with your profile this month.</p>
+        </div>
+
+        <!-- Original Stats Grid -->
+        <div class="stats-grid-sharp">
+            <div class="sharp-card" style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
+                <div>
+                    <span class="card-label">Attendance</span>
+                    <div class="card-value"><?= $stats['present_days'] ?></div>
+                    <span style="font-size:0.85rem;">Days Present this Month</span>
+                </div>
+                <i data-lucide="calendar-check"></i>
+                <div class="card-footer">Target: 24 Days</div>
+            </div>
+
+            <div class="sharp-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <div>
+                    <span class="card-label">Late Marks</span>
+                    <div class="card-value"><?= $stats['late_days'] ?></div>
+                    <span style="font-size:0.85rem;">Arrivals after 10:00 AM</span>
+                </div>
+                <i data-lucide="clock"></i>
+                <div class="card-footer">Stay Punctual!</div>
+            </div>
+
+            <div class="sharp-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <div>
+                    <span class="card-label">Avg. Hours</span>
+                    <div class="card-value"><?= round($stats['total_hours'] / ($stats['present_days'] ?: 1), 1) ?></div>
+                    <span style="font-size:0.85rem;">Average Daily Work Hours</span>
+                </div>
+                <i data-lucide="timer"></i>
+                <div class="card-footer">Total: <?= round($stats['total_hours'], 1) ?> hrs</div>
+            </div>
+
+            <div class="sharp-card" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                <div>
+                    <span class="card-label">Approved Leaves</span>
+                    <div class="card-value"><?= $approved_leaves ?></div>
+                    <span style="font-size:0.85rem;">Vacations & Sick Leaves</span>
+                </div>
+                <i data-lucide="palmtree"></i>
+                <div class="card-footer">Pending: <?= $pending_leaves ?></div>
+            </div>
+
+            <div class="sharp-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                <div>
+                    <span class="card-label">Birthday</span>
+                    <?php if ($next_birthday): ?>
+                        <div class="card-value" style="margin-top: 5px;">
+                            <?= htmlspecialchars($next_birthday['first_name']) ?>
+                        </div>
+                        <span
+                            style="font-size:0.85rem; display:block;"><?= date('d M', strtotime($next_birthday['dob'])) ?></span>
+                    <?php else: ?>
+                        <div class="card-value">---</div>
+                    <?php endif; ?>
+                </div>
+                <i data-lucide="cake"></i>
+                <div class="card-footer">Next Celebration</div>
+            </div>
+        </div>
+
+        <div class="content-grid-responsive" style="align-items: stretch;">
+            <!-- Left: Activity Chart -->
+            <div style="display: flex;">
+                <div class="card"
+                    style="border:none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; display: flex; flex-direction: column; border-radius: 1rem;">
+                    <div class="card-header"
+                        style="background:white; border-bottom:1px solid #f1f5f9; padding:1.25rem;">
+                        <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Performance Analytics</h3>
+                    </div>
+                    <div style="flex: 1; min-height: 250px; padding: 10px;">
+                        <canvas id="employeeWaveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Sidemenu Items -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Next Holiday -->
+                <div class="card"
+                    style="border-radius: 1rem; border:none; background:#0f172a; color:white; padding:1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; font-weight:600;">Upcoming
+                        Holiday</span>
+                    <?php if ($next_holiday): ?>
+                        <h3 style="margin:1rem 0 0.5rem; color: #6366f1;"><?= htmlspecialchars($next_holiday['title']) ?>
+                        </h3>
+                        <div style="font-size:0.9rem; margin-bottom:1rem;">
+                            <i data-lucide="calendar" style="width:14px; vertical-align:middle; margin-right:5px;"></i>
+                            <?= date('D, d M Y', strtotime($next_holiday['start_date'])) ?>
+                        </div>
+                    <?php else: ?>
+                        <p style="margin-top:1rem; color:#64748b;">No upcoming holidays.</p>
+                    <?php endif; ?>
+                    <a href="view_holidays.php"
+                        style="color:#6366f1; font-size:0.8rem; text-decoration:none; font-weight:600;">View Calendar
+                        &rarr;</a>
+                </div>
+
+                <!-- Recent Notices -->
+                <div style="margin-top:0.5rem;">
+                    <h3 style="margin-bottom:1rem; font-size:1.1rem; color:#1e293b;">Announcements</h3>
+                    <?php foreach ($latest_notices as $notice): ?>
+                        <a href="notice_details.php?id=<?= $notice['id'] ?>" class="notice-item-sharp">
+                            <div
+                                style="width: 10px; height: 10px; border-radius: 50%; background: <?= $notice['urgency'] === 'Urgent' ? '#ef4444' : '#6366f1' ?>;">
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600; font-size:0.9rem; color:#1e293b;">
+                                    <?= htmlspecialchars($notice['title']) ?>
+                                </div>
+                                <div style="font-size:0.75rem; color:#94a3b8;">
+                                    <?= date('d M', strtotime($notice['created_at'])) ?>
+                                </div>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>

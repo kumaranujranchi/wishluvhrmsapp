@@ -82,9 +82,30 @@ $latest_notices = $notice_q->fetchAll();
         display: block;
     }
 
-    /* Mobile View Container - Hidden on Desktop */
+    /* Mobile View Container - FORCE Hidden on Desktop by Default */
     .mobile-view-container {
-        display: none;
+        display: none !important;
+    }
+
+    /* Desktop View - Always Visible by Default */
+    .desktop-view-container {
+        display: block !important;
+    }
+
+    /* Explicit Desktop Rules (Belt and Suspenders) */
+    @media (min-width: 769px) {
+        .mobile-view-container {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .desktop-view-container {
+            display: block !important;
+            visibility: visible !important;
+        }
     }
 
     @media (max-width: 768px) {
@@ -569,133 +590,159 @@ $latest_notices = $notice_q->fetchAll();
     </div>
 
     <!-- ============================================== -->
-    <!-- DESKTOP VIEW (Original) -->
+    <!-- DESKTOP VIEW (New Card Design) -->
     <!-- ============================================== -->
     <div class="desktop-view-container">
-        <!-- Original Welcome Banner -->
-        <div class="welcome-banner">
-            <h2 style="margin:0; color:#1e293b; font-size:1.5rem;">Hello, <?= $_SESSION['first_name'] ?>!</h2>
-            <p style="margin:0.5rem 0 0; color:#64748b;">Here's what's happening with your profile this month.</p>
+        
+        <!-- Greeting Section -->
+        <div class="greeting-section">
+            <h2>Hello, <?php echo htmlspecialchars($_SESSION['first_name']); ?>!</h2>
+            <p>Here's what's happening with your profile this month.</p>
         </div>
 
-        <!-- Original Stats Grid -->
-        <div class="stats-grid-sharp">
-            <div class="sharp-card" style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
-                <div>
-                    <span class="card-label">Attendance</span>
-                    <div class="card-value"><?= $stats['present_days'] ?></div>
-                    <span style="font-size:0.85rem;">Days Present this Month</span>
+        <!-- Stats Cards Row -->
+        <div class="stats-cards-row">
+            <!-- Attendance Card -->
+            <div class="stat-card purple">
+                <div class="card-header">
+                    <span class="card-title">ATTENDANCE</span>
                 </div>
-                <i data-lucide="calendar-check"></i>
-                <div class="card-footer">Target: 24 Days</div>
+                <div class="card-value"><?php echo $stats['present_days']; ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                    Days Present this Month
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="target" style="width: 14px; height: 14px;"></i>
+                    Target: 24 Days
+                </div>
             </div>
 
-            <div class="sharp-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                <div>
-                    <span class="card-label">Late Marks</span>
-                    <div class="card-value"><?= $stats['late_days'] ?></div>
-                    <span style="font-size:0.85rem;">Arrivals after 10:00 AM</span>
+            <!-- Late Marks Card -->
+            <div class="stat-card orange">
+                <div class="card-header">
+                    <span class="card-title">LATE MARKS</span>
                 </div>
-                <i data-lucide="clock"></i>
-                <div class="card-footer">Stay Punctual!</div>
+                <div class="card-value"><?php echo $stats['late_count']; ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                    Arrivals after 10:00 AM
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
+                    Stay Punctual!
+                </div>
             </div>
 
-            <div class="sharp-card" style="background: linear-gradient(135deg, #10b981, #059669);">
-                <div>
-                    <span class="card-label">Avg. Hours</span>
-                    <div class="card-value"><?= round($stats['total_hours'] / ($stats['present_days'] ?: 1), 1) ?></div>
-                    <span style="font-size:0.85rem;">Average Daily Work Hours</span>
+            <!-- Avg Hours Card -->
+            <div class="stat-card green">
+                <div class="card-header">
+                    <span class="card-title">AVG. HOURS</span>
                 </div>
-                <i data-lucide="timer"></i>
-                <div class="card-footer">Total: <?= round($stats['total_hours'], 1) ?> hrs</div>
+                <div class="card-value"><?php echo number_format($stats['avg_hours'], 1); ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                    Average Daily Work Hours
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
+                    Total: <?php echo number_format($stats['avg_hours'] * $stats['present_days'], 1); ?> hrs
+                </div>
             </div>
 
-            <div class="sharp-card" style="background: linear-gradient(135deg, #ec4899, #db2777);">
-                <div>
-                    <span class="card-label">Approved Leaves</span>
-                    <div class="card-value"><?= $approved_leaves ?></div>
-                    <span style="font-size:0.85rem;">Vacations & Sick Leaves</span>
+            <!-- Approved Leaves Card -->
+            <div class="stat-card pink">
+                <div class="card-header">
+                    <span class="card-title">APPROVED LEAVES</span>
                 </div>
-                <i data-lucide="palmtree"></i>
-                <div class="card-footer">Pending: <?= $pending_leaves ?></div>
+                <div class="card-value"><?php echo $stats['approved_leaves']; ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="umbrella" style="width: 14px; height: 14px;"></i>
+                    Vacations & Sick Leaves
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="calendar-x" style="width: 14px; height: 14px;"></i>
+                    Pending: <?php echo $stats['pending_leaves']; ?>
+                </div>
             </div>
 
-            <div class="sharp-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
-                <div>
-                    <span class="card-label">Birthday</span>
-                    <?php if ($next_birthday): ?>
-                        <div class="card-value" style="margin-top: 5px;">
-                            <?= htmlspecialchars($next_birthday['first_name']) ?>
-                        </div>
-                        <span
-                            style="font-size:0.85rem; display:block;"><?= date('d M', strtotime($next_birthday['dob'])) ?></span>
+            <!-- Birthday Card -->
+            <div class="stat-card purple-birthday">
+                <div class="card-header">
+                    <span class="card-title">BIRTHDAY</span>
+                </div>
+                <div class="card-value-name">
+                    <?php 
+                    if (!empty($upcoming_birthday)) {
+                        echo htmlspecialchars($upcoming_birthday['name']);
+                    } else {
+                        echo 'No upcoming';
+                    }
+                    ?>
+                </div>
+                <div class="card-subtitle">
+                    <?php if (!empty($upcoming_birthday)): ?>
+                        <?php echo date('d M', strtotime($upcoming_birthday['date'])); ?>
                     <?php else: ?>
-                        <div class="card-value">---</div>
+                        birthdays this month
                     <?php endif; ?>
                 </div>
-                <i data-lucide="cake"></i>
-                <div class="card-footer">Next Celebration</div>
+                <div class="card-footer">
+                    <i data-lucide="cake" style="width: 14px; height: 14px;"></i>
+                    Next Celebration
+                </div>
             </div>
         </div>
 
-        <div class="content-grid-responsive" style="align-items: stretch;">
-            <!-- Left: Activity Chart -->
-            <div style="display: flex;">
-                <div class="card"
-                    style="border:none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; display: flex; flex-direction: column; border-radius: 1rem;">
-                    <div class="card-header"
-                        style="background:white; border-bottom:1px solid #f1f5f9; padding:1.25rem;">
-                        <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">Performance Analytics</h3>
-                    </div>
-                    <div style="flex: 1; min-height: 250px; padding: 10px;">
-                        <canvas id="employeeWaveChart"></canvas>
-                    </div>
+        <!-- Main Content Grid -->
+        <div class="main-content-grid">
+            <!-- Performance Analytics Section -->
+            <div class="chart-section">
+                <h3>Performance Analytics</h3>
+                <div class="chart-container">
+                    <canvas id="employeeWaveChart"></canvas>
                 </div>
             </div>
 
-            <!-- Right: Sidemenu Items -->
-            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <!-- Next Holiday -->
-                <div class="card"
-                    style="border-radius: 1rem; border:none; background:#0f172a; color:white; padding:1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                    <span style="font-size:0.75rem; text-transform:uppercase; color:#94a3b8; font-weight:600;">Upcoming
-                        Holiday</span>
+            <!-- Right Sidebar -->
+            <div class="right-sidebar">
+                <!-- Upcoming Holiday Card -->
+                <div class="holiday-card">
+                    <div class="holiday-header">UPCOMING HOLIDAY</div>
                     <?php if ($next_holiday): ?>
-                        <h3 style="margin:1rem 0 0.5rem; color: #6366f1;"><?= htmlspecialchars($next_holiday['title']) ?>
-                        </h3>
-                        <div style="font-size:0.9rem; margin-bottom:1rem;">
-                            <i data-lucide="calendar" style="width:14px; vertical-align:middle; margin-right:5px;"></i>
-                            <?= date('D, d M Y', strtotime($next_holiday['start_date'])) ?>
+                        <div class="holiday-name"><?php echo htmlspecialchars($next_holiday['title']); ?></div>
+                        <div class="holiday-date">
+                            <i data-lucide="calendar" style="width: 16px; height: 16px;"></i>
+                            <?php echo date('D, d M Y', strtotime($next_holiday['start_date'])); ?>
                         </div>
+                        <a href="view_holidays.php" class="holiday-link">View Calendar →</a>
                     <?php else: ?>
-                        <p style="margin-top:1rem; color:#64748b;">No upcoming holidays.</p>
+                        <div class="holiday-name">No upcoming holidays</div>
                     <?php endif; ?>
-                    <a href="view_holidays.php"
-                        style="color:#6366f1; font-size:0.8rem; text-decoration:none; font-weight:600;">View Calendar
-                        &rarr;</a>
                 </div>
 
-                <!-- Recent Notices -->
-                <div style="margin-top:0.5rem;">
-                    <h3 style="margin-bottom:1rem; font-size:1.1rem; color:#1e293b;">Announcements</h3>
-                    <?php foreach ($latest_notices as $notice): ?>
-                        <a href="notice_details.php?id=<?= $notice['id'] ?>" class="notice-item-sharp">
-                            <div
-                                style="width: 10px; height: 10px; border-radius: 50%; background: <?= $notice['urgency'] === 'Urgent' ? '#ef4444' : '#6366f1' ?>;">
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:600; font-size:0.9rem; color:#1e293b;">
-                                    <?= htmlspecialchars($notice['title']) ?>
+                <!-- Announcements Section -->
+                <div class="announcements-section">
+                    <h3>Announcements</h3>
+                    <div class="announcements-list">
+                        <?php if (!empty($recent_notices)): ?>
+                            <?php foreach (array_slice($recent_notices, 0, 3) as $notice): ?>
+                                <div class="announcement-item">
+                                    <div class="announcement-dot"></div>
+                                    <div class="announcement-content">
+                                        <div class="announcement-title"><?php echo htmlspecialchars($notice['title']); ?></div>
+                                        <div class="announcement-time"><?php echo date('d M', strtotime($notice['created_at'])); ?></div>
+                                    </div>
                                 </div>
-                                <div style="font-size:0.75rem; color:#94a3b8;">
-                                    <?= date('d M', strtotime($notice['created_at'])) ?>
-                                </div>
-                            </div>
-                        </a>
-                    <?php endforeach; ?>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="no-announcements">No announcements</p>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

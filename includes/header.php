@@ -63,6 +63,9 @@
     <!-- Chatbot CSS -->
     <link rel="stylesheet" href="assets/css/chatbot.css?v=2.0">
 
+    <!-- Desktop Dashboard CSS -->
+    <link rel="stylesheet" href="assets/css/desktop-dashboard.css">
+
     <style>
         /* Header Styles */
         .header {

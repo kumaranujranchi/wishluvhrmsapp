@@ -1,0 +1,155 @@
+    <!-- ============================================== -->
+    <!-- DESKTOP VIEW (New Card Design) -->
+    <!-- ============================================== -->
+    <div class="desktop-view-container">
+        
+        <!-- Greeting Section -->
+        <div class="greeting-section">
+            <h2>Hello, <?php echo htmlspecialchars($_SESSION['first_name']); ?>!</h2>
+            <p>Here's what's happening with your profile this month.</p>
+        </div>
+
+        <!-- Stats Cards Row -->
+        <div class="stats-cards-row">
+            <!-- Attendance Card -->
+            <div class="stat-card purple">
+                <div class="card-header">
+                    <span class="card-title">ATTENDANCE</span>
+                </div>
+                <div class="card-value"><?php echo $stats['present_days']; ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                    Days Present this Month
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="target" style="width: 14px; height: 14px;"></i>
+                    Target: 24 Days
+                </div>
+            </div>
+
+            <!-- Late Marks Card -->
+            <div class="stat-card orange">
+                <div class="card-header">
+                    <span class="card-title">LATE MARKS</span>
+                </div>
+                <div class="card-value"><?php echo $stats['late_count']; ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                    Arrivals after 10:00 AM
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
+                    Stay Punctual!
+                </div>
+            </div>
+
+            <!-- Avg Hours Card -->
+            <div class="stat-card green">
+                <div class="card-header">
+                    <span class="card-title">AVG. HOURS</span>
+                </div>
+                <div class="card-value"><?php echo number_format($stats['avg_hours'], 1); ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                    Average Daily Work Hours
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
+                    Total: <?php echo number_format($stats['avg_hours'] * $stats['present_days'], 1); ?> hrs
+                </div>
+            </div>
+
+            <!-- Approved Leaves Card -->
+            <div class="stat-card pink">
+                <div class="card-header">
+                    <span class="card-title">APPROVED LEAVES</span>
+                </div>
+                <div class="card-value"><?php echo $stats['approved_leaves']; ?></div>
+                <div class="card-subtitle">
+                    <i data-lucide="umbrella" style="width: 14px; height: 14px;"></i>
+                    Vacations & Sick Leaves
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="calendar-x" style="width: 14px; height: 14px;"></i>
+                    Pending: <?php echo $stats['pending_leaves']; ?>
+                </div>
+            </div>
+
+            <!-- Birthday Card -->
+            <div class="stat-card purple-birthday">
+                <div class="card-header">
+                    <span class="card-title">BIRTHDAY</span>
+                </div>
+                <div class="card-value-name">
+                    <?php 
+                    if (!empty($upcoming_birthday)) {
+                        echo htmlspecialchars($upcoming_birthday['name']);
+                    } else {
+                        echo 'No upcoming';
+                    }
+                    ?>
+                </div>
+                <div class="card-subtitle">
+                    <?php if (!empty($upcoming_birthday)): ?>
+                        <?php echo date('d M', strtotime($upcoming_birthday['date'])); ?>
+                    <?php else: ?>
+                        birthdays this month
+                    <?php endif; ?>
+                </div>
+                <div class="card-footer">
+                    <i data-lucide="cake" style="width: 14px; height: 14px;"></i>
+                    Next Celebration
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="main-content-grid">
+            <!-- Performance Analytics Section -->
+            <div class="chart-section">
+                <h3>Performance Analytics</h3>
+                <div class="chart-container">
+                    <canvas id="employeeWaveChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="right-sidebar">
+                <!-- Upcoming Holiday Card -->
+                <div class="holiday-card">
+                    <div class="holiday-header">UPCOMING HOLIDAY</div>
+                    <?php if ($next_holiday): ?>
+                        <div class="holiday-name"><?php echo htmlspecialchars($next_holiday['title']); ?></div>
+                        <div class="holiday-date">
+                            <i data-lucide="calendar" style="width: 16px; height: 16px;"></i>
+                            <?php echo date('D, d M Y', strtotime($next_holiday['start_date'])); ?>
+                        </div>
+                        <a href="view_holidays.php" class="holiday-link">View Calendar →</a>
+                    <?php else: ?>
+                        <div class="holiday-name">No upcoming holidays</div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Announcements Section -->
+                <div class="announcements-section">
+                    <h3>Announcements</h3>
+                    <div class="announcements-list">
+                        <?php if (!empty($recent_notices)): ?>
+                            <?php foreach (array_slice($recent_notices, 0, 3) as $notice): ?>
+                                <div class="announcement-item">
+                                    <div class="announcement-dot"></div>
+                                    <div class="announcement-content">
+                                        <div class="announcement-title"><?php echo htmlspecialchars($notice['title']); ?></div>
+                                        <div class="announcement-time"><?php echo date('d M', strtotime($notice['created_at'])); ?></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="no-announcements">No announcements</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
