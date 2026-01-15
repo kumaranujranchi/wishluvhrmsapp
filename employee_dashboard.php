@@ -14,21 +14,32 @@ $current_year = date('Y');
 // 1. Fetch Monthly Attendance Stats
 $attr_q = $conn->prepare("SELECT 
     COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days,
-    COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_days,
+    COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_count,
     SUM(total_hours) as total_hours
     FROM attendance 
     WHERE employee_id = :uid AND MONTH(date) = :m AND YEAR(date) = :y");
 $attr_q->execute(['uid' => $user_id, 'm' => $current_month, 'y' => $current_year]);
-$stats = $attr_q->fetch();
+$stats = $attr_q->fetch(PDO::FETCH_ASSOC); // Ensure associative array
 
-// Set defaults for missing keys
-if (!$stats)
-    $stats = [];
+// Set defaults
+if (!$stats) {
+    $stats = [
+        'present_days' => 0,
+        'late_count' => 0,
+        'total_hours' => 0
+    ];
+}
+
 $stats['present_days'] = $stats['present_days'] ?? 0;
 $stats['late_count'] = $stats['late_count'] ?? 0;
-$stats['avg_hours'] = $stats['avg_hours'] ?? 0.0;
-$stats['approved_leaves'] = $approved_leaves ?? 0;
-$stats['pending_leaves'] = $pending_leaves ?? 0;
+$total_hrs = $stats['total_hours'] ?? 0;
+
+// Calculate Average Hours
+if ($stats['present_days'] > 0) {
+    $stats['avg_hours'] = $total_hrs / $stats['present_days'];
+} else {
+    $stats['avg_hours'] = 0.0;
+}
 
 // 2. Fetch Leave Balance
 $leave_q = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id = :uid AND status = 'Approved'");
@@ -743,7 +754,8 @@ $latest_notices = $notice_q->fetchAll();
                                     <div class="announcement-content">
                                         <div class="announcement-title"><?php echo htmlspecialchars($notice['title']); ?></div>
                                         <div class="announcement-time">
-                                            <?php echo date('d M', strtotime($notice['created_at'])); ?></div>
+                                            <?php echo date('d M', strtotime($notice['created_at'])); ?>
+                                        </div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
