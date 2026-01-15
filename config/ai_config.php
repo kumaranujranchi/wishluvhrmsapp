@@ -28,4 +28,4 @@ if ($envPath) {
 
 // Gemini AI API Configuration
 define('GEMINI_API_KEY', getenv('GEMINI_API_KEY') ?: '');
-define('GEMINI_MODEL', 'gemini-1.5-flash-latest');
+define('GEMINI_MODEL', 'gemini-1.5-flash');
