@@ -18,12 +18,25 @@ $user_id = $_SESSION['user_id'];
 $date = date('Y-m-d');
 $message = "";
 
+// Fetch Assigned Locations for this employee
+$loc_stmt = $conn->prepare("
+    SELECT al.* 
+    FROM attendance_locations al
+    JOIN employee_locations el ON al.id = el.location_id
+    WHERE el.employee_id = :uid AND al.is_active = 1
+");
+$loc_stmt->execute(['uid' => $user_id]);
+$assigned_locations = $loc_stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // 1. Handle POST Requests (Check In / Check Out)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $lat = $_POST['latitude'] ?? null;
     $lng = $_POST['longitude'] ?? null;
     $address = $_POST['address'] ?? 'Location not allocated';
+    $location_id = $_POST['location_id'] ?? null;
+    $out_of_range = $_POST['out_of_range'] ?? 0;
+    $reason = $_POST['reason'] ?? null;
 
     if ($action === 'clock_in') {
         // Check if already checked in
@@ -40,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $status = (strtotime($current_time) > strtotime($shift_start)) ? 'Late' : 'Present';
 
-            $sql = "INSERT INTO attendance (employee_id, date, clock_in, status, clock_in_lat, clock_in_lng, clock_in_address) 
-                    VALUES (:uid, :date, :time, :status, :lat, :lng, :addr)";
+            $sql = "INSERT INTO attendance (employee_id, date, clock_in, status, clock_in_lat, clock_in_lng, clock_in_address, location_id, out_of_range, out_of_range_reason) 
+                    VALUES (:uid, :date, :time, :status, :lat, :lng, :addr, :loc_id, :oor, :reason)";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 'uid' => $user_id,
@@ -50,7 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'status' => $status,
                 'lat' => $lat,
                 'lng' => $lng,
-                'addr' => $address
+                'addr' => $address,
+                'loc_id' => $location_id,
+                'oor' => $out_of_range,
+                'reason' => $reason
             ]);
             $message = "<div class='alert success-glass'>Checked In Successfully at " . date('h:i A', strtotime($current_time)) . "</div>";
 
@@ -98,7 +114,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     total_hours = :hours,
                     clock_out_lat = :lat,
                     clock_out_lng = :lng,
-                    clock_out_address = :addr 
+                    clock_out_address = :addr,
+                    location_id = :loc_id,
+                    out_of_range = :oor,
+                    out_of_range_reason = :reason
                     WHERE employee_id = :uid AND date = :date";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
@@ -107,6 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'lat' => $lat,
                 'lng' => $lng,
                 'addr' => $address,
+                'loc_id' => $location_id,
+                'oor' => $out_of_range,
+                'reason' => $reason,
                 'uid' => $user_id,
                 'date' => $date
             ]);
@@ -400,6 +422,9 @@ foreach ($history as $h) {
                 <input type="hidden" name="latitude" id="latInput">
                 <input type="hidden" name="longitude" id="lngInput">
                 <input type="hidden" name="address" id="addrInput">
+                <input type="hidden" name="location_id" id="locationIdInput">
+                <input type="hidden" name="out_of_range" id="outOfRangeInput" value="0">
+                <input type="hidden" name="reason" id="reasonInput">
 
                 <?php if (!$has_checked_in): ?>
                     <button type="button" class="custom-punch-btn" onclick="getLocationAndSubmit('clock_in')">
@@ -524,6 +549,12 @@ foreach ($history as $h) {
                                     <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
                                         <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
                                     </div>
+                                    <?php if ($row['out_of_range']): ?>
+                                        <div
+                                            style="font-size: 0.7rem; color: #dc2626; font-weight: 700; margin-top: 5px; background: #fff1f2; padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                                            ⚠️ Out of Office: <?= htmlspecialchars($row['out_of_range_reason']) ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                                 <?php if ($row['clock_out']): ?>
                                     <div>
@@ -565,6 +596,20 @@ foreach ($history as $h) {
     updateClock();
 
     // Geolocation Logic
+    const assignedLocations = <?= json_encode($assigned_locations) ?>;
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radius of the earth in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c * 1000; // Distance in meters
+    }
+
     function getLocationAndSubmit(type) {
         const statusDiv = document.getElementById('locationStatus');
         const form = document.getElementById('attendanceForm');
@@ -579,6 +624,34 @@ foreach ($history as $h) {
                 document.getElementById('actionInput').value = type;
                 document.getElementById('latInput').value = lat;
                 document.getElementById('lngInput').value = lng;
+
+                // Geofencing Check
+                let matchedLocation = null;
+                let isOutOfRange = false;
+                let reason = "";
+
+                if (assignedLocations.length > 0) {
+                    for (const loc of assignedLocations) {
+                        const dist = getDistance(lat, lng, parseFloat(loc.latitude), parseFloat(loc.longitude));
+                        if (dist <= parseFloat(loc.radius)) {
+                            matchedLocation = loc;
+                            break;
+                        }
+                    }
+
+                    if (!matchedLocation) {
+                        isOutOfRange = true;
+                        reason = prompt("Warning: You are punching from out of the office! Main office se bahar hone ka reason bataye:");
+                        if (reason === null || reason.trim() === "") {
+                            statusDiv.innerHTML = '<span style="color:#ef4444;">Reason is required to punch from outside!</span>';
+                            return;
+                        }
+                    }
+                }
+
+                document.getElementById('locationIdInput').value = matchedLocation ? matchedLocation.id : '';
+                document.getElementById('outOfRangeInput').value = isOutOfRange ? 1 : 0;
+                document.getElementById('reasonInput').value = reason;
 
                 statusDiv.innerHTML = 'Location Locked. Getting Address...';
 

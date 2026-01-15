@@ -221,6 +221,12 @@ if (isset($_POST['export_csv'])) {
                                             </a>
                                         <?php endif; ?>
                                     </div>
+                                    <?php if ($row['out_of_range']): ?>
+                                        <div
+                                            style="font-size:0.7rem; color:#dc2626; font-weight:600; margin-top:4px; max-width:200px;">
+                                            ⚠️ Out of Office: <?= htmlspecialchars($row['out_of_range_reason']) ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                                 <td style="font-weight:500;">
                                     <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : '<span style="color:#cbd5e1;">--:--</span>' ?>
@@ -333,6 +339,12 @@ if (isset($_POST['export_csv'])) {
                                                     </a>
                                                 <?php endif; ?>
                                             </div>
+                                            <?php if ($row['out_of_range']): ?>
+                                                <div
+                                                    style="font-size:0.65rem; color:#dc2626; font-weight:600; margin-top:5px; background:#fef2f2; padding:4px 8px; border-radius:4px;">
+                                                    ⚠️ Out of Office: <?= htmlspecialchars($row['out_of_range_reason']) ?>
+                                                </div>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div>
                                     <div class="mobile-field">
