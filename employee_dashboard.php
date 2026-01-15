@@ -21,14 +21,25 @@ $attr_q = $conn->prepare("SELECT
 $attr_q->execute(['uid' => $user_id, 'm' => $current_month, 'y' => $current_year]);
 $stats = $attr_q->fetch();
 
+// Set defaults for missing keys
+if (!$stats)
+    $stats = [];
+$stats['present_days'] = $stats['present_days'] ?? 0;
+$stats['late_count'] = $stats['late_count'] ?? 0;
+$stats['avg_hours'] = $stats['avg_hours'] ?? 0.0;
+$stats['approved_leaves'] = $approved_leaves ?? 0;
+$stats['pending_leaves'] = $pending_leaves ?? 0;
+
 // 2. Fetch Leave Balance
 $leave_q = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id = :uid AND status = 'Approved'");
 $leave_q->execute(['uid' => $user_id]);
 $approved_leaves = $leave_q->fetchColumn();
+$stats['approved_leaves'] = $approved_leaves;
 
 $pending_leave_q = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id = :uid AND status = 'Pending'");
 $pending_leave_q->execute(['uid' => $user_id]);
 $pending_leaves = $pending_leave_q->fetchColumn();
+$stats['pending_leaves'] = $pending_leaves;
 
 // 3. Fetch Upcoming Holiday
 $holiday_q = $conn->prepare("SELECT * FROM holidays WHERE start_date >= CURDATE() AND is_active = 1 ORDER BY start_date ASC LIMIT 1");
@@ -593,7 +604,7 @@ $latest_notices = $notice_q->fetchAll();
     <!-- DESKTOP VIEW (New Card Design) -->
     <!-- ============================================== -->
     <div class="desktop-view-container">
-        
+
         <!-- Greeting Section -->
         <div class="greeting-section">
             <h2>Hello, <?php echo htmlspecialchars($_SESSION['first_name']); ?>!</h2>
@@ -672,7 +683,7 @@ $latest_notices = $notice_q->fetchAll();
                     <span class="card-title">BIRTHDAY</span>
                 </div>
                 <div class="card-value-name">
-                    <?php 
+                    <?php
                     if (!empty($upcoming_birthday)) {
                         echo htmlspecialchars($upcoming_birthday['name']);
                     } else {
@@ -731,7 +742,8 @@ $latest_notices = $notice_q->fetchAll();
                                     <div class="announcement-dot"></div>
                                     <div class="announcement-content">
                                         <div class="announcement-title"><?php echo htmlspecialchars($notice['title']); ?></div>
-                                        <div class="announcement-time"><?php echo date('d M', strtotime($notice['created_at'])); ?></div>
+                                        <div class="announcement-time">
+                                            <?php echo date('d M', strtotime($notice['created_at'])); ?></div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
