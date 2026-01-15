@@ -1,257 +1,277 @@
 <?php
-// Mobile Navigation and Drawer for HRMS
-$userRole = $_SESSION['user_role'] ?? 'Employee';
+// Determine current page for active state
 $current_page = basename($_SERVER['PHP_SELF']);
-
-function is_active_mobile($page, $current)
-{
-    // Handle pages with query strings or variants
-    return (strpos($current, $page) !== false) ? 'active' : '';
-}
 ?>
 
+<!-- Global Mobile Bottom Nav Styles -->
+<style>
+    /* Default hidden on desktop */
+    .m-bottom-nav-container {
+        display: none;
+    }
 
-<!-- Bottom Navigation (Disabled - Using Custom Dashboard Design) -->
-<!-- <div class="bottom-nav"> ... </div> -->
+    @media (max-width: 768px) {
+        .m-bottom-nav-container {
+            display: block;
+        }
 
-<!-- Mobile Drawer Overlay -->
+        .m-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #f1f5f9;
+            padding: 12px 16px 30px;
+            /* Extra padding for safe area */
+            display: flex;
+            justify-content: space-between;
+            z-index: 1000;
+        }
+
+        .m-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #94a3b8;
+            text-decoration: none;
+            width: 20%;
+        }
+
+        .m-nav-item.active {
+            color: #7C3AED;
+        }
+
+        .m-nav-label {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Adjust page content to not be hidden behind nav */
+        body {
+            padding-bottom: 90px;
+        }
+    }
+</style>
+
+<!-- Mobile Bottom Navigation Bar -->
+<div class="m-bottom-nav-container">
+    <nav class="m-bottom-nav">
+        <a href="employee_dashboard.php"
+            class="m-nav-item <?= $current_page == 'employee_dashboard.php' ? 'active' : '' ?>">
+            <i data-lucide="layout-grid" style="width: 24px;"></i>
+            <span class="m-nav-label">Dashboard</span>
+        </a>
+        <a href="attendance_view.php" class="m-nav-item <?= $current_page == 'attendance_view.php' ? 'active' : '' ?>">
+            <i data-lucide="calendar" style="width: 24px;"></i>
+            <span class="m-nav-label">Attendance</span>
+        </a>
+        <a href="leave_apply.php" class="m-nav-item <?= $current_page == 'leave_apply.php' ? 'active' : '' ?>"
+            style="position: relative;">
+            <i data-lucide="calendar-days" style="width: 24px;"></i>
+            <span class="m-nav-label">Leaves</span>
+            <!-- Red dot for notifications/updates can be dynamic later -->
+            <!-- <span style="position: absolute; top: -2px; right: 18px; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span> -->
+        </a>
+        <a href="payroll.php" class="m-nav-item <?= $current_page == 'payroll.php' ? 'active' : '' ?>">
+            <i data-lucide="wallet" style="width: 24px;"></i>
+            <span class="m-nav-label">Payroll</span>
+        </a>
+        <a href="javascript:void(0)" onclick="toggleMobileDrawer()" class="m-nav-item">
+            <i data-lucide="menu" style="width: 24px;"></i>
+            <span class="m-nav-label">Menu</span>
+        </a>
+    </nav>
+</div>
+
+<!-- Mobile Drawer Overlay (Kept from previous version) -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
 
-<!-- Mobile Drawer (Hamburger Menu) -->
+<!-- Mobile Drawer -->
 <div class="mobile-drawer" id="mobileDrawer">
-    <div
-        style="padding: 2rem 1.5rem; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border-radius: 0 !important;">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div
-                style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                <i data-lucide="user" style="width: 30px; height: 30px;"></i>
+    <div class="drawer-header">
+        <div class="brand">
+            <div class="logo-icon">
+                <span style="color:white; font-weight:800; font-size:1.2rem;">HR</span>
             </div>
-            <div>
-                <h3 style="margin: 0; font-size: 1.1rem;"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></h3>
-                <p style="margin: 0; font-size: 0.8rem; opacity: 0.8;"><?= htmlspecialchars($userRole) ?> Account</p>
-            </div>
+            <span style="font-weight:700; color:#1e293b; font-size:1.1rem;">HRMS Portal</span>
         </div>
+        <button class="close-btn" onclick="toggleMobileDrawer()">
+            <i data-lucide="x"></i>
+        </button>
     </div>
 
-    <div class="drawer-body" style="padding: 1rem 0; flex: 1; overflow-y: auto;">
-        <?php if ($userRole === 'Employee'): ?>
-            <!-- EMPLOYEE DRAWER LINKS -->
+    <div class="drawer-content">
+        <div class="drawer-section">
+            <span class="section-title">Menu</span>
             <a href="employee_dashboard.php"
-                class="nav-item-mobile <?= is_active_mobile('employee_dashboard.php', $current_page) ?>">
+                class="drawer-item <?= $current_page == 'employee_dashboard.php' ? 'active' : '' ?>">
                 <i data-lucide="layout-dashboard"></i> Dashboard
             </a>
             <a href="attendance_view.php"
-                class="nav-item-mobile <?= is_active_mobile('attendance_view.php', $current_page) ?>">
+                class="drawer-item <?= $current_page == 'attendance_view.php' ? 'active' : '' ?>">
                 <i data-lucide="calendar-check"></i> Attendance
             </a>
-            <a href="leave_apply.php" class="nav-item-mobile <?= is_active_mobile('leave_apply.php', $current_page) ?>">
-                <i data-lucide="coffee"></i> Leave Request
+            <a href="leave_apply.php" class="drawer-item <?= $current_page == 'leave_apply.php' ? 'active' : '' ?>">
+                <i data-lucide="calendar"></i> Leaves
             </a>
-            <a href="view_holidays.php" class="nav-item-mobile <?= is_active_mobile('view_holidays.php', $current_page) ?>">
-                <i data-lucide="calendar-days"></i> Holidays
+            <a href="holidays.php" class="drawer-item <?= $current_page == 'holidays.php' ? 'active' : '' ?>">
+                <i data-lucide="coffee"></i> Holidays
             </a>
-            <a href="view_notices.php" class="nav-item-mobile <?= is_active_mobile('view_notices.php', $current_page) ?>">
-                <i data-lucide="bell"></i> Notice Board
+            <a href="payroll.php" class="drawer-item <?= $current_page == 'payroll.php' ? 'active' : '' ?>">
+                <i data-lucide="banknote"></i> Payroll
             </a>
+        </div>
 
-            <!-- Payroll Dropdown for Mobile -->
-            <div class="nav-group-mobile">
-                <div class="nav-item-mobile dropdown-toggle-mobile" onclick="toggleMobileSubNav('payrollSubMobile', this)">
-                    <i data-lucide="banknote"></i>
-                    <span>Payroll</span>
-                    <i data-lucide="chevron-down" class="chevron-icon-mobile"
-                        style="margin-left: auto; width: 16px; transition: transform 0.2s;"></i>
-                </div>
-                <div id="payrollSubMobile" class="sub-nav-mobile">
-                    <a href="javascript:void(0)" class="sub-nav-item-mobile">
-                        <i data-lucide="file-down" style="width: 16px; height: 16px;"></i>
-                        <span>Download Salary Slip <small style="opacity: 0.6;">(Soon)</small></span>
-                    </a>
-                </div>
-            </div>
-
-            <a href="view_policy.php" class="nav-item-mobile <?= is_active_mobile('view_policy.php', $current_page) ?>">
-                <i data-lucide="book-open"></i> Company Policies
+        <div class="drawer-section">
+            <span class="section-title">Account</span>
+            <a href="profile.php" class="drawer-item <?= $current_page == 'profile.php' ? 'active' : '' ?>">
+                <i data-lucide="user"></i> My Profile
             </a>
-
-            <a href="resignation.php" class="nav-item-mobile <?= is_active_mobile('resignation.php', $current_page) ?>">
-                <i data-lucide="log-out"></i> Leaving Us
+            <a href="logout.php" class="drawer-item logout">
+                <i data-lucide="log-out"></i> Logout
             </a>
-            <a href="leave_manager_approval.php"
-                class="nav-item-mobile <?= is_active_mobile('leave_manager_approval.php', $current_page) ?>">
-                <i data-lucide="users"></i> Team Requests
-            </a>
-        <?php else: ?>
-            <!-- ADMIN DRAWER LINKS -->
-            <a href="index.php" class="nav-item-mobile <?= is_active_mobile('index.php', $current_page) ?>">
-                <i data-lucide="layout-dashboard"></i> Home Dashboard
-            </a>
-            <a href="leave_admin.php" class="nav-item-mobile <?= is_active_mobile('leave_admin.php', $current_page) ?>">
-                <i data-lucide="shield-check"></i> Leave Approvals
-            </a>
-
-            <a href="admin_resignations.php"
-                class="nav-item-mobile <?= is_active_mobile('admin_resignations.php', $current_page) ?>">
-                <i data-lucide="user-x"></i> Resignations
-            </a>
-
-            <!-- Admin Onboarding Dropdown -->
-            <div class="nav-group-mobile">
-                <?php
-                $onboardingPages = ['designation.php', 'department.php', 'employees.php'];
-                $is_onboarding_active = false;
-                foreach ($onboardingPages as $p) {
-                    if (strpos($current_page, $p) !== false) {
-                        $is_onboarding_active = true;
-                        break;
-                    }
-                }
-                ?>
-                <div class="nav-item-mobile dropdown-toggle-mobile <?= $is_onboarding_active ? 'active' : '' ?>"
-                    onclick="toggleMobileSubNav('onboardingSubMobile', this)">
-                    <i data-lucide="users"></i>
-                    <span>Onboarding</span>
-                    <i data-lucide="chevron-down" class="chevron-icon-mobile"
-                        style="margin-left: auto; width: 16px; transition: transform 0.2s; transform: <?= $is_onboarding_active ? 'rotate(180deg)' : 'rotate(0deg)' ?>"></i>
-                </div>
-                <div id="onboardingSubMobile" class="sub-nav-mobile <?= $is_onboarding_active ? 'show' : '' ?>">
-                    <a href="designation.php"
-                        class="sub-nav-item-mobile <?= is_active_mobile('designation.php', $current_page) ?>">
-                        <i data-lucide="briefcase" style="width:16px;"></i> Designations
-                    </a>
-                    <a href="department.php"
-                        class="sub-nav-item-mobile <?= is_active_mobile('department.php', $current_page) ?>">
-                        <i data-lucide="building-2" style="width:16px;"></i> Departments
-                    </a>
-                    <a href="employees.php"
-                        class="sub-nav-item-mobile <?= is_active_mobile('employees.php', $current_page) ?>">
-                        <i data-lucide="users" style="width:16px;"></i> Employee List
-                    </a>
-                </div>
-            </div>
-
-            <div
-                style="padding: 10px 1.5rem; font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">
-                Management</div>
-            <a href="attendance.php" class="nav-item-mobile <?= is_active_mobile('attendance.php', $current_page) ?>">
-                <i data-lucide="calendar-check"></i> Attendance Logs
-            </a>
-            <a href="leave.php" class="nav-item-mobile <?= is_active_mobile('leave.php', $current_page) ?>">
-                <i data-lucide="coffee"></i> All Leaves
-            </a>
-            <a href="holidays.php" class="nav-item-mobile <?= is_active_mobile('holidays.php', $current_page) ?>">
-                <i data-lucide="calendar-days"></i> Manage Holidays
-            </a>
-            <a href="locations.php" class="nav-item-mobile <?= is_active_mobile('locations.php', $current_page) ?>">
-                <i data-lucide="map-pin"></i> Branch Locations
-            </a>
-            <a href="admin_notices.php" class="nav-item-mobile <?= is_active_mobile('admin_notices.php', $current_page) ?>">
-                <i data-lucide="megaphone"></i> Manage Notices
-            </a>
-            <a href="policy.php" class="nav-item-mobile <?= is_active_mobile('policy.php', $current_page) ?>">
-                <i data-lucide="book-open"></i> Policy Settings
-            </a>
-        <?php endif; ?>
-
-        <div style="border-top: 1px solid #f1f5f9; margin: 1rem 0;"></div>
-
-        <a href="profile.php" class="nav-item-mobile <?= is_active_mobile('profile.php', $current_page) ?>">
-            <i data-lucide="user-circle"></i> My Profile
-        </a>
-        <a href="logout.php" class="nav-item-mobile" style="color: #ef4444; font-weight: 600;">
-            <i data-lucide="log-out"></i> Logout
-        </a>
+        </div>
     </div>
 </div>
-
-<style>
-    .nav-item-mobile {
-        padding: 0.85rem 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: #1e293b;
-        text-decoration: none;
-        font-size: 0.95rem;
-        font-weight: 500;
-        transition: all 0.2s;
-        cursor: pointer;
-    }
-
-    .nav-item-mobile i {
-        width: 20px;
-        height: 20px;
-        color: #64748b;
-    }
-
-    .nav-item-mobile.active {
-        background: #f8fafc;
-        color: #6366f1;
-        border-left: 4px solid #6366f1;
-    }
-
-    .nav-item-mobile.active i {
-        color: #6366f1;
-    }
-
-    /* Mobile Sub-nav styles */
-    .sub-nav-mobile {
-        display: none;
-        background: #fdfdfd;
-        padding-left: 1rem;
-    }
-
-    .sub-nav-mobile.show {
-        display: block;
-    }
-
-    .sub-nav-item-mobile {
-        padding: 0.75rem 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #475569;
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transition: all 0.2s;
-        border-left: 1px solid #e2e8f0;
-        margin-left: 1.5rem;
-    }
-
-    .sub-nav-item-mobile.active {
-        color: #6366f1;
-        border-left-color: #6366f1;
-        background: #f8fafc;
-    }
-
-    .sub-nav-item-mobile i {
-        width: 16px;
-        height: 16px;
-        opacity: 0.7;
-    }
-</style>
 
 <script>
     function toggleMobileDrawer() {
         const drawer = document.getElementById('mobileDrawer');
         const overlay = document.getElementById('drawerOverlay');
-        drawer.classList.toggle('open');
-        overlay.classList.toggle('show');
-    }
-
-    function toggleMobileSubNav(id, btn) {
-        const subNav = document.getElementById(id);
-        const icon = btn.querySelector('.chevron-icon-mobile');
-
-        const isOpening = !subNav.classList.contains('show');
-
-        subNav.classList.toggle('show');
-
-        if (isOpening) {
-            icon.style.transform = "rotate(180deg)";
-        } else {
-            icon.style.transform = "rotate(0deg)";
-        }
+        drawer.classList.toggle('active');
+        overlay.classList.toggle('active');
     }
 </script>
+
+<style>
+    /* Drawer Styles */
+    .mobile-drawer {
+        position: fixed;
+        top: 0;
+        right: -280px;
+        width: 280px;
+        height: 100%;
+        background: white;
+        z-index: 2000;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-drawer.active {
+        right: 0;
+    }
+
+    .drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+        backdrop-filter: blur(2px);
+    }
+
+    .drawer-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .drawer-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4f46e5, #818cf8);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .drawer-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+    }
+
+    .drawer-section {
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 15px;
+    }
+
+    .drawer-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        text-decoration: none;
+        color: #475569;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        margin-bottom: 5px;
+        transition: all 0.2s;
+    }
+
+    .drawer-item:hover {
+        background: #f8fafc;
+        color: #1e293b;
+    }
+
+    .drawer-item.active {
+        background: #e0e7ff;
+        color: #4338ca;
+        font-weight: 600;
+    }
+
+    .drawer-item i {
+        width: 20px;
+        height: 20px;
+    }
+
+    .drawer-item.logout {
+        color: #ef4444;
+    }
+
+    .drawer-item.logout:hover {
+        background: #fef2f2;
+    }
+</style>

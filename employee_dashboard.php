@@ -533,9 +533,11 @@ $latest_notices = $notice_q->fetchAll();
                 </div>
                 <div style="flex: 1;">
                     <h4 style="font-weight: 700; color: #1e293b;">
-                        <?= $next_holiday ? htmlspecialchars($next_holiday['title']) : 'No Holiday' ?></h4>
+                        <?= $next_holiday ? htmlspecialchars($next_holiday['title']) : 'No Holiday' ?>
+                    </h4>
                     <p style="font-size: 12px; color: #64748b; margin-top: 2px;">
-                        <?= $next_holiday ? date('D, d M Y', strtotime($next_holiday['start_date'])) : '---' ?></p>
+                        <?= $next_holiday ? date('D, d M Y', strtotime($next_holiday['start_date'])) : '---' ?>
+                    </p>
                 </div>
                 <a href="view_holidays.php"
                     style="color: #7C3AED; font-weight: 700; font-size: 13px; display: flex; align-items: center; text-decoration: none;">
@@ -559,7 +561,8 @@ $latest_notices = $notice_q->fetchAll();
                         <div style="flex: 1; overflow: hidden;">
                             <p
                                 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                <?= htmlspecialchars($notice['title']) ?></p>
+                                <?= htmlspecialchars($notice['title']) ?>
+                            </p>
                             <p style="font-size: 11px; color: #94a3b8;"><?= date('d M', strtotime($notice['created_at'])) ?>
                                 • <?= htmlspecialchars($notice['urgency']) ?></p>
                         </div>
@@ -569,31 +572,7 @@ $latest_notices = $notice_q->fetchAll();
             </div>
         </div>
 
-        <!-- Bottom Navigation -->
-        <nav class="m-bottom-nav">
-            <a href="employee_dashboard.php" class="m-nav-item active">
-                <i data-lucide="layout-grid" style="width: 24px;"></i>
-                <span class="m-nav-label">Dashboard</span>
-            </a>
-            <a href="attendance_view.php" class="m-nav-item">
-                <i data-lucide="calendar" style="width: 24px;"></i>
-                <span class="m-nav-label">Attendance</span>
-            </a>
-            <a href="leave_apply.php" class="m-nav-item" style="position: relative;">
-                <i data-lucide="calendar-days" style="width: 24px;"></i>
-                <span class="m-nav-label">Leaves</span>
-                <span
-                    style="position: absolute; top: -2px; right: 18px; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span>
-            </a>
-            <a href="javascript:void(0)" class="m-nav-item">
-                <i data-lucide="wallet" style="width: 24px;"></i>
-                <span class="m-nav-label">Payroll</span>
-            </a>
-            <a href="javascript:void(0)" onclick="toggleMobileDrawer()" class="m-nav-item">
-                <i data-lucide="menu" style="width: 24px;"></i>
-                <span class="m-nav-label">Menu</span>
-            </a>
-        </nav>
+        <!-- Bottom Navigation (Handled globally by includes/mobile_nav.php) -->
     </div>
 
     <!-- ============================================== -->
@@ -713,9 +692,11 @@ $latest_notices = $notice_q->fetchAll();
                             </div>
                             <div style="flex:1;">
                                 <div style="font-weight:600; font-size:0.9rem; color:#1e293b;">
-                                    <?= htmlspecialchars($notice['title']) ?></div>
+                                    <?= htmlspecialchars($notice['title']) ?>
+                                </div>
                                 <div style="font-size:0.75rem; color:#94a3b8;">
-                                    <?= date('d M', strtotime($notice['created_at'])) ?></div>
+                                    <?= date('d M', strtotime($notice['created_at'])) ?>
+                                </div>
                             </div>
                         </a>
                     <?php endforeach; ?>
