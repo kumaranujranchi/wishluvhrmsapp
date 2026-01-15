@@ -4,7 +4,7 @@
 <?php include 'includes/mobile_nav.php'; ?>
 
 <!-- PWA Script -->
-<script src="/assets/js/pwa.js"></script>
+<script src="assets/js/pwa.js"></script>
 
 <!-- Chatbot UI -->
 <div class="chatbot-container">
@@ -42,7 +42,9 @@
 
 <!-- Init Lucide Icons AFTER UI is loaded -->
 <script>
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 </script>
 
 <!-- Chatbot JS -->

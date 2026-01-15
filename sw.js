@@ -1,17 +1,19 @@
 // Service Worker for HRMS PWA
-const CACHE_NAME = 'hrms-v1.0.2';
-const OFFLINE_URL = '/offline.html';
+const CACHE_NAME = 'hrms-v1.0.3';
+const OFFLINE_URL = 'offline.html';
 
 // Files to cache
 const STATIC_CACHE = [
-    '/',
-    '/index.php',
-    '/attendance_view.php',
-    '/leave_apply.php',
-    '/view_holidays.php',
-    '/assets/css/style.css',
-    '/offline.html',
-    '/manifest.json'
+    'index.php',
+    'attendance_view.php',
+    'leave_apply.php',
+    'view_holidays.php',
+    'assets/css/style.css',
+    'assets/css/chatbot.css',
+    'assets/js/chatbot.js',
+    'assets/js/pwa.js',
+    'offline.html',
+    'manifest.json'
 ];
 
 // Install event - cache static assets
