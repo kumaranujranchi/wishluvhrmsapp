@@ -72,22 +72,32 @@
         <div class="main-content">
             <!-- Header Included Here -->
             <header class="header glass-panel">
+                <!-- Mobile: Profile Link (Left) -->
+                <a href="profile.php" class="mobile-profile-link mobile-only"
+                    style="margin-right: 12px; text-decoration: none;">
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['first_name'] ?? 'User') ?>&background=ffd6a8&color=d97706&size=128"
+                        alt="Profile"
+                        style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                </a>
+
+                <!-- Desktop: Hamburger (Hidden on mobile now as per request) -->
                 <div class="mobile-hamburger-trigger" onclick="toggleMobileDrawer()"
                     style="display: none; cursor: pointer; margin-right: 15px; color: #1e293b;">
                     <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
                 </div>
 
                 <div style="flex: 1;">
-                    <h2 style="margin:0; font-size:1.1rem; color:#1e293b; font-weight: 700;">
+                    <h2 class="header-greeting" style="margin:0; font-size:1.1rem; color:#1e293b; font-weight: 700;">
                         <?php
                         $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
                         echo '<span class="desktop-greeting">' . htmlspecialchars($display_name) . '</span>';
                         echo '<span class="mobile-greeting">Hello, ' . htmlspecialchars($display_name) . '!</span>';
                         ?>
                     </h2>
-                    <p style="margin:0; font-size:0.75rem; color:#64748b; font-weight: 500;">
+                    <p class="header-date" style="margin:0; font-size:0.75rem; color:#64748b; font-weight: 500;">
                         <span class="desktop-date"><?= date('D, d M') ?></span>
-                        <span class="mobile-date"><?= date('D, d M') ?> • <?= date('H') < 12 ? 'Good Morning' : (date('H') < 17 ? 'Good Afternoon' : 'Good Evening') ?></span>
+                        <span class="mobile-date"><?= date('D, d M') ?> •
+                            <?= date('H') < 12 ? 'Good Morning' : (date('H') < 17 ? 'Good Afternoon' : 'Good Evening') ?></span>
                     </p>
                 </div>
 
@@ -101,12 +111,12 @@
                     $unread_stmt->execute(['uid' => $_SESSION['user_id']]);
                     $unread_count = $unread_stmt->fetchColumn();
                     ?>
-                    <a href="view_notices.php" class="action-btn" title="Notices"
-                        style="position: relative; text-decoration: none; color: inherit;">
-                        <i data-lucide="bell" class="icon" style="width: 20px;"></i>
+                    <a href="view_notices.php" class="notification-bell" title="Notices"
+                        style="position: relative; text-decoration: none; color: #1e293b; background: #f8fafc; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                        <i data-lucide="bell" class="icon" style="width: 22px;"></i>
                         <?php if ($unread_count > 0): ?>
                             <span
-                                style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; border: 2px solid white;">
+                                style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; border: 2px solid white;">
                                 <?= $unread_count ?>
                             </span>
                         <?php endif; ?>
@@ -115,84 +125,65 @@
             </header>
 
             <style>
-                /* Desktop - show desktop greeting, hide mobile */
-                .mobile-greeting, .mobile-date {
+                /* Desktop default */
+                .mobile-greeting,
+                .mobile-date,
+                .mobile-profile-link {
                     display: none;
                 }
-                .desktop-greeting, .desktop-date {
+
+                .desktop-greeting,
+                .desktop-date {
                     display: inline;
                 }
 
+                .notification-bell {
+                    background: transparent !important;
+                    width: auto !important;
+                    height: auto !important;
+                    box-shadow: none !important;
+                }
+
                 @media (max-width: 768px) {
-                    /* Mobile - show mobile greeting, hide desktop */
-                    .desktop-greeting, .desktop-date {
-                        display: none;
-                    }
-                    .mobile-greeting, .mobile-date {
-                        display: inline;
+
+                    /* Mobile Override */
+                    .desktop-greeting,
+                    .desktop-date,
+                    .mobile-hamburger-trigger {
+                        display: none !important;
                     }
 
-                    .mobile-hamburger-trigger {
-                        display: block !important;
+                    .mobile-greeting,
+                    .mobile-date,
+                    .mobile-profile-link {
+                        display: inline-block !important;
                     }
 
                     .header {
-                        padding: 12px 16px !important;
+                        padding: 12px 20px !important;
                         background: white !important;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
-                    }
-
-                    .header h2::before {
-                        content: '';
-                        display: inline-block;
-                        width: 44px;
-                        height: 44px;
-                        border-radius: 50%;
-                        background: linear-gradient(135deg, #6366f1, #a855f7);
-                        margin-right: 12px;
-                        vertical-align: middle;
-                        background-image: url('https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['first_name'] ?? 'User') ?>&background=random&color=fff&size=128');
-                        background-size: cover;
-                        border: 2px solid #f1f5f9;
+                        box-shadow: none !important;
+                        display: flex !important;
+                        align-items: center !important;
                     }
 
                     .header h2 {
-                        font-size: 1.05rem !important;
-                        display: flex;
-                        align-items: center;
-                    }
-
-                    .header h2::after {
-                        content: 'Hello, ';
-                        position: absolute;
-                        left: -9999px;
+                        font-size: 1.1rem !important;
+                        margin-bottom: 2px !important;
                     }
 
                     .header p {
-                        margin-left: 56px !important;
-                        font-size: 0.72rem !important;
+                        font-size: 0.75rem !important;
+                        margin: 0 !important;
                     }
 
-                    .header .action-btn {
+                    .notification-bell {
                         width: 44px !important;
                         height: 44px !important;
-                        background: #f8fafc !important;
+                        background: white !important;
                         border-radius: 50% !important;
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.04) !important;
-                    }
-
-                    .header .action-btn i {
-                        width: 22px !important;
-                        height: 22px !important;
-                        color: #1e293b !important;
-                    }
-
-                    .header .action-btn span {
-                        top: 6px !important;
-                        right: 6px !important;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+                        border: 1px solid #f1f5f9 !important;
                     }
                 }
             </style>

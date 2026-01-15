@@ -61,6 +61,16 @@ for ($i = 6; $i >= 0; $i--) {
     $cq->execute(['uid' => $user_id, 'd' => $d]);
     $chart_data[] = floatval($cq->fetchColumn() ?: 0);
 }
+
+// 7. Fetch Notices (Global Access)
+$notice_q = $conn->prepare("
+    SELECT n.*, 
+    (SELECT 1 FROM notice_reads WHERE notice_id = n.id AND employee_id = :uid) as is_read 
+    FROM notices n 
+    ORDER BY n.created_at DESC LIMIT 3
+");
+$notice_q->execute(['uid' => $user_id]);
+$latest_notices = $notice_q->fetchAll();
 ?>
 
 <style>
@@ -345,6 +355,8 @@ for ($i = 6; $i >= 0; $i--) {
     </div>
 
     <!-- Analytics Cards -->
+    <!-- Stats Grid (Mobile & Desktop) -->
+    <!-- On mobile, we force a strict 2x2 grid via CSS -->
     <div class="stats-grid-sharp">
         <div class="sharp-card" style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
             <div>
@@ -386,7 +398,8 @@ for ($i = 6; $i >= 0; $i--) {
             <div class="card-footer">Pending: <?= $pending_leaves ?></div>
         </div>
 
-        <div class="sharp-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+        <!-- Birthday Card (Desktop Only via CSS) -->
+        <div class="sharp-card mobile-hidden" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
             <div>
                 <span class="card-label">Birthday</span>
                 <?php if ($next_birthday): ?>
@@ -401,6 +414,64 @@ for ($i = 6; $i >= 0; $i--) {
             </div>
             <i data-lucide="cake"></i>
             <div class="card-footer">Next Celebration</div>
+        </div>
+    </div>
+    
+    <!-- Mobile Analytics Chart Section -->
+    <div class="mobile-only section-container">
+        <div class="section-header">
+            <h3 class="section-title">Performance Analytics</h3>
+            <span class="weekly-badge">Weekly</span>
+        </div>
+        <div class="chart-card-mobile">
+            <div class="chart-container-mobile">
+                <canvas id="mobileChart"></canvas>
+            </div>
+            <div class="chart-footer-mobile">
+                <div class="legend-item">
+                    <span class="dot"></span> Work Efficiency
+                </div>
+                <div class="percentage">+12.5%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Holiday Section -->
+    <div class="mobile-only section-container">
+         <div class="section-header">
+            <h3 class="section-title">Upcoming Holiday</h3>
+        </div>
+        <div class="mobile-content-card">
+            <div class="icon-box-purple">
+                <i data-lucide="calendar"></i>
+            </div>
+            <div class="content-box">
+                <h4><?= $next_holiday ? htmlspecialchars($next_holiday['title']) : 'No Holiday' ?></h4>
+                <p><?= $next_holiday ? date('D, d M Y', strtotime($next_holiday['start_date'])) : '---' ?></p>
+            </div>
+            <a href="view_holidays.php" class="action-link">
+                View <i data-lucide="chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Mobile Announcements Section -->
+    <div class="mobile-only section-container">
+        <div class="section-header">
+            <h3 class="section-title">Announcements</h3>
+            <a href="view_notices.php" class="see-all-link">See all</a>
+        </div>
+        <div class="announcements-list">
+             <?php foreach ($latest_notices as $notice): ?>
+                <a href="notice_details.php?id=<?= $notice['id'] ?>" class="mobile-content-card small-pad">
+                    <span class="status-dot-mobile" style="background: <?= $notice['urgency'] === 'Urgent' ? '#ef4444' : '#6366f1' ?>;"></span>
+                    <div class="content-box">
+                        <h4 class="truncate"><?= htmlspecialchars($notice['title']) ?></h4>
+                        <p><?= date('d M', strtotime($notice['created_at'])) ?> • <?= htmlspecialchars($notice['urgency']) ?></p>
+                    </div>
+                    <i data-lucide="chevron-right" style="color: #cbd5e1; width: 18px;"></i>
+                </a>
+             <?php endforeach; ?>
         </div>
     </div>
 
@@ -440,20 +511,10 @@ for ($i = 6; $i >= 0; $i--) {
                     &rarr;</a>
             </div>
 
-            <!-- Recent Notices -->
-            <div style="margin-top:0.5rem;">
+            <!-- Recent Notices (Desktop Only) -->
+            <div style="margin-top:0.5rem;" class="desktop-only">
                 <h3 style="margin-bottom:1rem; font-size:1.1rem; color:#1e293b;">Announcements</h3>
-                <?php
-                $stmt = $conn->prepare("
-                    SELECT n.*, 
-                    (SELECT 1 FROM notice_reads WHERE notice_id = n.id AND employee_id = :uid) as is_read 
-                    FROM notices n 
-                    ORDER BY n.created_at DESC LIMIT 3
-                ");
-                $stmt->execute(['uid' => $user_id]);
-                $latest_notices = $stmt->fetchAll();
-
-                foreach ($latest_notices as $notice): ?>
+                <?php foreach ($latest_notices as $notice): ?>
                     <a href="notice_details.php?id=<?= $notice['id'] ?>" class="notice-item-sharp">
                         <div
                             style="width: 10px; height: 10px; border-radius: 50%; background: <?= $notice['urgency'] === 'Urgent' ? '#ef4444' : '#6366f1' ?>;">
@@ -518,3 +579,31 @@ for ($i = 6; $i >= 0; $i--) {
 </script>
 
 <?php include 'includes/footer.php'; ?>
+
+<script>
+    // Mobile Chart
+    const mobileCtx = document.getElementById('mobileChart');
+    if (mobileCtx) {
+        new Chart(mobileCtx, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode($chart_labels) ?>,
+                datasets: [{
+                    data: <?= json_encode($chart_data) ?>,
+                    backgroundColor: '#8b5cf6',
+                    borderRadius: 6,
+                    barThickness: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    y: { display: false }
+                }
+            }
+        });
+    }
+</script>
