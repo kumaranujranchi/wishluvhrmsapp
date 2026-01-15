@@ -70,8 +70,8 @@
         <?php include 'includes/sidebar.php'; ?>
 
         <div class="main-content">
-            <!-- Header Included Here -->
-            <header class="header glass-panel">
+            <!-- Header (Desktop Only) -->
+            <header class="header glass-panel desktop-only">
                 <!-- Mobile: Profile Link (Left) -->
                 <a href="profile.php" class="mobile-profile-link mobile-only"
                     style="margin-right: 12px; text-decoration: none;">

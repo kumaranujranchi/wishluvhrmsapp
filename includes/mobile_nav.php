@@ -11,6 +11,9 @@ function is_active_mobile($page, $current)
 ?>
 
 
+<!-- Bottom Navigation (Disabled - Using Custom Dashboard Design) -->
+<!-- <div class="bottom-nav"> ... </div> -->
+
 <!-- Mobile Drawer Overlay -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
 
