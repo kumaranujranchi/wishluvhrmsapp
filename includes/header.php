@@ -61,7 +61,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Chatbot CSS -->
-    <link rel="stylesheet" href="assets/css/chatbot.css">
+    <link rel="stylesheet" href="assets/css/chatbot.css?v=2.0">
 
     <style>
         /* Header Styles */
@@ -190,15 +190,6 @@
         function toggleMobileChat() {
             const cw = document.getElementById('chatWindow');
             if (cw) cw.classList.toggle('active');
-        }
-
-        function toggleMobileDrawer() {
-            const drawer = document.getElementById('mobileDrawer');
-            const overlay = document.getElementById('drawerOverlay');
-            if (drawer && overlay) {
-                drawer.classList.toggle('active');
-                overlay.classList.toggle('active');
-            }
         }
     </script>
 </head>
