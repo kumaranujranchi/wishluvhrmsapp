@@ -425,34 +425,6 @@ $latest_notices = $notice_q->fetchAll();
     <!-- ============================================== -->
     <div class="mobile-view-container">
 
-        <!-- Header -->
-        <header class="mobile-header">
-            <div class="profile-section">
-                <a href="profile.php" class="avatar-circle">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['first_name']) ?>&background=e2e8f0&color=1e293b&size=128"
-                        alt="Profile">
-                </a>
-                <div class="greeting-text">
-                    <h1>Hello, <?= htmlspecialchars($_SESSION['first_name']) ?>!</h1>
-                    <p><?= date('D, d M') ?> • Good Morning</p>
-                </div>
-            </div>
-
-            <div class="header-actions-mobile">
-                <!-- Chat Toggle -->
-                <button onclick="toggleMobileChat()" class="header-icon-btn">
-                    <i data-lucide="message-circle" style="width: 20px; height: 20px;"></i>
-                </button>
-
-                <!-- Notifications -->
-                <a href="view_notices.php" class="header-icon-btn">
-                    <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
-                    <?php if (count($latest_notices) > 0): ?>
-                        <span class="notif-badge"><?= count($latest_notices) ?></span>
-                    <?php endif; ?>
-                </a>
-            </div>
-        </header>
 
         <!-- Stats Grid -->
         <div class="mobile-grid">

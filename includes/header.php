@@ -69,126 +69,229 @@
         <!-- Sidebar Included Here -->
         <?php include 'includes/sidebar.php'; ?>
 
-        <div class="main-content">
-            <!-- Header (Desktop Only) -->
-            <header class="header glass-panel desktop-only">
-                <!-- Mobile: Profile Link (Left) -->
-                <a href="profile.php" class="mobile-profile-link mobile-only"
-                    style="margin-right: 12px; text-decoration: none;">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['first_name'] ?? 'User') ?>&background=ffd6a8&color=d97706&size=128"
-                        alt="Profile"
-                        style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                </a>
+        <!-- Header (Unified Responsive) -->
+        <header class="header glass-panel">
+            <!-- Mobile: Profile Link (Left) -->
+            <a href="profile.php" class="mobile-only profile-link-mobile">
+                <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['first_name'] ?? 'User') ?>&background=ffd6a8&color=d97706&size=128"
+                    alt="Profile">
+            </a>
 
-                <!-- Desktop: Hamburger (Hidden on mobile now as per request) -->
-                <div class="mobile-hamburger-trigger" onclick="toggleMobileDrawer()"
-                    style="display: none; cursor: pointer; margin-right: 15px; color: #1e293b;">
-                    <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
-                </div>
+            <!-- Desktop: Hamburger (Hidden on mobile) -->
+            <div class="desktop-only hamburger-trigger" onclick="toggleMobileDrawer()">
+                <i data-lucide="menu"></i>
+            </div>
 
-                <div style="flex: 1;">
-                    <h2 class="header-greeting" style="margin:0; font-size:1.1rem; color:#1e293b; font-weight: 700;">
-                        <?php
-                        $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
-                        echo '<span class="desktop-greeting">' . htmlspecialchars($display_name) . '</span>';
-                        echo '<span class="mobile-greeting">Hello, ' . htmlspecialchars($display_name) . '!</span>';
-                        ?>
-                    </h2>
-                    <p class="header-date" style="margin:0; font-size:0.75rem; color:#64748b; font-weight: 500;">
-                        <span class="desktop-date"><?= date('D, d M') ?></span>
-                        <span class="mobile-date"><?= date('D, d M') ?> •
-                            <?= date('H') < 12 ? 'Good Morning' : (date('H') < 17 ? 'Good Afternoon' : 'Good Evening') ?></span>
-                    </p>
-                </div>
-
-                <div class="header-actions">
+            <div style="flex: 1; margin-left: 10px;">
+                <h2 class="header-greeting">
                     <?php
-                    // Fetch unread notice count
-                    $unread_stmt = $conn->prepare("
+                    $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
+                    // Mobile Greeting
+                    echo '<span class="mobile-only">Hello, ' . htmlspecialchars($display_name) . '!</span>';
+                    // Desktop Greeting
+                    echo '<span class="desktop-only">' . htmlspecialchars($display_name) . '</span>';
+                    ?>
+                </h2>
+                <p class="header-date">
+                    <!-- Mobile Date -->
+                    <span class="mobile-only"><?= date('D, d M') ?> • Good Morning</span>
+                    <!-- Desktop Date -->
+                    <span class="desktop-only"><?= date('D, d M') ?></span>
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <!-- Chat Toggle (Mobile Only) -->
+                <button onclick="toggleMobileChat()" class="mobile-only action-icon-btn" style="margin-right: 8px;">
+                    <i data-lucide="message-circle"></i>
+                </button>
+
+                <?php
+                // Fetch unread notice count
+                $unread_stmt = $conn->prepare("
                         SELECT COUNT(*) FROM notices n 
                         WHERE n.id NOT IN (SELECT notice_id FROM notice_reads WHERE employee_id = :uid)
                     ");
-                    $unread_stmt->execute(['uid' => $_SESSION['user_id']]);
-                    $unread_count = $unread_stmt->fetchColumn();
-                    ?>
-                    <a href="view_notices.php" class="notification-bell" title="Notices"
-                        style="position: relative; text-decoration: none; color: #1e293b; background: #f8fafc; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                        <i data-lucide="bell" class="icon" style="width: 22px;"></i>
-                        <?php if ($unread_count > 0): ?>
-                            <span
-                                style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; border: 2px solid white;">
-                                <?= $unread_count ?>
-                            </span>
-                        <?php endif; ?>
-                    </a>
-                </div>
-            </header>
+                $unread_stmt->execute(['uid' => $_SESSION['user_id']]);
+                $unread_count = $unread_stmt->fetchColumn();
+                ?>
+                <a href="view_notices.php" class="action-icon-btn notification-bell">
+                    <i data-lucide="bell"></i>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="badge"><?= $unread_count ?></span>
+                    <?php endif; ?>
+                </a>
+            </div>
+        </header>
 
-            <style>
-                /* Desktop default */
-                .mobile-greeting,
-                .mobile-date,
-                .mobile-profile-link {
-                    display: none;
+        <style>
+            /* Shared Styles */
+            .header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 15px 25px;
+            }
+
+            .header-greeting {
+                margin: 0;
+                font-size: 1.1rem;
+                color: #1e293b;
+                font-weight: 700;
+            }
+
+            .header-date {
+                margin: 0;
+                font-size: 0.75rem;
+                color: #64748b;
+                font-weight: 500;
+            }
+
+            .action-icon-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #f8fafc;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #1e293b;
+                text-decoration: none;
+                border: none;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .action-icon-btn i {
+                width: 20px;
+                height: 20px;
+            }
+
+            .badge {
+                position: absolute;
+                top: -2px;
+                right: -2px;
+                background: #ef4444;
+                color: white;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.65rem;
+                font-weight: 800;
+                border: 2px solid white;
+            }
+
+            .profile-link-mobile img {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 2px solid white;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Mobile/Desktop Visibility Toggles */
+            .mobile-only {
+                display: none !important;
+            }
+
+            .desktop-only {
+                display: inline-block !important;
+            }
+
+            /* Mobile Specifics */
+            @media (max-width: 768px) {
+                .mobile-only {
+                    display: inline-block !important;
                 }
 
-                .desktop-greeting,
-                .desktop-date {
-                    display: inline;
+                .desktop-only {
+                    display: none !important;
                 }
 
-                .notification-bell {
-                    background: transparent !important;
-                    width: auto !important;
-                    height: auto !important;
-                    box-shadow: none !important;
+                .header {
+                    padding: 15px 20px !important;
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(10px);
+                    position: sticky;
+                    top: 0;
+                    z-index: 40;
                 }
 
-                @media (max-width: 768px) {
-
-                    /* Strict Hide Desktop Header */
-                    .desktop-only {
-                        display: none !important;
-                    }
-
-                    /* Mobile Override */
-                    .desktop-greeting,
-                    .desktop-date,
-                    .mobile-hamburger-trigger {
-                        display: none !important;
-                    }
-
-                    .mobile-greeting,
-                    .mobile-date,
-                    .mobile-profile-link {
-                        display: inline-block !important;
-                    }
-
-                    .header {
-                        padding: 12px 20px !important;
-                        background: white !important;
-                        box-shadow: none !important;
-                        display: flex !important;
-                        align-items: center !important;
-                    }
-
-                    .header h2 {
-                        font-size: 1.1rem !important;
-                        margin-bottom: 2px !important;
-                    }
-
-                    .header p {
-                        font-size: 0.75rem !important;
-                        margin: 0 !important;
-                    }
-
-                    .notification-bell {
-                        width: 44px !important;
-                        height: 44px !important;
-                        background: white !important;
-                        border-radius: 50% !important;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
-                        border: 1px solid #f1f5f9 !important;
-                    }
+                .action-icon-btn {
+                    background: white;
+                    border: 1px solid #f1f5f9;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                    color: #475569;
                 }
-            </style>
+
+                /* Flex alignment for mobile actions */
+                .header-actions {
+                    display: flex;
+                    align-items: center;
+                }
+            }
+        </style>
+
+        .desktop-greeting,
+        .desktop-date {
+        display: inline;
+        }
+
+        .notification-bell {
+        background: transparent !important;
+        width: auto !important;
+        height: auto !important;
+        box-shadow: none !important;
+        }
+
+        @media (max-width: 768px) {
+
+        /* Strict Hide Desktop Header */
+        .desktop-only {
+        display: none !important;
+        }
+
+        /* Mobile Override */
+        .desktop-greeting,
+        .desktop-date,
+        .mobile-hamburger-trigger {
+        display: none !important;
+        }
+
+        .mobile-greeting,
+        .mobile-date,
+        .mobile-profile-link {
+        display: inline-block !important;
+        }
+
+        .header {
+        padding: 12px 20px !important;
+        background: white !important;
+        box-shadow: none !important;
+        display: flex !important;
+        align-items: center !important;
+        }
+
+        .header h2 {
+        font-size: 1.1rem !important;
+        margin-bottom: 2px !important;
+        }
+
+        .header p {
+        font-size: 0.75rem !important;
+        margin: 0 !important;
+        }
+
+        .notification-bell {
+        width: 44px !important;
+        height: 44px !important;
+        background: white !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid #f1f5f9 !important;
+        }
+        }
+        </style>

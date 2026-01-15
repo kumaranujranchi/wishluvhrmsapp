@@ -50,6 +50,13 @@
 <!-- Chatbot JS -->
 <script src="assets/js/chatbot.js"></script>
 
+<script>
+    function toggleMobileChat() {
+        const cw = document.getElementById('chatWindow');
+        if (cw) cw.classList.toggle('active');
+    }
+</script>
+
 </body>
 
 </html>
