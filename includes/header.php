@@ -218,12 +218,12 @@
                         <?php
                         $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
                         echo '<span class="mobile-only">Hello, ' . htmlspecialchars($display_name) . '!</span>';
-                        echo '<span class="desktop-only">' . htmlspecialchars($display_name) . '</span>';
+                        // Desktop name removed to avoid duplication
                         ?>
                     </h2>
                     <p class="header-date">
                         <span class="mobile-only"><?= date('D, d M') ?> • Good Morning</span>
-                        <span class="desktop-only"><?= date('D, d M') ?></span>
+                        <span class="desktop-only"><?= date('D, d M, Y') ?></span>
                     </p>
                 </div>
 
