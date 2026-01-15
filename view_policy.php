@@ -142,14 +142,20 @@ include 'includes/header.php';
         <!-- Policy Navigation -->
         <div class="policy-nav">
             <div class="policy-nav-title">Policies</div>
-            <?php foreach ($all_policies as $p): ?>
-                <a href="?slug=<?= $p['slug'] ?>" class="policy-nav-item <?= ($p['slug'] == $slug) ? 'active' : '' ?>">
-                    <i data-lucide="<?= htmlspecialchars($p['icon']) ?>" style="width: 18px;"></i>
-                    <span>
-                        <?= htmlspecialchars($p['title']) ?>
-                    </span>
-                </a>
-            <?php endforeach; ?>
+            <?php if (empty($all_policies)): ?>
+                <div style="font-size: 0.85rem; color: #94a3b8; padding: 1rem 0;">
+                    No active policies found.
+                </div>
+            <?php else: ?>
+                <?php foreach ($all_policies as $p): ?>
+                    <a href="?slug=<?= $p['slug'] ?>" class="policy-nav-item <?= ($p['slug'] == $slug) ? 'active' : '' ?>">
+                        <i data-lucide="<?= htmlspecialchars($p['icon']) ?>" style="width: 18px;"></i>
+                        <span>
+                            <?= htmlspecialchars($p['title']) ?>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
 
         <!-- Policy Content -->
@@ -174,14 +180,21 @@ include 'includes/header.php';
                 </div>
 
                 <div class="policy-body">
-                    <?= $policy['content'] ?>
-                </div>
+                    <?php if (!empty($policy['content'])): ?>
+                            <?= $policy['content'] ?>
+                        <?php else: ?>
+                            <div style="padding: 2rem; background: #f8fafc; border-radius: 0.5rem; text-align: center; color: #64748b; border: 1px dashed #e2e8f0;">
+                                <i data-lucide="info" style="width: 32px; height: 32px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                                <p style="margin: 0;">No content has been published for this policy yet.</p>
+                            </div>
+                    <?php endif; ?>
+                    </div>
             <?php else: ?>
-                <div style="text-align:center; padding:5rem 0; color:#64748b;">
-                    <i data-lucide="book-open" style="width:64px; height:64px; margin-bottom:1.5rem; opacity:0.2;"></i>
-                    <h2>Select a Policy</h2>
-                    <p>Please select a policy from the sidebar to view its details.</p>
-                </div>
+                    <div style="text-align:center; padding:5rem 0; color:#64748b;">
+                        <i data-lucide="book-open" style="width:64px; height:64px; margin-bottom:1.5rem; opacity:0.2;"></i>
+                        <h2>Select a Policy</h2>
+                        <p>Please select a policy from the sidebar to view its details.</p>
+                    </div>
             <?php endif; ?>
         </div>
     </div>

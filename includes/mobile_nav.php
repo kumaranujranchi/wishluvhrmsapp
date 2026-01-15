@@ -67,32 +67,9 @@ function is_active_mobile($page, $current)
                 </div>
             </div>
 
-            <!-- Dynamic Policy Dropdown for Mobile -->
-            <div class="nav-group-mobile">
-                <?php
-                // Fetch active policies for mobile
-                $policy_stmt = $conn->query("SELECT slug, title, icon FROM policies WHERE is_active = 1 ORDER BY display_order ASC");
-                $active_policies = $policy_stmt->fetchAll();
-
-                $is_policy_page = (strpos($current_page, 'view_policy.php') !== false);
-                ?>
-                <div class="nav-item-mobile dropdown-toggle-mobile <?= $is_policy_page ? 'active' : '' ?>"
-                    onclick="toggleMobileSubNav('policySubMobile', this)">
-                    <i data-lucide="book-open"></i>
-                    <span>Company Policies</span>
-                    <i data-lucide="chevron-down" class="chevron-icon-mobile"
-                        style="margin-left: auto; width: 16px; transition: transform 0.2s; transform: <?= $is_policy_page ? 'rotate(180deg)' : 'rotate(0deg)' ?>"></i>
-                </div>
-                <div id="policySubMobile" class="sub-nav-mobile <?= $is_policy_page ? 'show' : '' ?>">
-                    <?php foreach ($active_policies as $policy): ?>
-                        <a href="view_policy.php?slug=<?= $policy['slug'] ?>"
-                            class="sub-nav-item-mobile <?= (isset($_GET['slug']) && $_GET['slug'] == $policy['slug']) ? 'active' : '' ?>">
-                            <i data-lucide="<?= htmlspecialchars($policy['icon']) ?>" style="width: 16px; height: 16px;"></i>
-                            <span><?= htmlspecialchars($policy['title']) ?></span>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+            <a href="view_policy.php" class="nav-item-mobile <?= is_active_mobile('view_policy.php', $current_page) ?>">
+                <i data-lucide="book-open"></i> Company Policies
+            </a>
 
             <a href="resignation.php" class="nav-item-mobile <?= is_active_mobile('resignation.php', $current_page) ?>">
                 <i data-lucide="log-out"></i> Leaving Us

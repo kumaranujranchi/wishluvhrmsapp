@@ -110,33 +110,10 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 </div>
             </div>
 
-            <!-- Policy Dropdown -->
-            <div class="nav-group">
-                <?php
-                // Fetch active policies from database
-                $policy_stmt = $conn->query("SELECT slug, title, icon FROM policies WHERE is_active = 1 ORDER BY display_order ASC");
-                $active_policies = $policy_stmt->fetchAll();
-
-                $policyPages = array_column($active_policies, 'slug');
-                $groupState = isGroupOpen($policyPages, true);
-                ?>
-                <button class="nav-item dropdown-btn <?= $groupState ?>" onclick="toggleSubNav('policySubNav', this)">
-                    <i data-lucide="book-open" class="icon"></i>
-                    <span>Policy</span>
-                    <i data-lucide="chevron-right" class="icon chevron-icon"
-                        style="transition: transform 0.2s; transform: <?= strpos($groupState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
-                </button>
-                <div id="policySubNav" class="sub-nav <?= strpos($groupState, 'open') !== false ? 'open' : '' ?>">
-                    <?php foreach ($active_policies as $policy): ?>
-                        <a href="view_policy.php?slug=<?= $policy['slug'] ?>"
-                            class="sub-nav-item <?php echo (isset($_GET['slug']) && $_GET['slug'] == $policy['slug']) ? 'active' : ''; ?>">
-                            <i data-lucide="<?= htmlspecialchars($policy['icon']) ?>" class="icon"
-                                style="width:16px;height:16px;"></i>
-                            <span><?= htmlspecialchars($policy['title']) ?></span>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+            <a href="view_policy.php" class="nav-item <?php echo isActive('view_policy'); ?>">
+                <i data-lucide="book-open" class="icon"></i>
+                <span>Policies</span>
+            </a>
 
             <a href="resignation.php" class="nav-item <?php echo isActive('resignation'); ?>">
                 <i data-lucide="log-out" class="icon"></i>
