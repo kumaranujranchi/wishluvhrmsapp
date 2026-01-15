@@ -84,11 +84,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </nav>
 </div>
 
-<!-- Mobile Drawer Overlay (Kept from previous version) -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
+<!-- Mobile Drawer Overlay -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
 
 <!-- Mobile Drawer -->
-<div class="mobile-drawer" id="mobileDrawer" style="position: fixed; top: 0; right: -280px; width: 280px; height: 100vh; background: white; z-index: 99999;">
+<div class="mobile-drawer" id="mobileDrawer"
+    style="position: fixed; top: 0; right: -280px; width: 280px; height: 100vh; background: white; z-index: 99999;">
     <div class="drawer-header">
         <div class="brand">
             <div class="logo-icon">

@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         newMenuBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             console.log('🖱️ Menu clicked!');
             
             const isActive = drawer.classList.contains('active');
@@ -38,18 +39,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 overlay.classList.add('active');
                 drawer.style.right = '0px';
                 console.log('✅ Opening drawer');
+                
+                // Attach overlay click handler AFTER a small delay
+                setTimeout(function() {
+                    overlay.addEventListener('click', function closeDrawer(e) {
+                        e.stopPropagation();
+                        console.log('🖱️ Overlay clicked - closing drawer');
+                        drawer.classList.remove('active');
+                        overlay.classList.remove('active');
+                        drawer.style.right = '-280px';
+                        overlay.removeEventListener('click', closeDrawer);
+                    }, { once: true });
+                }, 100);
             }
             
             console.log('Drawer active:', drawer.classList.contains('active'));
             console.log('Drawer right position:', drawer.style.right);
-        });
-        
-        // Also handle overlay click to close
-        overlay.addEventListener('click', function() {
-            console.log('🖱️ Overlay clicked - closing drawer');
-            drawer.classList.remove('active');
-            overlay.classList.remove('active');
-            drawer.style.right = '-280px';
         });
         
         console.log('✅ Menu handlers attached successfully');
