@@ -108,17 +108,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <span class="m-nav-label">Leaves</span>
         </a>
 
-        <!-- 4. Holidays -->
-        <a href="holidays.php" class="m-nav-item <?= $current_page == 'holidays.php' ? 'active' : '' ?>">
+        <!-- 4. Holidays (Fixed Link) -->
+        <a href="view_holidays.php" class="m-nav-item <?= $current_page == 'view_holidays.php' ? 'active' : '' ?>">
             <i data-lucide="coffee" class="m-nav-icon"></i>
             <span class="m-nav-label">Holiday</span>
         </a>
 
-        <!-- 5. Payroll -->
-        <a href="payroll.php" class="m-nav-item <?= $current_page == 'payroll.php' ? 'active' : '' ?>">
-            <i data-lucide="wallet" class="m-nav-icon"></i>
-            <span class="m-nav-label">Payroll</span>
-        </a>
+        <!-- Payroll Removed as requested -->
 
         <!-- 6. Policy -->
         <a href="view_policy.php" class="m-nav-item <?= $current_page == 'view_policy.php' ? 'active' : '' ?>">
