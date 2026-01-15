@@ -206,6 +206,10 @@ try {
     if ($http_code === 200) {
         $result = json_decode($response_json, true);
         $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
+
+        // DEBUG: Check which model is actually running
+        // $bot_text .= "\n\n(Debug: Using " . GEMINI_MODEL . " on v1beta)";
+
         $response = trim($bot_text);
 
         // Save to history
