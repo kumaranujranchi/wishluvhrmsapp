@@ -81,10 +81,14 @@
                     <h2 style="margin:0; font-size:1.1rem; color:#1e293b; font-weight: 700;">
                         <?php
                         $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
-                        echo htmlspecialchars($display_name);
+                        echo '<span class="desktop-greeting">' . htmlspecialchars($display_name) . '</span>';
+                        echo '<span class="mobile-greeting">Hello, ' . htmlspecialchars($display_name) . '!</span>';
                         ?>
                     </h2>
-                    <p style="margin:0; font-size:0.75rem; color:#64748b; font-weight: 500;"><?= date('D, d M') ?></p>
+                    <p style="margin:0; font-size:0.75rem; color:#64748b; font-weight: 500;">
+                        <span class="desktop-date"><?= date('D, d M') ?></span>
+                        <span class="mobile-date"><?= date('D, d M') ?> • <?= date('H') < 12 ? 'Good Morning' : (date('H') < 17 ? 'Good Afternoon' : 'Good Evening') ?></span>
+                    </p>
                 </div>
 
                 <div class="header-actions">
@@ -111,9 +115,84 @@
             </header>
 
             <style>
+                /* Desktop - show desktop greeting, hide mobile */
+                .mobile-greeting, .mobile-date {
+                    display: none;
+                }
+                .desktop-greeting, .desktop-date {
+                    display: inline;
+                }
+
                 @media (max-width: 768px) {
+                    /* Mobile - show mobile greeting, hide desktop */
+                    .desktop-greeting, .desktop-date {
+                        display: none;
+                    }
+                    .mobile-greeting, .mobile-date {
+                        display: inline;
+                    }
+
                     .mobile-hamburger-trigger {
                         display: block !important;
+                    }
+
+                    .header {
+                        padding: 12px 16px !important;
+                        background: white !important;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.03) !important;
+                    }
+
+                    .header h2::before {
+                        content: '';
+                        display: inline-block;
+                        width: 44px;
+                        height: 44px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #6366f1, #a855f7);
+                        margin-right: 12px;
+                        vertical-align: middle;
+                        background-image: url('https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['first_name'] ?? 'User') ?>&background=random&color=fff&size=128');
+                        background-size: cover;
+                        border: 2px solid #f1f5f9;
+                    }
+
+                    .header h2 {
+                        font-size: 1.05rem !important;
+                        display: flex;
+                        align-items: center;
+                    }
+
+                    .header h2::after {
+                        content: 'Hello, ';
+                        position: absolute;
+                        left: -9999px;
+                    }
+
+                    .header p {
+                        margin-left: 56px !important;
+                        font-size: 0.72rem !important;
+                    }
+
+                    .header .action-btn {
+                        width: 44px !important;
+                        height: 44px !important;
+                        background: #f8fafc !important;
+                        border-radius: 50% !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.04) !important;
+                    }
+
+                    .header .action-btn i {
+                        width: 22px !important;
+                        height: 22px !important;
+                        color: #1e293b !important;
+                    }
+
+                    .header .action-btn span {
+                        top: 6px !important;
+                        right: 6px !important;
                     }
                 }
             </style>

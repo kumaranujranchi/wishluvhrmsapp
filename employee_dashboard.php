@@ -190,94 +190,150 @@ for ($i = 6; $i >= 0; $i--) {
 
     /* Mobile Enhancements */
 
-    /* Mobile Enhancements (STRICT RESET) */
+    /* Mobile Enhancements - Design Reference Implementation */
     @media (max-width: 768px) {
+        body {
+            background: #f8fafc !important;
+        }
+
         .page-content {
-            padding: 10px !important;
+            padding: 16px !important;
             width: 100% !important;
             overflow-x: hidden !important;
             box-sizing: border-box !important;
-            display: block !important;
+            background: #f8fafc !important;
         }
 
         .welcome-banner {
-            width: 100% !important;
-            box-sizing: border-box;
-            border-radius: 12px !important;
-            margin-bottom: 15px !important;
-            padding: 15px !important;
-            border-left-width: 4px;
+            display: none !important;
         }
 
+        /* Stats Grid - 2x2 Layout */
         .stats-grid-sharp {
             display: grid !important;
             grid-template-columns: repeat(2, 1fr) !important;
-            gap: 10px !important;
-            width: 100% !important;
+            gap: 12px !important;
             margin-bottom: 20px !important;
         }
 
-        .stats-grid-sharp .sharp-card:last-child {
-            grid-column: span 2 !important;
+        .stats-grid-sharp .sharp-card:nth-child(5) {
+            display: none !important;
+            /* Hide birthday card on mobile */
         }
 
         .sharp-card {
-            min-height: 140px !important;
-            padding: 15px !important;
-            border-radius: 16px !important;
-            width: 100% !important;
-            box-sizing: border-box;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-        }
-
-        .card-footer {
-            margin: 1rem -15px -15px !important;
-            padding: 0.8rem 15px !important;
-            font-size: 0.7rem !important;
-            border-bottom-left-radius: 16px;
-            border-bottom-right-radius: 16px;
-        }
-
-        .sharp-card i {
-            display: none;
-            /* Hide large icons on mobile for cleaner look as they overlap text */
-        }
-
-        .card-value {
-            font-size: 1.75rem !important;
-            margin: 5px 0 !important;
+            min-height: 165px !important;
+            padding: 18px !important;
+            border-radius: 22px !important;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
+            position: relative !important;
+            overflow: hidden !important;
         }
 
         .card-label {
-            font-size: 0.75rem !important;
+            font-size: 0.65rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.05em !important;
+            opacity: 0.85 !important;
+            margin-bottom: 6px !important;
         }
 
+        .card-value {
+            font-size: 2.6rem !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
+            margin: 8px 0 !important;
+        }
+
+        .sharp-card>div>span {
+            font-size: 0.75rem !important;
+            line-height: 1.3 !important;
+            opacity: 0.9 !important;
+        }
+
+        .card-footer {
+            background: none !important;
+            margin: 12px 0 0 !important;
+            padding: 0 !important;
+            font-size: 0.7rem !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            font-weight: 600 !important;
+            opacity: 0.85 !important;
+        }
+
+        .card-footer i {
+            width: 12px !important;
+            height: 12px !important;
+        }
+
+        .sharp-card>i {
+            display: block !important;
+            position: absolute !important;
+            right: -12px !important;
+            bottom: -12px !important;
+            width: 85px !important;
+            height: 85px !important;
+            opacity: 0.15 !important;
+            transform: rotate(-10deg) !important;
+        }
+
+        /* Content Grid */
         .content-grid-responsive {
             display: block !important;
-            width: 100% !important;
         }
 
+        .content-grid-responsive>div:first-child {
+            margin-bottom: 20px !important;
+        }
+
+        /* Chart Card */
         .card {
-            border-radius: 16px !important;
-            width: 100% !important;
-            margin: 0 0 15px 0 !important;
-            padding: 15px !important;
-            box-sizing: border-box !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+            background: white !important;
+            border-radius: 20px !important;
+            padding: 18px !important;
+            margin-bottom: 20px !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .card-header {
+            padding: 0 0 12px 0 !important;
+            margin-bottom: 12px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+
+        .card-header h3 {
+            font-size: 1.15rem !important;
+            font-weight: 700 !important;
         }
 
         .chart-container-mobile {
-            width: 100% !important;
-            height: 250px !important;
-            padding: 5px !important;
-            box-sizing: border-box !important;
+            height: 180px !important;
+            margin-bottom: 12px !important;
         }
 
-        #employeeWaveChart {
-            width: 100% !important;
-            height: 100% !important;
+        /* Holiday & Notice Cards */
+        .notice-item-sharp {
+            background: white !important;
+            border-radius: 18px !important;
+            padding: 14px !important;
+            margin-bottom: 10px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+            border-left: none !important;
+            gap: 12px !important;
+        }
+
+        .notice-item-sharp>div:first-child {
+            width: 10px !important;
+            height: 10px !important;
+        }
+
+        .notice-item-sharp:hover {
+            transform: none !important;
+            border-left: none !important;
         }
     }
 </style>
