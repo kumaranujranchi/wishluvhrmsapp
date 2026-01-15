@@ -209,7 +209,7 @@
                 </a>
 
                 <!-- Desktop: Hamburger (Hidden on mobile) -->
-                <div class="desktop-only hamburger-trigger" onclick="toggleMobileDrawer()" style="cursor: pointer;">
+                <div class="desktop-only hamburger-trigger" onclick="toggleSidebar()" style="cursor: pointer;">
                     <i data-lucide="menu"></i>
                 </div>
 
