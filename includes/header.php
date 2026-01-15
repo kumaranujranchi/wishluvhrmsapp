@@ -146,6 +146,11 @@
 
                 @media (max-width: 768px) {
 
+                    /* Strict Hide Desktop Header */
+                    .desktop-only {
+                        display: none !important;
+                    }
+
                     /* Mobile Override */
                     .desktop-greeting,
                     .desktop-date,

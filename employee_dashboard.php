@@ -125,6 +125,12 @@ $latest_notices = $notice_q->fetchAll();
             gap: 12px;
         }
 
+        .header-actions-mobile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .avatar-circle {
             width: 48px;
             height: 48px;
@@ -156,9 +162,10 @@ $latest_notices = $notice_q->fetchAll();
             font-weight: 500;
         }
 
-        .notif-btn {
+        .header-icon-btn {
             position: relative;
-            padding: 10px;
+            width: 40px;
+            height: 40px;
             background: white;
             border-radius: 50%;
             border: 1px solid #f1f5f9;
@@ -166,6 +173,8 @@ $latest_notices = $notice_q->fetchAll();
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #475569;
+            text-decoration: none;
         }
 
         .notif-badge {
@@ -428,12 +437,21 @@ $latest_notices = $notice_q->fetchAll();
                     <p><?= date('D, d M') ?> • Good Morning</p>
                 </div>
             </div>
-            <a href="view_notices.php" class="notif-btn">
-                <i data-lucide="bell" style="width: 20px; height: 20px; color: #475569;"></i>
-                <?php if (count($latest_notices) > 0): ?>
-                    <span class="notif-badge"><?= count($latest_notices) ?></span>
-                <?php endif; ?>
-            </a>
+
+            <div class="header-actions-mobile">
+                <!-- Chat Toggle -->
+                <button onclick="toggleMobileChat()" class="header-icon-btn">
+                    <i data-lucide="message-circle" style="width: 20px; height: 20px;"></i>
+                </button>
+
+                <!-- Notifications -->
+                <a href="view_notices.php" class="header-icon-btn">
+                    <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+                    <?php if (count($latest_notices) > 0): ?>
+                        <span class="notif-badge"><?= count($latest_notices) ?></span>
+                    <?php endif; ?>
+                </a>
+            </div>
         </header>
 
         <!-- Stats Grid -->
@@ -734,6 +752,20 @@ $latest_notices = $notice_q->fetchAll();
                 }
             }
         });
+    }
+</script>
+
+<script>
+    function toggleMobileChat() {
+        // Toggle the global chat window
+        const chatWindow = document.querySelector('.chat-window');
+        if (chatWindow) {
+            // Check if display is none (initial state) or if active class handles it
+            // detailed in chatbot.css: .chat-window { display: none; } .chat-window.active { display: flex; }
+            chatWindow.classList.toggle('active');
+        } else {
+            console.log("Chat window resource not loaded yet.");
+        }
     }
 </script>
 

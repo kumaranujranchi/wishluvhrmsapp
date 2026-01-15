@@ -313,12 +313,7 @@
 
 @media (max-width: 480px) {
   .chat-bubble {
-    width: 56px;
-    height: 56px;
-    bottom: 115px;
-    right: 25px;
-    animation: none !important; /* Stable on mobile */
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    display: none !important;
   }
 
   .chat-helper-text {
