@@ -212,9 +212,6 @@
                 </a>
 
                 <!-- Desktop: Hamburger (Hidden on mobile) -->
-                <div class="desktop-only hamburger-trigger" onclick="toggleSidebar()" style="cursor: pointer;">
-                    <i data-lucide="menu"></i>
-                </div>
 
                 <div style="flex: 1; margin-left: 10px;">
                     <h2 class="header-greeting">
