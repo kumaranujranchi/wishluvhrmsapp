@@ -5,3 +5,4 @@ config/db_local.php
 uploads/
 config/email_credentials.php
 .env
+.env
