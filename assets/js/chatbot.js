@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         showTyping();
 
-        fetch('ajax/chat_handler.php', {
+        fetch('ajax/chat_handler_v2.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `message=${encodeURIComponent(text)}`
