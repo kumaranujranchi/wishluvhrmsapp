@@ -239,9 +239,10 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <i data-lucide="log-out" style="width: 20px;"></i>
             </a>
         </div>
-        <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
-            <i data-lucide="chevron-left" style="width: 14px; height: 14px;" id="sidebarToggleIcon"></i>
-        </button>
+    </div> <!-- Close sidebar-inner properly -->
+    <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+        <i data-lucide="chevron-left" style="width: 14px; height: 14px;" id="sidebarToggleIcon"></i>
+    </button>
 </aside>
 
 <script>
