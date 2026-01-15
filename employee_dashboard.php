@@ -92,18 +92,21 @@ $latest_notices = $notice_q->fetchAll();
             display: none !important;
         }
 
-        .mobile-view-container {
-            display: block !important;
-            font-family: 'Inter', sans-serif;
-            background-color: #F9FAFB;
-            min-height: 100vh;
-            padding-bottom: 90px;
-        }
-
         /* Reset default padding from page-content */
         .page-content {
             padding: 0 !important;
             background: #F9FAFB !important;
+            display: block !important;
+            /* Fix for potential flex collapse */
+        }
+
+        /* Mobile View Container */
+        .mobile-view-container {
+            display: block !important;
+            width: 100% !important;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding-bottom: 90px;
         }
 
         /* Header */
