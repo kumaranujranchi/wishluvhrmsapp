@@ -10,6 +10,7 @@
 <div class="chatbot-container">
     <div class="chat-bubble" id="chatBubble">
         <i data-lucide="message-circle-more" style="width: 30px; height: 30px;"></i>
+        <div class="online-indicator"></div>
     </div>
     <div class="chat-helper-text" id="chatHelperText">I am here to help!</div>
 
@@ -19,7 +20,7 @@
                 style="width: 40px; height: 40px; border-radius: 10px; background: white; padding: 5px;">
             <div class="bot-info">
                 <h4>Smart Assistant</h4>
-                <span>Online</span>
+                <span><span class="online-dot"></span> Online</span>
             </div>
             <div class="chat-close" id="chatClose">
                 <i data-lucide="x" style="width: 20px;"></i>
