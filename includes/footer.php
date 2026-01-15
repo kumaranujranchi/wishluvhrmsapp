@@ -51,7 +51,7 @@
 <script src="assets/js/chatbot.js"></script>
 
 <!-- Mobile Menu Handler -->
-<script src="assets/js/mobile-menu.js"></script>
+<script src="assets/js/mobile-menu-v2.js"></script>
 
 <script>
     function toggleMobileChat() {
