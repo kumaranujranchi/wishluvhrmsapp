@@ -115,9 +115,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     clock_out_lat = :lat,
                     clock_out_lng = :lng,
                     clock_out_address = :addr,
-                    location_id = :loc_id,
-                    out_of_range = :oor,
-                    out_of_range_reason = :reason
+                    location_id = COALESCE(:loc_id, location_id),
+                    out_of_range = CASE WHEN out_of_range = 1 THEN 1 ELSE :oor END,
+                    out_of_range_reason = CASE 
+                        WHEN out_of_range = 1 AND :oor = 1 THEN CONCAT(out_of_range_reason, ' | Out on Exit: ', :reason)
+                        WHEN out_of_range = 1 THEN out_of_range_reason
+                        ELSE :reason 
+                    END
                     WHERE employee_id = :uid AND date = :date";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
@@ -126,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'lat' => $lat,
                 'lng' => $lng,
                 'addr' => $address,
-                'loc_id' => $location_id,
+                'loc_id' => $location_id ?: null,
                 'oor' => $out_of_range,
                 'reason' => $reason,
                 'uid' => $user_id,
@@ -549,10 +553,10 @@ foreach ($history as $h) {
                                     <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
                                         <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
                                     </div>
-                                    <?php if ($row['out_of_range']): ?>
+                                    <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
                                         <div
                                             style="font-size: 0.7rem; color: #dc2626; font-weight: 700; margin-top: 5px; background: #fff1f2; padding: 4px 8px; border-radius: 4px; display: inline-block;">
-                                            ⚠️ Out of Office: <?= htmlspecialchars($row['out_of_range_reason']) ?>
+                                            ⚠️ Out of Range: <?= htmlspecialchars($row['out_of_range_reason']) ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -564,6 +568,13 @@ foreach ($history as $h) {
                                         <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
                                             <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
                                         </div>
+                                        <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
+                                            <div
+                                                style="font-size: 0.7rem; color: #dc2626; font-weight: 700; margin-top: 5px; background: #fff1f2; padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                                                ⚠️ Out of Range (Exit):
+                                                <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -641,12 +652,15 @@ foreach ($history as $h) {
 
                     if (!matchedLocation) {
                         isOutOfRange = true;
-                        reason = prompt("Warning: You are punching from out of the office! Main office se bahar hone ka reason bataye:");
+                        const actionText = (type === 'clock_in') ? 'Punch In' : 'Punch Out';
+                        reason = prompt(`Warning: You are ${actionText} from out of the office! Main office se bahar hone ka reason bataye:`);
                         if (reason === null || reason.trim() === "") {
                             statusDiv.innerHTML = '<span style="color:#ef4444;">Reason is required to punch from outside!</span>';
                             return;
                         }
                     }
+                } else {
+                    console.warn("No assigned locations found for this employee. Geofencing check skipped.");
                 }
 
                 document.getElementById('locationIdInput').value = matchedLocation ? matchedLocation.id : '';
