@@ -77,7 +77,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i data-lucide="book-open" style="width: 24px;"></i>
             <span class="m-nav-label">Policy</span>
         </a>
-        <a href="javascript:void(0)" onclick="toggleMobileDrawer()" class="m-nav-item">
+        <a href="javascript:void(0)" onclick="toggleMobileDrawer()" id="mobileMenuBtn" class="m-nav-item">
             <i data-lucide="menu" style="width: 24px;"></i>
             <span class="m-nav-label">Menu</span>
         </a>
@@ -139,20 +139,36 @@ $current_page = basename($_SERVER['PHP_SELF']);
 </div>
 
 <script>
-    function toggleMobileDrawer() {
-        console.log('toggleMobileDrawer called');
+    // Make function globally accessible
+    window.toggleMobileDrawer = function () {
+        console.log('🔧 toggleMobileDrawer called');
+
         const drawer = document.getElementById('mobileDrawer');
         const overlay = document.getElementById('drawerOverlay');
-        console.log('Drawer:', drawer);
-        console.log('Overlay:', overlay);
-        if (drawer && overlay) {
-            drawer.classList.toggle('active');
-            overlay.classList.toggle('active');
-            console.log('Toggled active class');
-        } else {
-            console.error('Drawer or overlay not found!');
+
+        console.log('📦 Drawer element:', drawer);
+        console.log('🎭 Overlay element:', overlay);
+
+        if (!drawer) {
+            console.error('❌ Drawer element not found!');
+            return;
         }
-    }
+
+        if (!overlay) {
+            console.error('❌ Overlay element not found!');
+            return;
+        }
+
+        // Toggle classes
+        drawer.classList.toggle('active');
+        overlay.classList.toggle('active');
+
+        console.log('✅ Drawer active:', drawer.classList.contains('active'));
+        console.log('✅ Overlay active:', overlay.classList.contains('active'));
+    };
+
+    // Test on load
+    console.log('🚀 toggleMobileDrawer function loaded');
 </script>
 
 <style>
