@@ -92,6 +92,8 @@ try {
     // --------------------------------
     $models_to_try = [
         'gemini-1.5-flash',
+        'gemini-2.0-flash-exp', // Added based on history
+        'gemini-1.5-pro',
         'gemini-pro',
         'gemini-1.0-pro',
         'gemini-flash-lite-latest'
