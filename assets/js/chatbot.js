@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function formatMessage(text) {
+        if (!text) return "";
+
         // 1. Escape basic HTML for security (XSS prevention)
         let formatted = text
             .replace(/&/g, "&amp;")
@@ -62,14 +64,20 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/>/g, "&gt;");
 
         // 2. Bold: **text** -> <b>text</b>
+        // Using a more robust regex that handles potential multi-line and greedy matching
         formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
         // 3. Italic: _text_ or *text* -> <i>text</i>
+        // We do this AFTER bold to avoid partial matches
         formatted = formatted.replace(/\*(.*?)\*/g, '<i>$1</i>');
         formatted = formatted.replace(/_(.*?)_/g, '<i>$1</i>');
 
         // 4. Bullet points: Start of line with - or *
-        formatted = formatted.replace(/^[-*] (.*)/gm, '• $1');
+        // Handle both - and * and space
+        formatted = formatted.replace(/^[\s]*[-*][\s]+(.*)/gm, '• $1');
+
+        // 5. Newlines: \n -> <br>
+        formatted = formatted.replace(/\n/g, '<br>');
 
         return formatted;
     }

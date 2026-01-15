@@ -13,6 +13,11 @@ $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'Employee';
 $message = trim($_POST['message'] ?? '');
 
+// Initialize history if not exists
+if (!isset($_SESSION['chat_history'])) {
+    $_SESSION['chat_history'] = [];
+}
+
 if (empty($message)) {
     echo json_encode(['response' => 'Aapne kuch likha nahi.']);
     exit;
@@ -142,7 +147,24 @@ try {
     - If user asks about office timings, lunch break, or any company policy, ALWAYS use the COMPANY POLICIES section above.
     - If the question is about something NOT in your context (like salary details, specific HR policies not mentioned, etc.), respond politely that you don't have that info and refer to Anuj sir (7280008102).
     - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
-    - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).";
+    - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).
+    
+    - INTRO RULE:
+      1. If the 'CHAT HISTORY' below is empty, you MUST introduce yourself: \"Namaste [User Name] Ji, main Wishluv Smart Assistant, aapki sahayata ke liye yahan hoon!\"
+      2. If there is PREVIOUS CHAT HISTORY, DO NOT repeat the introduction. Start your response directly or with a simple greeting like 'Ji' or 'Haan' if appropriate.
+    ";
+
+    // 3. Prepare Chat History for Gemini
+    // ----------------------------------
+    $history_context = "";
+    if (!empty($_SESSION['chat_history'])) {
+        foreach ($_SESSION['chat_history'] as $chat) {
+            $role_label = ($chat['role'] === 'user') ? "User" : "Assistant";
+            $history_context .= $role_label . ": " . $chat['content'] . "\n";
+        }
+    }
+
+    $final_prompt = $system_prompt . "\n\nCHAT HISTORY:\n" . $history_context . "\nUser: " . $message . "\nAssistant:";
 
     // 3. Call Gemini API
     // ------------------
@@ -152,7 +174,7 @@ try {
         "contents" => [
             [
                 "parts" => [
-                    ["text" => $system_prompt . "\n\nUser Message: " . $message]
+                    ["text" => $final_prompt]
                 ]
             ]
         ],
@@ -181,6 +203,15 @@ try {
         $result = json_decode($response_json, true);
         $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
         $response = trim($bot_text);
+
+        // Save to history
+        $_SESSION['chat_history'][] = ["role" => "user", "content" => $message];
+        $_SESSION['chat_history'][] = ["role" => "assistant", "content" => $response];
+
+        // Keep last 10 exchanges (20 entries)
+        if (count($_SESSION['chat_history']) > 20) {
+            $_SESSION['chat_history'] = array_slice($_SESSION['chat_history'], -20);
+        }
     } else {
         throw new Exception("Gemini API Error: " . $response_json);
     }
