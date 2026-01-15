@@ -24,9 +24,8 @@ if (empty($message)) {
 }
 
 try {
-    // 1. Fetch ALL relevant context (Same as original)
-    $stmt = $conn->prepare("SELECT e.*, m.first_name as mgr_fname, m.last_name as mgr_lname 
-                           FROM employees e LEFT JOIN employees m ON e.reporting_manager_id = m.id WHERE e.id = :uid");
+    // 1. Fetch Context (Same as before)
+    $stmt = $conn->prepare("SELECT e.*, m.first_name as mgr_fname, m.last_name as mgr_lname FROM employees e LEFT JOIN employees m ON e.reporting_manager_id = m.id WHERE e.id = :uid");
     $stmt->execute(['uid' => $user_id]);
     $user = $stmt->fetch();
     $user_name = $user['first_name'] . ' ' . $user['last_name'];
@@ -36,9 +35,7 @@ try {
     $stmt = $conn->prepare("SELECT clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
     $stmt->execute(['uid' => $user_id]);
     $today = $stmt->fetch();
-    $attendance_context = $today ?
-        "Status: {$today['status']}, In: {$today['clock_in']}, Out: " . ($today['clock_out'] ?: 'N/A') . ", Hours: {$today['total_hours']}" :
-        "Not punched in yet for today.";
+    $attendance_context = $today ? "Status: {$today['status']}, In: {$today['clock_in']}, Out: " . ($today['clock_out'] ?: 'N/A') . ", Hours: {$today['total_hours']}" : "Not punched in yet for today.";
 
     $stmt = $conn->prepare("SELECT start_date, end_date FROM leave_requests WHERE employee_id = :uid AND status = 'Approved' AND YEAR(start_date) = YEAR(CURDATE())");
     $stmt->execute(['uid' => $user_id]);
@@ -49,11 +46,7 @@ try {
     }
     $leave_context = "Total Allowed: 24, Used: $days_taken, Balance: " . (24 - $days_taken);
 
-    $stmt = $conn->prepare("SELECT 
-        COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days,
-        COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_days
-        FROM attendance 
-        WHERE employee_id = :uid AND MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())");
+    $stmt = $conn->prepare("SELECT COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days, COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_days FROM attendance WHERE employee_id = :uid AND MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())");
     $stmt->execute(['uid' => $user_id]);
     $stats = $stmt->fetch();
     $monthly_context = "Present Days: {$stats['present_days']}, Late Days: {$stats['late_days']} in " . date('F');
@@ -69,22 +62,20 @@ try {
         $stmt->execute();
         $present_employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $present_list = [];
-        foreach ($present_employees as $emp) {
+        foreach ($present_employees as $emp)
             $present_list[] = $emp['first_name'] . " (" . date('H:i', strtotime($emp['clock_in'])) . ")";
-        }
         $present_count = count($present_list);
-        $present_names = implode(", ", $present_list);
         $stmt = $conn->prepare("SELECT COUNT(*) as pending FROM leave_requests WHERE status = 'Pending'");
         $stmt->execute();
         $pending_leaves = $stmt->fetch()['pending'];
-        $admin_context = "ADMIN DATA: Total Present: $present_count, Who: $present_names, Pending Leaves: $pending_leaves";
+        $admin_context = "ADMIN DATA: Total Present: $present_count, Who: " . implode(", ", $present_list) . ", Pending Leaves: $pending_leaves";
     }
 
     // 2. Prepare Prompt
     $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper. User: $user_name ($user_gender). 
-    Context: Attendance: $attendance_context. Monthly: $monthly_context. Leave Bal: $leave_context. Manager: $manager_name. Holiday: $holiday_context. $admin_context.
+    Context: Today: $attendance_context. Month: $monthly_context. LeaveBal: $leave_context. NextHoliday: $holiday_context. $admin_context.
     Policies: Office 10-5:30(Winter)/6(Summer). Lunch 2-2:30.
-    Persona: Friendly female AI. If English -> English. If Hindi/Hinglish -> Hinglish.
+    Persona: Friendly female AI. If English -> English. If Hindi/Hinglish -> Hinglish. Use 'main karti hoon'.
     Answer concisely.";
 
     $history_context = "";
@@ -97,49 +88,59 @@ try {
 
     $final_prompt = $system_prompt . "\n\nCHAT HISTORY:\n" . $history_context . "\nUser: " . $message . "\nAssistant:";
 
-    // 3. Call Gemini API (v1beta)
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
-
-    $payload = [
-        "contents" => [
-            [
-                "parts" => [
-                    ["text" => $final_prompt]
-                ]
-            ]
-        ],
-        "generationConfig" => [
-            "temperature" => 0.4,
-            "maxOutputTokens" => 1024
-        ]
+    // 3. Call Gemini API WITH FAILOVER
+    // --------------------------------
+    $models_to_try = [
+        'gemini-1.5-flash',
+        'gemini-pro',
+        'gemini-1.0-pro',
+        'gemini-flash-lite-latest'
     ];
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
+    $success = false;
+    $last_error = "";
 
-    $response_json = curl_exec($ch);
+    $payload = [
+        "contents" => [["parts" => [["text" => $final_prompt]]]],
+        "generationConfig" => ["temperature" => 0.4, "maxOutputTokens" => 1024]
+    ];
 
-    if ($response_json === false) {
-        throw new Exception("CURL Error: " . curl_error($ch));
+    foreach ($models_to_try as $model) {
+        try {
+            // Using v1beta for widest compatibility
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/" . $model . ":generateContent?key=" . GEMINI_API_KEY;
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
+
+            $response_json = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($http_code === 200) {
+                $result = json_decode($response_json, true);
+                $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, no response.";
+                $response = trim($bot_text);
+                $success = true;
+                break; // Exit loop on success
+            } else {
+                $last_error = "Model $model failed ($http_code): " . $response_json;
+            }
+        } catch (Exception $e) {
+            $last_error = $e->getMessage();
+        }
     }
 
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($http_code === 200) {
-        $result = json_decode($response_json, true);
-        $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, no response.";
-        $response = trim($bot_text);
-
+    if ($success) {
         $_SESSION['chat_history'][] = ["role" => "user", "content" => $message];
         $_SESSION['chat_history'][] = ["role" => "assistant", "content" => $response];
         if (count($_SESSION['chat_history']) > 20)
             $_SESSION['chat_history'] = array_slice($_SESSION['chat_history'], -20);
     } else {
-        throw new Exception("Gemini API Error ($http_code): " . $response_json);
+        throw new Exception("All models failed. Last error: " . $last_error);
     }
 
 } catch (Exception $e) {
