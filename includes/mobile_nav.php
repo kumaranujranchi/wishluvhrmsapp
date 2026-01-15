@@ -88,7 +88,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
 
 <!-- Mobile Drawer -->
-<div class="mobile-drawer" id="mobileDrawer">
+<div class="mobile-drawer" id="mobileDrawer" style="position: fixed; top: 0; right: -280px; width: 280px; height: 100vh; background: white; z-index: 99999;">
     <div class="drawer-header">
         <div class="brand">
             <div class="logo-icon">
@@ -188,7 +188,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     }
 
     .mobile-drawer.active {
-        right: 0;
+        right: 0 !important;
     }
 
     .drawer-overlay {

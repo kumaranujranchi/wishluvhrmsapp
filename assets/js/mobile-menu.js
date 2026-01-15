@@ -24,10 +24,24 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             console.log('🖱️ Menu clicked!');
             
-            drawer.classList.toggle('active');
-            overlay.classList.toggle('active');
+            const isActive = drawer.classList.contains('active');
             
-            console.log('✅ Toggled - Drawer active:', drawer.classList.contains('active'));
+            if (isActive) {
+                // Close drawer
+                drawer.classList.remove('active');
+                overlay.classList.remove('active');
+                drawer.style.right = '-280px';
+                console.log('❌ Closing drawer');
+            } else {
+                // Open drawer
+                drawer.classList.add('active');
+                overlay.classList.add('active');
+                drawer.style.right = '0px';
+                console.log('✅ Opening drawer');
+            }
+            
+            console.log('Drawer active:', drawer.classList.contains('active'));
+            console.log('Drawer right position:', drawer.style.right);
         });
         
         // Also handle overlay click to close
@@ -35,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('🖱️ Overlay clicked - closing drawer');
             drawer.classList.remove('active');
             overlay.classList.remove('active');
+            drawer.style.right = '-280px';
         });
         
         console.log('✅ Menu handlers attached successfully');
