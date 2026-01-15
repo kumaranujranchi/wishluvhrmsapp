@@ -11,6 +11,7 @@
     <div class="chat-bubble" id="chatBubble">
         <i data-lucide="message-circle-more" style="width: 30px; height: 30px;"></i>
     </div>
+    <div class="chat-helper-text" id="chatHelperText">I am here to help!</div>
 
     <div class="chat-window" id="chatWindow">
         <div class="chat-header">

@@ -10,16 +10,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle Chat
     bubble.addEventListener('click', () => {
         window.classList.toggle('active');
+        const helperText = document.getElementById('chatHelperText');
+        
         if (window.classList.contains('active')) {
             input.focus();
+            if (helperText) helperText.style.display = 'none';
             if (body.children.length === 0) {
                 addMessage('bot', "Hello! main Wishluv Smart Assistant hoon. Aapki HR se judi help kaise kar sakti hoon? Aap mujhse apni leave balance, attendance, ya holidays ke baare mein pooch sakte hain.");
             }
+        } else {
+            if (helperText) helperText.style.display = 'block';
         }
     });
 
     closeBtn.addEventListener('click', () => {
         window.classList.remove('active');
+        const helperText = document.getElementById('chatHelperText');
+        if (helperText) helperText.style.display = 'block';
     });
 
     // Send Message
