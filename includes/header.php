@@ -208,9 +208,20 @@
                 display: none !important;
             }
 
-            /* Force Hide Sidebar */
+            /* Force Hide Sidebar by default, but allow override */
             .sidebar {
-                display: none !important;
+                display: none; /* Changed from !important to allow toggle */
+            }
+            .sidebar.mobile-open {
+                display: block !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 10001; /* Above header */
+                width: 250px;
+                box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+                animation: slideInLeft 0.3s ease-out;
             }
 
             /* Ensure Main Content is Visible */
@@ -244,6 +255,32 @@
                 align-items: center;
                 gap: 8px;
             }
+            
+            /* Sidebar Overlay */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                backdrop-filter: blur(2px);
+                z-index: 10000; /* Below sidebar, above header */
+                animation: fadeIn 0.3s ease-out;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            @keyframes slideInLeft {
+                from { transform: translateX(-100%); }
+                to { transform: translateX(0); }
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
         }
     </style>
 
@@ -252,7 +289,17 @@
             const cw = document.getElementById('chatWindow');
             if (cw) cw.classList.toggle('active');
         }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
     </script>
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 </head>
 
 <body>
@@ -264,10 +311,11 @@
             <!-- Header (Unified Responsive) -->
             <header class="header glass-panel">
                 <!-- Mobile: Profile Link (Left) -->
-                <a href="profile.php" class="mobile-only profile-link-mobile">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['first_name'] ?? 'User') ?>&background=ffd6a8&color=d97706&size=128"
-                        alt="Profile">
-                </a>
+                <!-- Mobile: Hamburger Menu (Left) -->
+                <button class="mobile-only action-icon-btn" onclick="toggleMobileSidebar()"
+                    style="border:none; background:transparent; padding:0; margin-right:5px;">
+                    <i data-lucide="menu" style="width: 28px; height: 28px; color: #1e293b;"></i>
+                </button>
 
                 <!-- Desktop: Hamburger (Hidden on mobile) -->
 
@@ -282,7 +330,7 @@
                     <div class="header-date">
                         <i data-lucide="calendar" class="mobile-only"></i>
                         <span class="mobile-only"><?= date('D, d M') ?></span>
-                        
+
                         <i data-lucide="calendar-days" class="desktop-only"></i>
                         <span class="desktop-only"><?= date('l, d F Y') ?></span>
                         <span class="date-separator desktop-only"></span>
