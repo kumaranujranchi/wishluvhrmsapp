@@ -112,6 +112,31 @@ try {
         ";
     }
 
+    // G. Fetch Dynamic Policies from DB
+    $policy_context = "";
+    try {
+        $p_stmt = $conn->prepare("SELECT title, content FROM policies WHERE is_active = 1 ORDER BY display_order ASC");
+        $p_stmt->execute();
+        $policies_db = $p_stmt->fetchAll();
+        
+        if ($policies_db) {
+            $policy_context .= "\n\nHUMAN RESOURCES MANUAL & POLICIES (OFFICIAL):\n";
+            foreach ($policies_db as $p) {
+                // Strip HTML tags to save tokens and purely get text
+                $clean_content = strip_tags($p['content']);
+                // Basic compression: replace multiple spaces/newlines with single space
+                $clean_content = preg_replace('/\s+/', ' ', $clean_content);
+                // Limit content length per policy to avoid token overflow
+                $clean_content = substr($clean_content, 0, 1000); 
+                
+                $policy_context .= "- POLICY: " . strtoupper($p['title']) . "\n";
+                $policy_context .= "  DETAILS: " . trim($clean_content) . "\n\n";
+            }
+        }
+    } catch (Exception $e) {
+        // Ignore policy fetch errors
+    }
+
     // 2. Prepare Gemini Prompt
     // ------------------------
     $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for Wishluv Buildcon. 
@@ -124,9 +149,15 @@ try {
     3. Leave Balance: $leave_context
     4. Reporting Manager: $manager_name
     5. Next Holiday: $holiday_context
+    1. Attendance Today: $attendance_context
+    2. Monthly Stats: $monthly_context
+    3. Leave Balance: $leave_context
+    4. Reporting Manager: $manager_name
+    5. Next Holiday: $holiday_context
     $admin_context
+    $policy_context
 
-    COMPANY POLICIES:
+    COMPANY POLICIES (These are defaults, use OFFICIAL POLICIES above if available):
     - Office Timings (Current - Winter): 10:00 AM to 5:30 PM
     - Office Timings (Summer): 10:00 AM to 6:00 PM
     - Lunch Break: 2:00 PM to 2:30 PM (30 minutes)
