@@ -10,7 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (!empty($email) && !empty($password)) {
         try {
-            $stmt = $conn->prepare("SELECT * FROM employees WHERE email = :email");
+            $stmt = $conn->prepare("
+                SELECT e.*, d.name as designation_name 
+                FROM employees e 
+                LEFT JOIN designations d ON e.designation_id = d.id 
+                WHERE e.email = :email
+            ");
             $stmt->execute(['email' => $email]);
             $user = $stmt->fetch();
 
@@ -23,6 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['first_name'] = $user['first_name'];
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_email'] = $user['email'];
+                // Store designation if available, else fallback to Role
+                $_SESSION['user_designation'] = !empty($user['designation_name']) ? $user['designation_name'] : $user['role'];
 
                 // Explicitly set cache-control headers to prevent stale dashboards
                 header("Pragma: no-cache");

@@ -18,6 +18,7 @@ function isGroupOpen($pages, $include_view_policy = false)
 // Get User Info from Session
 $userName = $_SESSION['user_name'] ?? 'Admin User';
 $userRole = $_SESSION['user_role'] ?? 'Super Admin';
+$userDesignation = $_SESSION['user_designation'] ?? $userRole; // Use designation for display
 $userInitials = strtoupper(substr($userName, 0, 2));
 ?>
 <aside class="sidebar">
@@ -232,7 +233,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <div class="user-avatar"><?= $userInitials ?></div>
                 <a href="profile.php" class="user-details" style="text-decoration: none; color: inherit;">
                     <span class="user-name" title="View Profile"><?= htmlspecialchars($userName) ?></span>
-                    <span class="user-role"><?= htmlspecialchars($userRole) ?></span>
+                    <span class="user-role"><?= htmlspecialchars($userDesignation) ?></span>
                 </a>
             </div>
             <a href="logout.php" title="Logout" style="color: #94a3b8; margin-left: auto;">
