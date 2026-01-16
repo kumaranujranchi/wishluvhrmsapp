@@ -62,6 +62,81 @@ $dept_stats = $conn->query($sql_dept)->fetchAll();
 
 ?>
 
+<style>
+    @media (max-width: 768px) {
+        .page-content {
+            background: #f5f7fa !important;
+            min-height: 100vh !important;
+            padding: 1rem !important;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.85rem;
+        }
+
+        .dashboard-actions {
+            width: 100%;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+
+        .stats-card {
+            padding: 1.25rem !important;
+        }
+
+        .dashboard-content-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+
+        .chart-placeholder {
+            height: 200px !important;
+        }
+
+        .bar-chart {
+            padding: 0 0.5rem;
+        }
+
+        .bar-wrapper {
+            width: 30px !important;
+        }
+
+        .label {
+            font-size: 0.7rem;
+        }
+
+        .department-list {
+            gap: 1rem !important;
+        }
+
+        .dept-info {
+            font-size: 0.85rem;
+        }
+
+        .dept-count {
+            font-size: 0.7rem !important;
+        }
+    }
+</style>
+
 <div class="page-content dashboard">
     <div class="dashboard-header">
         <div>
