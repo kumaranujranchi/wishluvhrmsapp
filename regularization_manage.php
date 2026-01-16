@@ -45,8 +45,9 @@ $employees = $stmt->fetchAll();
 
     .admin-container {
         padding: 2rem;
-        max-width: 1400px;
-        margin: 0 auto;
+        max-width: 100%;
+        /* Fill the screen */
+        margin: 0;
         animation: fadeIn 0.5s ease-out;
     }
 
@@ -62,12 +63,24 @@ $employees = $stmt->fetchAll();
         }
     }
 
-    /* Stats Section */
+    /* Stats Section - Force 3 Columns on Wide Screens */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 1.5rem;
         margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     .stat-card {
@@ -110,24 +123,41 @@ $employees = $stmt->fetchAll();
         font-weight: 500;
     }
 
+    /* Dashboard Main Layout */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        /* Left column flexible, right column fixed width */
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 1300px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
     /* Section Styles */
     .section-card {
         background: var(--glass-bg);
         border-radius: 24px;
-        padding: 2.5rem;
-        margin-bottom: 2.5rem;
+        padding: 2rem;
+        margin-bottom: 0;
+        /* Let grid gap handle spacing */
         box-shadow: var(--card-shadow);
         border: 1px solid rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(10px);
+        height: 100%;
     }
 
     .section-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
+        gap: 1rem;
+        margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #f0f0f0;
+        border-bottom: 1px solid #f1f5f9;
     }
 
     .requests-grid {
@@ -325,103 +355,105 @@ $employees = $stmt->fetchAll();
             </div>
         </div>
 
-        <!-- Pending Requests Section -->
-        <div class="section-card">
-            <div class="section-header">
-                <h3><i data-lucide="clock"></i> Pending Requests</h3>
-                <span class="badge badge-pending">
-                    <?php echo count($pending_requests); ?> Pending
-                </span>
-            </div>
+        <div class="dashboard-grid">
+            <!-- Left Column: Pending Requests -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3><i data-lucide="clock"></i> Pending Requests</h3>
+                    <span class="badge badge-pending">
+                        <?php echo count($pending_requests); ?> Pending
+                    </span>
+                </div>
 
-            <div class="requests-grid">
-                <?php if (count($pending_requests) > 0): ?>
-                    <?php foreach ($pending_requests as $req): ?>
-                        <div class="request-card" data-request-id="<?php echo $req['id']; ?>">
-                            <div class="request-header">
-                                <div class="emp-avatar">
-                                    <?php echo substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1); ?>
+                <div class="requests-grid">
+                    <?php if (count($pending_requests) > 0): ?>
+                        <?php foreach ($pending_requests as $req): ?>
+                            <div class="request-card" data-request-id="<?php echo $req['id']; ?>">
+                                <div class="request-header">
+                                    <div class="emp-avatar">
+                                        <?php echo substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1); ?>
+                                    </div>
+                                    <div class="employee-info">
+                                        <h4><?php echo $req['first_name'] . ' ' . $req['last_name']; ?></h4>
+                                        <p><?php echo $req['email']; ?></p>
+                                    </div>
+                                    <span class="badge badge-pending" style="margin-left: auto;">Pending</span>
                                 </div>
-                                <div class="employee-info">
-                                    <h4><?php echo $req['first_name'] . ' ' . $req['last_name']; ?></h4>
-                                    <p><?php echo $req['email']; ?></p>
-                                </div>
-                                <span class="badge badge-pending" style="margin-left: auto;">Pending</span>
-                            </div>
 
-                            <div class="request-details">
-                                <div class="detail-item">
-                                    <label>Date</label>
-                                    <strong>
-                                        <?php echo date('d M Y', strtotime($req['attendance_date'])); ?>
-                                    </strong>
+                                <div class="request-details">
+                                    <div class="detail-item">
+                                        <label>Date</label>
+                                        <strong>
+                                            <?php echo date('d M Y', strtotime($req['attendance_date'])); ?>
+                                        </strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Clock In</label>
+                                        <strong>
+                                            <?php echo $req['requested_clock_in']; ?>
+                                        </strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Clock Out</label>
+                                        <strong>
+                                            <?php echo $req['requested_clock_out']; ?>
+                                        </strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Type</label>
+                                        <strong>
+                                            <?php echo ucwords(str_replace('_', ' ', $req['request_type'])); ?>
+                                        </strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Requested On</label>
+                                        <strong>
+                                            <?php echo date('d M, h:i A', strtotime($req['requested_at'])); ?>
+                                        </strong>
+                                    </div>
                                 </div>
-                                <div class="detail-item">
-                                    <label>Clock In</label>
-                                    <strong>
-                                        <?php echo $req['requested_clock_in']; ?>
-                                    </strong>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Clock Out</label>
-                                    <strong>
-                                        <?php echo $req['requested_clock_out']; ?>
-                                    </strong>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Type</label>
-                                    <strong>
-                                        <?php echo ucwords(str_replace('_', ' ', $req['request_type'])); ?>
-                                    </strong>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Requested On</label>
-                                    <strong>
-                                        <?php echo date('d M, h:i A', strtotime($req['requested_at'])); ?>
-                                    </strong>
-                                </div>
-                            </div>
 
-                            <div class="reason-box">
-                                <label style="font-size: 0.75rem; color: #666;">Reason:</label>
-                                <p style="margin: 0.5rem 0 0 0;">
-                                    <?php echo htmlspecialchars($req['reason']); ?>
-                                </p>
-                            </div>
+                                <div class="reason-box">
+                                    <label style="font-size: 0.75rem; color: #666;">Reason:</label>
+                                    <p style="margin: 0.5rem 0 0 0;">
+                                        <?php echo htmlspecialchars($req['reason']); ?>
+                                    </p>
+                                </div>
 
-                            <div class="form-group">
-                                <label>Admin Remarks (Optional for approval, Required for rejection)</label>
-                                <textarea class="admin-remarks" rows="2" placeholder="Add your remarks..."></textarea>
-                            </div>
+                                <div class="form-group">
+                                    <label>Admin Remarks (Optional for approval, Required for rejection)</label>
+                                    <textarea class="admin-remarks" rows="2" placeholder="Add your remarks..."></textarea>
+                                </div>
 
-                            <div class="action-buttons">
-                                <button class="btn btn-approve" onclick="processRequest(<?php echo $req['id']; ?>, 'approved')">
-                                    <i data-lucide="check"></i> Approve
-                                </button>
-                                <button class="btn btn-reject" onclick="processRequest(<?php echo $req['id']; ?>, 'rejected')">
-                                    <i data-lucide="x"></i> Reject
-                                </button>
+                                <div class="action-buttons">
+                                    <button class="btn btn-approve"
+                                        onclick="processRequest(<?php echo $req['id']; ?>, 'approved')">
+                                        <i data-lucide="check"></i> Approve
+                                    </button>
+                                    <button class="btn btn-reject"
+                                        onclick="processRequest(<?php echo $req['id']; ?>, 'rejected')">
+                                        <i data-lucide="x"></i> Reject
+                                    </button>
+                                </div>
                             </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="empty-state">
+                            <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
+                            <h3>No Pending Requests</h3>
+                            <p>All regularization requests have been processed.</p>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
-                        <h3>No Pending Requests</h3>
-                        <p>All regularization requests have been processed.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Direct Regularization Section -->
-        <div class="section-card">
-            <div class="section-header">
-                <h3><i data-lucide="edit"></i> Direct Regularization</h3>
+                    <?php endif; ?>
+                </div>
             </div>
 
-            <form id="directRegularizationForm">
-                <div class="form-grid">
+            <!-- Right Column: Direct Regularization -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h3><i data-lucide="edit"></i> Direct Regularization</h3>
+                </div>
+
+                <form id="directRegularizationForm">
                     <div class="form-group">
                         <label>Select Employee *</label>
                         <select name="employee_id" required>
@@ -439,27 +471,29 @@ $employees = $stmt->fetchAll();
                         <input type="date" name="attendance_date" required max="<?php echo date('Y-m-d'); ?>">
                     </div>
 
-                    <div class="form-group">
-                        <label>Clock In Time *</label>
-                        <input type="time" name="clock_in" required>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Clock In *</label>
+                            <input type="time" name="clock_in" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Clock Out *</label>
+                            <input type="time" name="clock_out" required>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Clock Out Time *</label>
-                        <input type="time" name="clock_out" required>
+                        <label>Reason *</label>
+                        <textarea name="reason" required rows="4"
+                            placeholder="Reason for direct regularization..."></textarea>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Reason *</label>
-                    <textarea name="reason" required rows="3"
-                        placeholder="Reason for direct regularization..."></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <i data-lucide="save"></i> Regularize Attendance
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        <i data-lucide="save"></i> Regularize Attendance
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
