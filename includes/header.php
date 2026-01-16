@@ -73,6 +73,11 @@
             align-items: center;
             justify-content: space-between;
             padding: 15px 25px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .header-greeting {
@@ -93,7 +98,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #f8fafc;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -102,11 +107,20 @@
             border: none;
             cursor: pointer;
             position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .action-icon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
         }
 
         .action-icon-btn i {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
+            stroke-width: 2;
         }
 
         .badge {
@@ -124,6 +138,19 @@
             font-size: 0.65rem;
             font-weight: 800;
             border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+            }
         }
 
         .profile-link-mobile img {
