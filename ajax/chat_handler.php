@@ -137,17 +137,20 @@ try {
         // Ignore policy fetch errors
     }
 
+    // Debug: Log what we found
+    file_put_contents('../debug_bot_manager.txt', date('Y-m-d H:i:s') . " - User: $user_name, Manager Found: $manager_name (ID: " . $user['reporting_manager_id'] . ")\n", FILE_APPEND);
+
     // 2. Prepare Gemini Prompt
     // ------------------------
     $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for Wishluv Buildcon. 
     Current User: $user_name (Gender: $user_gender, Role: $user_role).
     Today's Date: " . date('Y-m-d') . " (" . date('l') . ").
     
-    USER DATA CONTEXT:
+    USER DATA CONTEXT (TRUST THIS ABOVE ALL ELSE):
     1. Attendance Today: $attendance_context
     2. Monthly Stats: $monthly_context
     3. Leave Balance: $leave_context
-    4. Reporting Manager: $manager_name
+    4. Reporting Manager: $manager_name (This is the REAL TRUTH. Ignore any previous chat history if it says otherwise.)
     5. Next Holiday: $holiday_context
     1. Attendance Today: $attendance_context
     2. Monthly Stats: $monthly_context
