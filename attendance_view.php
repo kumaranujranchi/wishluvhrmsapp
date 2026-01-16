@@ -694,17 +694,51 @@ foreach ($history as $h) {
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
+                    // Use Google Maps Geocoding API for precise location
+                    const apiKey = '<?= getenv("GOOGLE_MAPS_API_KEY") ?>';
                     const response = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+                        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`,
                         { signal: controller.signal }
                     );
                     clearTimeout(timeoutId);
 
                     const data = await response.json();
-                    if (data.display_name) {
-                        document.getElementById('addrInput').value = data.display_name;
+
+                    if (data.status === 'OK' && data.results[0]) {
+                        const addressComponents = data.results[0].address_components;
+                        let locationParts = [];
+
+                        // Helper function to extract address component by type
+                        const getComponent = (type) => {
+                            const comp = addressComponents.find(c => c.types.includes(type));
+                            return comp ? comp.long_name : null;
+                        };
+
+                        // Priority: route (road name) > sublocality > locality
+                        const road = getComponent('route');
+                        const sublocality = getComponent('sublocality_level_1') || getComponent('sublocality');
+                        const locality = getComponent('locality');
+
+                        // Add road/area name
+                        if (road) {
+                            locationParts.push(road);
+                        } else if (sublocality) {
+                            locationParts.push(sublocality);
+                        }
+
+                        // Always add city for context
+                        if (locality) {
+                            locationParts.push(locality);
+                        }
+
+                        // Use extracted location or fallback to formatted address
+                        const shortAddress = locationParts.length > 0
+                            ? locationParts.join(', ')
+                            : data.results[0].formatted_address;
+
+                        document.getElementById('addrInput').value = shortAddress;
                     } else {
-                        throw new Error('No address found');
+                        throw new Error('Geocoding failed: ' + data.status);
                     }
                 } catch (e) {
                     console.warn('Geocoding failed:', e);
