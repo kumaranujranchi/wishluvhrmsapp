@@ -410,7 +410,175 @@ foreach ($history as $h) {
             font-size: 0.7rem;
         }
     }
+
+    /* Custom Warning Modal */
+    .warning-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .warning-modal-overlay.active {
+        display: flex;
+    }
+
+    .warning-modal {
+        background: white;
+        border-radius: 20px;
+        max-width: 500px;
+        width: 90%;
+        padding: 0;
+        box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4);
+        animation: modalSlideIn 0.3s ease-out;
+        overflow: hidden;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .warning-modal-header {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        padding: 2rem;
+        text-align: center;
+        color: white;
+    }
+
+    .warning-modal-header i {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 1rem;
+        animation: warningPulse 2s infinite;
+    }
+
+    @keyframes warningPulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .warning-modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .warning-modal-body {
+        padding: 2rem;
+    }
+
+    .warning-modal-body p {
+        color: #64748b;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    .warning-modal-body textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        resize: vertical;
+        transition: border-color 0.3s;
+    }
+
+    .warning-modal-body textarea:focus {
+        outline: none;
+        border-color: #ef4444;
+    }
+
+    .warning-modal-footer {
+        padding: 0 2rem 2rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .warning-modal-footer button {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .warning-modal-cancel {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .warning-modal-cancel:hover {
+        background: #e2e8f0;
+    }
+
+    .warning-modal-submit {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .warning-modal-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .warning-modal-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
 </style>
+
+<!-- Custom Warning Modal -->
+<div class="warning-modal-overlay" id="warningModal">
+    <div class="warning-modal">
+        <div class="warning-modal-header">
+            <i data-lucide="alert-triangle"></i>
+            <h2>⚠️ Out of Range Warning</h2>
+        </div>
+        <div class="warning-modal-body">
+            <p id="warningModalMessage">You are punching from outside the permitted office location. Please provide a
+                reason for this action.</p>
+            <textarea id="warningReasonInput"
+                placeholder="Enter reason here... (e.g., Client meeting, Field work, etc.)"></textarea>
+        </div>
+        <div class="warning-modal-footer">
+            <button class="warning-modal-cancel" onclick="closeWarningModal()">
+                <i data-lucide="x" style="width:18px; height:18px; vertical-align:middle;"></i> Cancel
+            </button>
+            <button class="warning-modal-submit" id="warningSubmitBtn" onclick="submitWarningReason()">
+                <i data-lucide="check" style="width:18px; height:18px; vertical-align:middle;"></i> Submit & Continue
+            </button>
+        </div>
+    </div>
+</div>
 
 <div class="page-content">
     <?= $message ?>
@@ -675,11 +843,20 @@ foreach ($history as $h) {
                     if (!matchedLocation) {
                         isOutOfRange = true;
                         const actionText = (type === 'clock_in') ? 'Punch In' : 'Punch Out';
-                        reason = prompt(`Warning: You are ${actionText} from out of the office! Main office se bahar hone ka reason bataye:`);
-                        if (reason === null || reason.trim() === "") {
+
+                        // Show custom warning modal instead of browser prompt
+                        document.getElementById('warningModalMessage').textContent =
+                            `Warning: You are attempting to ${actionText} from outside the permitted office location. Please provide a reason for this action.`;
+
+                        // Show modal and wait for user response
+                        const modalResult = await showWarningModal();
+
+                        if (!modalResult || modalResult.trim() === "") {
                             statusDiv.innerHTML = '<span style="color:#ef4444;">Reason is required to punch from outside!</span>';
                             return;
                         }
+
+                        reason = modalResult;
                     }
                 } else {
                     console.warn("No assigned locations found for this employee. Geofencing check skipped.");
@@ -699,7 +876,7 @@ foreach ($history as $h) {
                     // Use Google Maps Geocoding API for precise location
                     const apiKey = '<?= getenv("GOOGLE_MAPS_API_KEY") ?>';
                     console.log('API Key loaded:', apiKey ? 'Yes (length: ' + apiKey.length + ')' : 'No - EMPTY!');
-                    
+
                     const response = await fetch(
                         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`,
                         { signal: controller.signal }
@@ -784,6 +961,72 @@ foreach ($history as $h) {
             alert("Geolocation not supported by this browser.");
         }
     }
+
+    // Custom Warning Modal Functions
+    let warningModalResolve = null;
+
+    function showWarningModal() {
+        return new Promise((resolve) => {
+            warningModalResolve = resolve;
+            const modal = document.getElementById('warningModal');
+            const textarea = document.getElementById('warningReasonInput');
+
+            // Clear previous input
+            textarea.value = '';
+
+            // Show modal
+            modal.classList.add('active');
+
+            // Focus on textarea
+            setTimeout(() => textarea.focus(), 300);
+
+            // Enable/disable submit button based on input
+            textarea.addEventListener('input', function () {
+                const submitBtn = document.getElementById('warningSubmitBtn');
+                submitBtn.disabled = this.value.trim() === '';
+            });
+
+            // Initialize submit button as disabled
+            document.getElementById('warningSubmitBtn').disabled = true;
+        });
+    }
+
+    function closeWarningModal() {
+        const modal = document.getElementById('warningModal');
+        modal.classList.remove('active');
+
+        if (warningModalResolve) {
+            warningModalResolve(null); // Return null when cancelled
+            warningModalResolve = null;
+        }
+    }
+
+    function submitWarningReason() {
+        const reason = document.getElementById('warningReasonInput').value.trim();
+
+        if (reason === '') {
+            alert('Please enter a reason before submitting.');
+            return;
+        }
+
+        const modal = document.getElementById('warningModal');
+        modal.classList.remove('active');
+
+        if (warningModalResolve) {
+            warningModalResolve(reason); // Return the reason
+            warningModalResolve = null;
+        }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('warningModal');
+            if (modal.classList.contains('active')) {
+                closeWarningModal();
+            }
+        }
+    });
 </script>
 
 <?php include 'includes/footer.php'; ?>
