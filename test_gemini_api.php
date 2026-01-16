@@ -2,9 +2,8 @@
 require_once 'config/ai_config.php';
 header('Content-Type: text/plain');
 
-echo "=== Gemini API Debug Test ===\n\n";
+echo "=== Gemini API Debug Test (v1beta endpoint) ===\n\n";
 
-// Check if API key is loaded
 echo "API Key Loaded: " . (GEMINI_API_KEY ? "YES (Length: " . strlen(GEMINI_API_KEY) . ")" : "NO") . "\n\n";
 
 if (!GEMINI_API_KEY) {
@@ -12,32 +11,17 @@ if (!GEMINI_API_KEY) {
     exit;
 }
 
-// Test simple prompt with different models
-$models_to_test = [
-    'gemini-pro',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash-latest',
-    'gemini-1.5-pro-latest'
-];
-
+$models_to_test = ['gemini-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 $test_prompt = "Say 'Hello' in one word.";
 
 foreach ($models_to_test as $model) {
-    echo "Testing Model: $model\n";
+    echo "Testing: $model\n";
     echo str_repeat("-", 50) . "\n";
 
-    $url = "https://generativelanguage.googleapis.com/v1/models/" . $model . ":generateContent?key=" . GEMINI_API_KEY;
+    // CORRECT Google AI Studio format
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . GEMINI_API_KEY;
 
-    $payload = [
-        "contents" => [
-            [
-                "parts" => [
-                    ["text" => $test_prompt]
-                ]
-            ]
-        ]
-    ];
+    $payload = ["contents" => [["parts" => [["text" => $test_prompt]]]]];
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -55,13 +39,12 @@ foreach ($models_to_test as $model) {
         $result = json_decode($response, true);
         $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? 'No response';
         echo "✅ SUCCESS! Response: $text\n";
+        echo "*** WORKING MODEL: $model ***\n";
+        break;
     } else {
         echo "❌ FAILED\n";
-        echo "Response: " . substr($response, 0, 300) . "\n";
+        echo substr($response, 0, 200) . "...\n";
     }
-
     echo "\n";
 }
-
-echo "\n=== Test Complete ===\n";
 ?>
