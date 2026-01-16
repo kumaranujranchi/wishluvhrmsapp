@@ -348,6 +348,12 @@ foreach ($history as $h) {
 
     /* Mobile Polishing */
     @media (max-width: 1024px) {
+        .page-content {
+            background: #f5f7fa !important;
+            min-height: 100vh !important;
+            padding: 1rem !important;
+        }
+
         .dashboard-container {
             grid-template-columns: 1fr;
             gap: 1.5rem;
