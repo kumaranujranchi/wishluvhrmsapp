@@ -337,10 +337,68 @@
                 color: #4f46e5 !important;
             }
 
-            /* Logout Button specific */
-            .sidebar.mobile-open .sidebar-footer a:hover {
-                background: #fee2e2 !important;
-                color: #ef4444 !important;
+            /* Improve User Info in Mobile Sidebar */
+            .sidebar.mobile-open .sidebar-footer {
+                padding: 16px !important;
+                border-top: 1px solid #f1f5f9;
+                margin-top: auto;
+                /* Push to bottom */
+            }
+
+            .sidebar.mobile-open .user-info {
+                padding: 12px 16px !important;
+                background: #f8fafc;
+                margin: 0 !important;
+                border-radius: 12px;
+                display: flex !important;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+            }
+
+            .sidebar.mobile-open .user-details {
+                display: flex !important;
+                flex-direction: column;
+                justify-content: center;
+                overflow: visible !important;
+                /* Allow full name show */
+            }
+
+            .sidebar.mobile-open .user-name {
+                display: block !important;
+                font-size: 0.95rem !important;
+                font-weight: 600 !important;
+                color: #1e293b !important;
+                white-space: normal !important;
+                /* Allow text wrapping if needed */
+                overflow: visible !important;
+                line-height: 1.3;
+            }
+
+            .sidebar.mobile-open .user-role {
+                display: block !important;
+                font-size: 0.75rem !important;
+                color: #64748b !important;
+            }
+
+            .sidebar.mobile-open .user-avatar {
+                width: 40px !important;
+                height: 40px !important;
+                min-width: 40px !important;
+                border-radius: 10px !important;
+            }
+
+            /* Ensure logout icon is visible and spaced */
+            .sidebar.mobile-open .sidebar-footer a[title="Logout"] {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+                background: #fff0f0;
+                color: #ef4444;
+                margin-left: 8px !important;
             }
 
             /* Hide the desktop toggle button on mobile sidebar */
