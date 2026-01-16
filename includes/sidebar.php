@@ -26,7 +26,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <!-- Logo with rounded corners -->
             <img src="assets/logo.png" alt="Myworld Logo"
                 style="width: 45px; height: 45px; object-fit: contain; border-radius: 12px;">
-            <div style="display: flex; flex-direction: column; justify-content: center;">
+            <div class="brand-info">
                 <h1 class="logo-text" style="line-height: 1;">Myworld</h1>
                 <span
                     style="font-size: 0.65rem; color: #64748b; font-weight: 500; letter-spacing: 0.5px; margin-top: 2px;">By

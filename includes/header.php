@@ -55,7 +55,7 @@
         rel="stylesheet">
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="assets/css/style.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/style.css?v=2.6">
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>

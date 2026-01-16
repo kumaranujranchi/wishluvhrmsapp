@@ -82,7 +82,7 @@ body {
     z-index: 50;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     transition: width 0.3s ease;
-    overflow: visible; /* Important for Button Visibility */
+    overflow: visible !important; /* Important for Button Visibility */
 }
 
 /* Scrollable Container */
@@ -131,6 +131,12 @@ body {
     font-weight: 700;
     letter-spacing: -0.5px;
     color: white;
+}
+
+.brand-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .sidebar-nav {
@@ -885,8 +891,8 @@ select.form-control {
 
 /* Sidebar Toggle */
 .sidebar-toggle-btn {
-    position: absolute;
-    right: -12px;
+    position: fixed; /* Changed from absolute to fixed */
+    left: 268px; /* 280px sidebar, button is 24px wide. Overlapping edge. */
     top: 50px;
     background: white;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -898,9 +904,9 @@ select.form-control {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 60;
+    z-index: 1000;
     color: #475569;
-    transition: transform 0.3s ease;
+    transition: left 0.3s ease, transform 0.3s ease;
 }
 .sidebar-toggle-btn:hover {
     background-color: #f1f5f9;
@@ -910,6 +916,18 @@ select.form-control {
 .sidebar.collapsed {
     width: 80px;
 }
+
+/* Move toggle button with sidebar */
+.sidebar.collapsed ~ .sidebar-toggle-btn, /* If button is sibling (not case here usually) - need Javascript or correct selector if inside */
+.sidebar.collapsed .sidebar-toggle-btn {   /* Since button is INSIDE sidebar in HTML */
+    left: 68px; /* 80px width, -12px overlap equivalent */
+    transform: rotate(180deg);
+}
+
+.sidebar.collapsed .brand-info {
+    display: none !important;
+}
+
 .sidebar.collapsed .logo-text,
 .sidebar.collapsed .nav-item span,
 .sidebar.collapsed .user-details,
