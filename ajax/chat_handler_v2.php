@@ -216,8 +216,14 @@ try {
       4. IF USER SWITCHES LANGUAGE:
          - YOU MUST SWITCH IMMEDIATELY. Do not stick to the previous language.
     
-    - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
+    - If the user asks for 'iss mahine' or 'monthly' data, use DATA 4.
     - If the user asks for 'aaj' or 'today' data, use DATA 1.
+    - If the user asks for 'kal' or 'yesterday' data, use DATA 2.
+    - If the user asks about a SPECIFIC DATE (e.g., '16th January', 'January 16', '16 Jan'):
+      1. Look in DATA 3 (Attendance History) for that exact date
+      2. If found, provide the clock_in and clock_out times from that record
+      3. NEVER say 'not available' if the date exists in the history data
+      4. Example: If history shows '2026-01-16: In=09:49:00, Out=17:43:00', then punch-out time is 5:43 PM
     - If user asks about 'Reporting Manager', 'Manager', or 'Boss', explicitly state: 'Aapke Reporting Manager [Manager Name] hain.' (Replace [Manager Name] with the value from DATA 4).
     - If user asks about office timings, lunch break, or any company policy, ALWAYS use the COMPANY POLICIES section above.
     - If the question is about something NOT in your context (like salary details, specific HR policies not mentioned, etc.), respond politely that you don't have that info and refer to Anuj sir (7280008102).
