@@ -294,6 +294,55 @@
                 color: #64748b !important;
             }
 
+            /* Fix Mobile Sidebar Active/Hover States */
+            .sidebar.mobile-open .nav-item:hover,
+            .sidebar.mobile-open .nav-item.active {
+                background: #f1f5f9 !important;
+                /* Light grey background */
+                color: #0f172a !important;
+                /* Dark text for contrast */
+            }
+
+            .sidebar.mobile-open .nav-item:hover .icon,
+            .sidebar.mobile-open .nav-item.active .icon {
+                color: #4f46e5 !important;
+                /* Brand color for icon */
+            }
+
+            .sidebar.mobile-open .nav-item span {
+                color: #334155 !important;
+                /* Standard dark slate for text */
+                font-weight: 500 !important;
+            }
+
+            .sidebar.mobile-open .nav-item.active span {
+                color: #0f172a !important;
+                /* Darker for active */
+                font-weight: 600 !important;
+            }
+
+            /* Submenu items */
+            .sidebar.mobile-open .sub-nav-item:hover,
+            .sidebar.mobile-open .sub-nav-item.active {
+                color: #4f46e5 !important;
+                background: transparent !important;
+            }
+
+            .sidebar.mobile-open .sub-nav-item span {
+                color: #64748b !important;
+            }
+
+            .sidebar.mobile-open .sub-nav-item.active span,
+            .sidebar.mobile-open .sub-nav-item:hover span {
+                color: #4f46e5 !important;
+            }
+
+            /* Logout Button specific */
+            .sidebar.mobile-open .sidebar-footer a:hover {
+                background: #fee2e2 !important;
+                color: #ef4444 !important;
+            }
+
             /* Hide the desktop toggle button on mobile sidebar */
             .sidebar.mobile-open .sidebar-toggle-btn {
                 display: none !important;
