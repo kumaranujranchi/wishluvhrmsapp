@@ -90,13 +90,7 @@ if (isset($_POST['export_csv'])) {
             </div>
             <div class="stats-icon-wrapper"><i data-lucide="users" class="icon" style="color:#3b82f6;"></i></div>
         </div>
-        <div class="card stats-card" style="border-left: 4px solid #10b981;">
-            <div class="stats-info">
-                <span class="stats-title">Present Today</span>
-                <h3 class="stats-value"><?= $present_count ?></h3>
-            </div>
-            <div class="stats-icon-wrapper"><i data-lucide="user-check" class="icon" style="color:#10b981;"></i></div>
-        </div>
+
         <div class="card stats-card" style="border-left: 4px solid #f59e0b;">
             <div class="stats-info">
                 <span class="stats-title">Late Today</span>
