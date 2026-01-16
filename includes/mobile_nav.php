@@ -112,13 +112,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </a>
 
         <!-- 3. Leaves -->
-        <a href="leave_apply.php" class="m-nav-item <?= $current_page == 'leave_apply.php' ? 'active' : '' ?>">
+        <a href="<?= $is_admin ? 'leave.php' : 'leave_apply.php' ?>"
+            class="m-nav-item <?= ($current_page == 'leave.php' || $current_page == 'leave_apply.php') ? 'active' : '' ?>">
             <i data-lucide="calendar-days" class="m-nav-icon"></i>
             <span class="m-nav-label">Leaves</span>
         </a>
 
-        <!-- 4. Holidays (Fixed Link) -->
-        <a href="view_holidays.php" class="m-nav-item <?= $current_page == 'view_holidays.php' ? 'active' : '' ?>">
+        <!-- 4. Holidays -->
+        <a href="<?= $is_admin ? 'holidays.php' : 'view_holidays.php' ?>"
+            class="m-nav-item <?= ($current_page == 'holidays.php' || $current_page == 'view_holidays.php') ? 'active' : '' ?>">
             <i data-lucide="coffee" class="m-nav-icon"></i>
             <span class="m-nav-label">Holiday</span>
         </a>
@@ -126,7 +128,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- Payroll Removed as requested -->
 
         <!-- 6. Policy -->
-        <a href="view_policy.php" class="m-nav-item <?= $current_page == 'view_policy.php' ? 'active' : '' ?>">
+        <a href="<?= $is_admin ? 'policy.php' : 'view_policy.php' ?>"
+            class="m-nav-item <?= ($current_page == 'policy.php' || $current_page == 'view_policy.php') ? 'active' : '' ?>">
             <i data-lucide="book-open" class="m-nav-icon"></i>
             <span class="m-nav-label">Policy</span>
         </a>
