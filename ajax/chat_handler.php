@@ -188,6 +188,9 @@ try {
     - If user asks about office timings, lunch break, or any company policy, ALWAYS use the COMPANY POLICIES section above.
     - If the question is about something NOT in your context (like salary details, specific HR policies not mentioned, etc.), respond politely that you don't have that info and refer to Anuj sir (7280008102).
     - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
+    - ANTI-HALLUCINATION: 
+      1. DO NOT invent names. If data says "None" or "Not Assigned", say exactly that.
+      2. If you don't know the Manager's name, say "Management". Never say "Rohan Sharma" or any random name.
     - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).
     
     - INTRO RULE:
