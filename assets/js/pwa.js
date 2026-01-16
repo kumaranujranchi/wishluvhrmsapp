@@ -60,10 +60,8 @@ if ('serviceWorker' in navigator) {
     // Listen for service worker updates
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         console.log('[PWA] New service worker activated');
-        // Optionally show a notification to user
-        if (confirm('New version available! Reload to update?')) {
-            window.location.reload();
-        }
+        // Removed intrusive confirm dialog
+        // Updates will apply on next reload naturally
     });
 }
 
