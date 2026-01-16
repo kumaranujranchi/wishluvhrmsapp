@@ -141,17 +141,7 @@
             border: 2px solid white;
         }
 
-        @keyframes pulse {
 
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
-            }
-        }
 
         .profile-link-mobile img {
             width: 44px;
