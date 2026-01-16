@@ -137,8 +137,8 @@ try {
         // Ignore policy fetch errors
     }
 
-    // Debug: Log what we found
-    file_put_contents('../debug_bot_manager.txt', date('Y-m-d H:i:s') . " - User: $user_name, Manager Found: $manager_name (ID: " . $user['reporting_manager_id'] . ")\n", FILE_APPEND);
+    // Debug: Log removed to prevent permission errors
+    // file_put_contents('../debug_bot_manager.txt', ...);
 
     // 2. Prepare Gemini Prompt
     // ------------------------
@@ -272,7 +272,7 @@ try {
     }
 
 } catch (Exception $e) {
-    file_put_contents('debug_log.txt', date('Y-m-d H:i:s') . " - Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    // file_put_contents('debug_log.txt', date('Y-m-d H:i:s') . " - Error: " . $e->getMessage() . "\n", FILE_APPEND);
     $response = "DEBUG ERROR: " . $e->getMessage();
 }
 
