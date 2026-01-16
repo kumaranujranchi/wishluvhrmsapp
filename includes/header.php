@@ -90,9 +90,31 @@
 
         .header-date {
             margin: 0;
-            font-size: 0.75rem;
-            color: #64748b;
-            font-weight: 500;
+            font-size: 0.85rem;
+            color: #475569;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid #bae6fd;
+            box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .header-date i {
+            width: 16px;
+            height: 16px;
+            color: #0284c7;
+        }
+
+        .date-separator {
+            width: 4px;
+            height: 4px;
+            background: #94a3b8;
+            border-radius: 50%;
+            margin: 0 4px;
         }
 
         .action-icon-btn {
@@ -238,10 +260,19 @@
                         // Desktop name removed to avoid duplication
                         ?>
                     </h2>
-                    <p class="header-date">
-                        <span class="mobile-only"><?= date('D, d M') ?> • Good Morning</span>
-                        <span class="desktop-only"><?= date('D, d M, Y') ?></span>
-                    </p>
+                    <div class="header-date">
+                        <i data-lucide="calendar" class="mobile-only"></i>
+                        <span class="mobile-only"><?= date('D, d M') ?></span>
+                        <span class="date-separator mobile-only"></span>
+                        <i data-lucide="sun" class="mobile-only"></i>
+                        <span class="mobile-only">Good Morning</span>
+                        
+                        <i data-lucide="calendar-days" class="desktop-only"></i>
+                        <span class="desktop-only"><?= date('l, d F Y') ?></span>
+                        <span class="date-separator desktop-only"></span>
+                        <i data-lucide="clock" class="desktop-only"></i>
+                        <span class="desktop-only" id="live-time"></span>
+                    </div>
                 </div>
 
                 <div class="header-actions">

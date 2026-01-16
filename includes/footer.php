@@ -55,6 +55,21 @@
         const cw = document.getElementById('chatWindow');
         if (cw) cw.classList.toggle('active');
     }
+
+    // Update live time in header
+    function updateLiveTime() {
+        const timeElement = document.getElementById('live-time');
+        if (timeElement) {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            timeElement.textContent = `${hours}:${minutes}`;
+        }
+    }
+
+    // Update time immediately and then every minute
+    updateLiveTime();
+    setInterval(updateLiveTime, 60000);
 </script>
 
 </body>
