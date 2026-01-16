@@ -1,6 +1,6 @@
 <?php
 // Environment Configuration
-// This file loads API keys from .env file if available, otherwise uses fallback values
+// This file loads API keys from .env file
 
 // Try multiple possible paths to find .env file
 $possiblePaths = [
@@ -27,19 +27,6 @@ foreach ($possiblePaths as $envPath) {
         $envLoaded = true;
         break;  // Stop after finding the first valid .env file
     }
-}
-
-
-// Fallback: If .env not found or keys not loaded, use direct values
-// IMPORTANT: Replace these with your actual API keys on live server
-if (!getenv('GOOGLE_MAPS_API_KEY')) {
-    putenv('GOOGLE_MAPS_API_KEY=AIzaSyB-G2YfDMGSnxWiqMRKASJENDHNW0iUVp8');
-    $_ENV['GOOGLE_MAPS_API_KEY'] = 'AIzaSyB-G2YfDMGSnxWiqMRKASJENDHNW0iUVp8';
-}
-
-if (!getenv('GEMINI_API_KEY')) {
-    putenv('GEMINI_API_KEY=AIzaSyB4My_SRbGXTEAGg2CJb1ZbxfnFt0FtAaE');
-    $_ENV['GEMINI_API_KEY'] = 'AIzaSyB4My_SRbGXTEAGg2CJb1ZbxfnFt0FtAaE';
 }
 
 // Define constants for easy access
