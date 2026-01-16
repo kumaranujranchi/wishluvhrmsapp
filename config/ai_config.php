@@ -32,4 +32,5 @@ foreach ($possiblePaths as $envPath) {
 // Define constants for easy access
 define('GEMINI_API_KEY', getenv('GEMINI_API_KEY') ?: '');
 define('GEMINI_MODEL', 'gemini-1.5-flash');
+define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
 ?>
