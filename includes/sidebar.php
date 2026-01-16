@@ -43,10 +43,39 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                     <span>Dashboard</span>
                 </a>
 
-                <a href="attendance_view.php" class="nav-item <?php echo isActive('attendance_view'); ?>">
-                    <i data-lucide="calendar-check" class="icon"></i>
-                    <span>Attendance</span>
-                </a>
+
+                <!-- Attendance Group -->
+                <div class="nav-group">
+                    <?php
+                    $attendancePages = ['attendance_view', 'regularization_request', 'regularization_status'];
+                    $attendanceState = isGroupOpen($attendancePages);
+                    ?>
+                    <button
+                        class="nav-item nav-group-toggle <?= strpos($attendanceState, 'active') !== false ? 'active' : '' ?>"
+                        onclick="toggleSubNav('attendanceSubNav', this)">
+                        <i data-lucide="calendar-check" class="icon"></i>
+                        <span>Attendance</span>
+                        <i data-lucide="chevron-right" class="icon chevron-icon"
+                            style="transition: transform 0.2s; transform: <?= strpos($attendanceState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                    </button>
+                    <div id="attendanceSubNav"
+                        class="sub-nav <?= strpos($attendanceState, 'open') !== false ? 'open' : '' ?>">
+                        <a href="attendance_view.php" class="sub-nav-item <?php echo isActive('attendance_view'); ?>">
+                            <i data-lucide="clock" class="icon" style="width:16px;height:16px;"></i>
+                            <span>My Attendance</span>
+                        </a>
+                        <a href="regularization_request.php"
+                            class="sub-nav-item <?php echo isActive('regularization_request'); ?>">
+                            <i data-lucide="edit" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Request Regularization</span>
+                        </a>
+                        <a href="regularization_status.php"
+                            class="sub-nav-item <?php echo isActive('regularization_status'); ?>">
+                            <i data-lucide="file-text" class="icon" style="width:16px;height:16px;"></i>
+                            <span>My Requests</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- Leave Management Group -->
                 <div class="nav-group">
@@ -194,10 +223,34 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                     </div>
                 </div>
 
-                <a href="attendance.php" class="nav-item <?php echo isActive('attendance'); ?>">
-                    <i data-lucide="calendar-check" class="icon"></i>
-                    <span>Attendance</span>
-                </a>
+
+                <!-- Admin Attendance Group -->
+                <div class="nav-group">
+                    <?php
+                    $adminAttendancePages = ['attendance', 'regularization_manage'];
+                    $adminAttendanceState = isGroupOpen($adminAttendancePages);
+                    ?>
+                    <button
+                        class="nav-item nav-group-toggle <?= strpos($adminAttendanceState, 'active') !== false ? 'active' : '' ?>"
+                        onclick="toggleSubNav('adminAttendanceSubNav', this)">
+                        <i data-lucide="calendar-check" class="icon"></i>
+                        <span>Attendance</span>
+                        <i data-lucide="chevron-right" class="icon chevron-icon"
+                            style="transition: transform 0.2s; transform: <?= strpos($adminAttendanceState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                    </button>
+                    <div id="adminAttendanceSubNav"
+                        class="sub-nav <?= strpos($adminAttendanceState, 'open') !== false ? 'open' : '' ?>">
+                        <a href="attendance.php" class="sub-nav-item <?php echo isActive('attendance'); ?>">
+                            <i data-lucide="users" class="icon" style="width:16px;height:16px;"></i>
+                            <span>View Attendance</span>
+                        </a>
+                        <a href="regularization_manage.php"
+                            class="sub-nav-item <?php echo isActive('regularization_manage'); ?>">
+                            <i data-lucide="settings" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Regularization</span>
+                        </a>
+                    </div>
+                </div>
 
 
 
