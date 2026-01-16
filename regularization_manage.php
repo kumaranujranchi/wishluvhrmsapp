@@ -1,5 +1,8 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require_once 'config/db.php';
 
 // Check if user is admin
@@ -11,14 +14,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Admin') {
 $page_title = "Manage Regularization";
 
 include 'includes/header.php';
-include 'includes/sidebar.php';
+// sidebar.php is already included inside header.php, so we don't include it here again to avoid fatal error
 
 // Fetch pending requests
+// Fetch pending requests without designation join first to be safe
 $stmt = $conn->prepare("
-    SELECT r.*, e.first_name, e.last_name, e.email, d.name as designation
+    SELECT r.*, e.first_name, e.last_name, e.email
     FROM attendance_regularization r
     JOIN employees e ON r.employee_id = e.id
-    LEFT JOIN designations d ON e.designation_id = d.id
     WHERE r.status = 'pending'
     ORDER BY r.requested_at ASC
 ");
@@ -26,7 +29,7 @@ $stmt->execute();
 $pending_requests = $stmt->fetchAll();
 
 // Fetch all employees for direct regularization
-$stmt = $conn->prepare("SELECT id, first_name, last_name, email FROM employees WHERE status = 'active' ORDER BY first_name");
+$stmt = $conn->prepare("SELECT id, first_name, last_name, email FROM employees ORDER BY first_name");
 $stmt->execute();
 $employees = $stmt->fetchAll();
 ?>
@@ -224,7 +227,7 @@ $employees = $stmt->fetchAll();
                                         <?php echo $req['first_name'] . ' ' . $req['last_name']; ?>
                                     </h4>
                                     <p>
-                                        <?php echo $req['designation'] ?: 'Employee'; ?> •
+                                        <?php echo 'Employee'; ?> •
                                         <?php echo $req['email']; ?>
                                     </p>
                                 </div>

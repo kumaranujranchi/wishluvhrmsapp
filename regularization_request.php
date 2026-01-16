@@ -13,7 +13,7 @@ $user_name = $_SESSION['user_name'];
 $page_title = "Request Attendance Regularization";
 
 include 'includes/header.php';
-include 'includes/sidebar.php';
+// sidebar.php is already included inside header.php
 ?>
 
 <style>

@@ -11,7 +11,7 @@ $user_id = $_SESSION['user_id'];
 $page_title = "Regularization Requests";
 
 include 'includes/header.php';
-include 'includes/sidebar.php';
+// sidebar.php is already included inside header.php
 
 // Fetch all requests for this user
 $stmt = $conn->prepare("

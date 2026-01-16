@@ -562,11 +562,37 @@
                     $unread_stmt->execute(['uid' => $_SESSION['user_id']]);
                     $unread_count = $unread_stmt->fetchColumn();
                     ?>
-                    <a href="view_notices.php" class="action-icon-btn notification-bell">
+                    <a href="view_notices.php" class="action-icon-btn notification-bell" title="Notifications">
                         <i data-lucide="bell"></i>
                         <?php if ($unread_count > 0): ?>
                             <span class="notification-badge"><?= $unread_count ?></span>
                         <?php endif; ?>
                     </a>
+
+                    <!-- Profile/Logout Section -->
+                    <div class="desktop-only" style="margin-left: 8px;">
+                        <a href="logout.php" class="action-icon-btn" title="Logout" style="color: #ef4444; background: #fee2e2;">
+                            <i data-lucide="log-out"></i>
+                        </a>
+                    </div>
                 </div>
             </header>
+
+            <script>
+                // Ensure icons are created even if script loads late or page crashes partially
+                (function() {
+                    function initLucide() {
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    }
+                    if (document.readyState === "loading") {
+                        document.addEventListener("DOMContentLoaded", initLucide);
+                    } else {
+                        initLucide();
+                    }
+                    // Backup call
+                    setTimeout(initLucide, 500);
+                    setTimeout(initLucide, 2000); // Second backup
+                })();
+            </script>
