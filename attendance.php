@@ -196,8 +196,9 @@ if (isset($_POST['export_csv'])) {
                                 <td>
                                     <?php
                                     $sColor = match ($row['status']) {
-                                        'Present' => 'background:#dcfce7; color:#166534;',
+                                        'On Time' => 'background:#dcfce7; color:#166534;',
                                         'Late' => 'background:#fef9c3; color:#854d0e;',
+                                        'Present' => 'background:#dbeafe; color:#1e40af;',
                                         'Half Day' => 'background:#ffedd5; color:#9a3412;',
                                         'Absent' => 'background:#fee2e2; color:#991b1b;',
                                         default => 'background:#f1f5f9; color:#475569;'
@@ -307,8 +308,9 @@ if (isset($_POST['export_csv'])) {
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <?php
                                     $sColorMobile = match ($row['status']) {
-                                        'Present' => 'background:#dcfce7; color:#166534;',
+                                        'On Time' => 'background:#dcfce7; color:#166534;',
                                         'Late' => 'background:#fef9c3; color:#854d0e;',
+                                        'Present' => 'background:#dbeafe; color:#1e40af;',
                                         'Half Day' => 'background:#ffedd5; color:#9a3412;',
                                         'Absent' => 'background:#fee2e2; color:#991b1b;',
                                         default => 'background:#f1f5f9; color:#475569;'

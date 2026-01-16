@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $emp_q->execute(['uid' => $user_id]);
             $shift_start = $emp_q->fetchColumn() ?: '10:00:00';
 
-            $status = (strtotime($current_time) > strtotime($shift_start)) ? 'Late' : 'Present';
+            $status = (strtotime($current_time) > strtotime($shift_start)) ? 'Late' : 'On Time';
 
             $sql = "INSERT INTO attendance (employee_id, date, clock_in, status, clock_in_lat, clock_in_lng, clock_in_address, location_id, out_of_range, out_of_range_reason) 
                     VALUES (:uid, :date, :time, :status, :lat, :lng, :addr, :loc_id, :oor, :reason)";
@@ -521,8 +521,9 @@ foreach ($history as $h) {
                                 style="font-weight:700; color:#1e293b; font-size: 0.95rem;"><?= date('l', strtotime($row['date'])) ?></span>
                             <?php
                             $badgeStyle = match ($row['status']) {
-                                'Present' => 'background:#dcfce7; color:#166534;',
+                                'On Time' => 'background:#dcfce7; color:#166534;',
                                 'Late' => 'background:#fef9c3; color:#854d0e;',
+                                'Present' => 'background:#dbeafe; color:#1e40af;',
                                 default => 'background:#f1f5f9; color:#64748b;'
                             };
                             ?>
@@ -613,13 +614,13 @@ foreach ($history as $h) {
     // Update UI status if geofencing is active
     if (assignedLocations.length > 0) {
         const statusDiv = document.getElementById('locationStatus');
-        if(statusDiv) {
-             statusDiv.innerHTML += ' <span style="color:#10b981; font-weight:600;">(Geofencing Active)</span>';
+        if (statusDiv) {
+            statusDiv.innerHTML += ' <span style="color:#10b981; font-weight:600;">(Geofencing Active)</span>';
         }
     } else {
         const statusDiv = document.getElementById('locationStatus');
-        if(statusDiv) {
-             statusDiv.innerHTML += ' <span style="color:#94a3b8;">(Geofencing Inactive - Open Punch)</span>';
+        if (statusDiv) {
+            statusDiv.innerHTML += ' <span style="color:#94a3b8;">(Geofencing Inactive - Open Punch)</span>';
         }
     }
 
@@ -690,11 +691,25 @@ foreach ($history as $h) {
                 statusDiv.innerHTML = 'Location Locked. Getting Address...';
 
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+                        { signal: controller.signal }
+                    );
+                    clearTimeout(timeoutId);
+
                     const data = await response.json();
-                    document.getElementById('addrInput').value = data.display_name || (lat + ', ' + lng);
+                    if (data.display_name) {
+                        document.getElementById('addrInput').value = data.display_name;
+                    } else {
+                        throw new Error('No address found');
+                    }
                 } catch (e) {
-                    document.getElementById('addrInput').value = lat + ', ' + lng;
+                    console.warn('Geocoding failed:', e);
+                    // Fallback: Use a more readable format
+                    document.getElementById('addrInput').value = `Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
                 }
 
                 form.submit();
@@ -703,11 +718,11 @@ foreach ($history as $h) {
             const errorCallback = (error) => {
                 // FALLBACK: Try again with low accuracy if first attempt failed
                 if (options.enableHighAccuracy) {
-                     statusDiv.innerHTML = '<span class="spin" style="display:inline-block;">⌛</span> GPS weak, trying standard network location...';
-                     options.enableHighAccuracy = false;
-                     options.timeout = 20000; // Give 20s for network location
-                     navigator.geolocation.getCurrentPosition(successCallback, finalErrorCallback, options);
-                     return;
+                    statusDiv.innerHTML = '<span class="spin" style="display:inline-block;">⌛</span> GPS weak, trying standard network location...';
+                    options.enableHighAccuracy = false;
+                    options.timeout = 20000; // Give 20s for network location
+                    navigator.geolocation.getCurrentPosition(successCallback, finalErrorCallback, options);
+                    return;
                 }
                 finalErrorCallback(error);
             };
