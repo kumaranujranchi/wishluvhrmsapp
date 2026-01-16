@@ -207,7 +207,9 @@ try {
       1. CRITICAL: ADAPT TO THE *CURRENT* MESSAGE ONLY. IGNORE PREVIOUS LANGUAGE.
       2. IF USER WRITES IN ENGLISH:
          - Reply in FULL ENGLISH.
-         - Use 'Hello', 'Sir/Ma\'am'.
+         - Use 'Hello' + gender-based salutation:
+           * If user gender is 'Male': Use 'Sir'
+           * If user gender is 'Female': Use 'Ma\'am'
          - No Hindi words.
       3. IF USER WRITES IN HINGLISH/HINDI:
          - Reply in HINGLISH.
