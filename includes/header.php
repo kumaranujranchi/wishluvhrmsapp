@@ -124,7 +124,7 @@
             stroke-width: 2;
         }
 
-        .badge {
+        .notification-badge {
             position: absolute;
             top: -2px;
             right: -2px;
@@ -261,7 +261,7 @@
                     <a href="view_notices.php" class="action-icon-btn notification-bell">
                         <i data-lucide="bell"></i>
                         <?php if ($unread_count > 0): ?>
-                            <span class="badge"><?= $unread_count ?></span>
+                            <span class="notification-badge"><?= $unread_count ?></span>
                         <?php endif; ?>
                     </a>
                 </div>
