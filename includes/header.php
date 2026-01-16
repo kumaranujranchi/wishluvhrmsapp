@@ -88,6 +88,13 @@
             font-weight: 700;
         }
 
+        @media (max-width: 768px) {
+            .header-greeting {
+                font-size: 0.95rem;
+                line-height: 1.3;
+            }
+        }
+
         .header-date {
             margin: 0;
             font-size: 0.85rem;
@@ -101,6 +108,15 @@
             border-radius: 12px;
             border: 1px solid #bae6fd;
             box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .header-date {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+                gap: 4px;
+                margin-top: 4px;
+            }
         }
 
         .header-date i {
@@ -206,12 +222,15 @@
             }
 
             .header {
-                padding: 15px 20px !important;
+                padding: 12px 15px !important;
                 background: white !important;
                 position: sticky;
                 top: 0;
                 z-index: 1001;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                display: flex !important;
+                align-items: center !important;
+                gap: 10px !important;
             }
 
             .action-icon-btn {
@@ -263,9 +282,6 @@
                     <div class="header-date">
                         <i data-lucide="calendar" class="mobile-only"></i>
                         <span class="mobile-only"><?= date('D, d M') ?></span>
-                        <span class="date-separator mobile-only"></span>
-                        <i data-lucide="sun" class="mobile-only"></i>
-                        <span class="mobile-only">Good Morning</span>
                         
                         <i data-lucide="calendar-days" class="desktop-only"></i>
                         <span class="desktop-only"><?= date('l, d F Y') ?></span>
