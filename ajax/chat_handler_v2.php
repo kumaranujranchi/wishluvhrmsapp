@@ -217,58 +217,75 @@ try {
 
     $final_prompt = $system_prompt . "\n\nCHAT HISTORY:\n" . $history_context . "\nUser: " . $message . "\nAssistant:";
 
-    // 3. Call Gemini API
+    // 3. Call Gemini API with Fallback Models
     // ------------------
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
-
-    $payload = [
-        "contents" => [
-            [
-                "parts" => [
-                    ["text" => $final_prompt]
-                ]
-            ]
-        ],
-        "generationConfig" => [
-            "temperature" => 0.4,
-            "maxOutputTokens" => 1024
-        ]
+    $models_to_try = [
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-pro-latest',
+        'gemini-pro',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro'
     ];
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
+    $response = null;
+    $last_error = null;
 
-    $response_json = curl_exec($ch);
-    if ($response_json === false) {
-        $err = curl_error($ch);
-        curl_close($ch);
-        throw new Exception("CURL Error: " . $err);
-    }
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    foreach ($models_to_try as $model) {
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/" . $model . ":generateContent?key=" . GEMINI_API_KEY;
 
-    if ($http_code === 200) {
-        $result = json_decode($response_json, true);
-        $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
+        $payload = [
+            "contents" => [
+                [
+                    "parts" => [
+                        ["text" => $final_prompt]
+                    ]
+                ]
+            ],
+            "generationConfig" => [
+                "temperature" => 0.4,
+                "maxOutputTokens" => 1024
+            ]
+        ];
 
-        // DEBUG: Check which model is actually running
-        // $bot_text .= "\n\n(Debug: Using " . GEMINI_MODEL . " on v1beta)";
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
 
-        $response = trim($bot_text);
-
-        // Save to history
-        $_SESSION['chat_history'][] = ["role" => "user", "content" => $message];
-        $_SESSION['chat_history'][] = ["role" => "assistant", "content" => $response];
-
-        // Keep last 10 exchanges (20 entries)
-        if (count($_SESSION['chat_history']) > 20) {
-            $_SESSION['chat_history'] = array_slice($_SESSION['chat_history'], -20);
+        $response_json = curl_exec($ch);
+        if ($response_json === false) {
+            $last_error = curl_error($ch);
+            curl_close($ch);
+            continue; // Try next model
         }
-    } else {
-        throw new Exception("Gemini API Error: " . $response_json);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code === 200) {
+            $result = json_decode($response_json, true);
+            $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
+            $response = trim($bot_text);
+
+            // Save to history
+            $_SESSION['chat_history'][] = ["role" => "user", "content" => $message];
+            $_SESSION['chat_history'][] = ["role" => "assistant", "content" => $response];
+
+            // Keep last 10 exchanges (20 entries)
+            if (count($_SESSION['chat_history']) > 20) {
+                $_SESSION['chat_history'] = array_slice($_SESSION['chat_history'], -20);
+            }
+            break; // Success! Exit loop
+        } else {
+            // Model not found or other error, try next
+            $last_error = $response_json;
+            continue;
+        }
+    }
+
+    // If all models failed
+    if ($response === null) {
+        throw new Exception("All Gemini models failed. Last error: " . $last_error);
     }
 
 } catch (Exception $e) {
