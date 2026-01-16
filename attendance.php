@@ -79,6 +79,48 @@ if (isset($_POST['export_csv'])) {
 }
 ?>
 
+<style>
+    @media (max-width: 768px) {
+        .page-content {
+            background: #f5f7fa !important;
+            min-height: 100vh !important;
+            padding: 1rem !important;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+
+        .filter-form {
+            flex-direction: column !important;
+            width: 100%;
+        }
+
+        .filter-form input[type="date"] {
+            width: 100% !important;
+        }
+
+        .header-action-btn {
+            width: 100%;
+        }
+
+        .page-header-flex {
+            flex-direction: column !important;
+            gap: 1rem !important;
+            align-items: stretch !important;
+        }
+
+        .page-header-flex>div {
+            width: 100%;
+        }
+    }
+</style>
+
 <div class="page-content">
 
     <!-- Stats Cards -->

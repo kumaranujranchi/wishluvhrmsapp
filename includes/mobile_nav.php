@@ -89,15 +89,21 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <!-- Mobile Bottom Navigation Bar (Scrollable) -->
 <div class="m-bottom-nav-container">
     <nav class="m-bottom-nav">
+        <?php
+        // Determine user role
+        $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'Admin';
+        $home_page = $is_admin ? 'index.php' : 'employee_dashboard.php';
+        $attendance_page = $is_admin ? 'attendance.php' : 'attendance_view.php';
+        ?>
+
         <!-- 1. Dashboard -->
-        <a href="employee_dashboard.php"
-            class="m-nav-item <?= $current_page == 'employee_dashboard.php' ? 'active' : '' ?>">
+        <a href="<?= $home_page ?>" class="m-nav-item <?= $current_page == $home_page ? 'active' : '' ?>">
             <i data-lucide="layout-grid" class="m-nav-icon"></i>
             <span class="m-nav-label">Home</span>
         </a>
 
         <!-- 2. Attendance -->
-        <a href="attendance_view.php" class="m-nav-item <?= $current_page == 'attendance_view.php' ? 'active' : '' ?>">
+        <a href="<?= $attendance_page ?>" class="m-nav-item <?= $current_page == $attendance_page ? 'active' : '' ?>">
             <i data-lucide="calendar-check" class="m-nav-icon"></i>
             <span class="m-nav-label">Attend.</span>
         </a>
