@@ -1,3 +1,4 @@
+<?php require_once 'config/ai_config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -218,4 +219,3 @@
 </body>
 
 </html>
-<?php require_once 'config/ai_config.php'; ?>
