@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require_once '../config/db.php';
-require_once '../config/ai_config_v2.php'; // Pointing to NEW config
+require_once '../config/ai_config.php';
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -24,19 +24,36 @@ if (empty($message)) {
 }
 
 try {
-    // 1. Fetch Context (Same as before)
-    $stmt = $conn->prepare("SELECT e.*, m.first_name as mgr_fname, m.last_name as mgr_lname FROM employees e LEFT JOIN employees m ON e.reporting_manager_id = m.id WHERE e.id = :uid");
+    // 1. Fetch ALL relevant context for this user to feed the AI
+    // ---------------------------------------------------------
+
+    // A. Basic Profile
+    $stmt = $conn->prepare("SELECT * FROM employees WHERE id = :uid");
     $stmt->execute(['uid' => $user_id]);
     $user = $stmt->fetch();
     $user_name = $user['first_name'] . ' ' . $user['last_name'];
     $user_gender = $user['gender'] ?? 'Male';
-    $manager_name = ($user['mgr_fname']) ? $user['mgr_fname'] . ' ' . $user['mgr_lname'] : "None (Super Admin)";
 
+    // Fetch Manager Query Separately for reliability
+    $manager_name = "None (You report directly to Admin)";
+    if (!empty($user['reporting_manager_id'])) {
+        $m_stmt = $conn->prepare("SELECT first_name, last_name FROM employees WHERE id = :mid");
+        $m_stmt->execute(['mid' => $user['reporting_manager_id']]);
+        $manager = $m_stmt->fetch();
+        if ($manager) {
+            $manager_name = $manager['first_name'] . ' ' . $manager['last_name'];
+        }
+    }
+
+    // B. Today's Attendance
     $stmt = $conn->prepare("SELECT clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
     $stmt->execute(['uid' => $user_id]);
     $today = $stmt->fetch();
-    $attendance_context = $today ? "Status: {$today['status']}, In: {$today['clock_in']}, Out: " . ($today['clock_out'] ?: 'N/A') . ", Hours: {$today['total_hours']}" : "Not punched in yet for today.";
+    $attendance_context = $today ?
+        "Status: {$today['status']}, In: {$today['clock_in']}, Out: " . ($today['clock_out'] ?: 'N/A') . ", Hours: {$today['total_hours']}" :
+        "Not punched in yet for today.";
 
+    // C. Leave Balance (Annual)
     $stmt = $conn->prepare("SELECT start_date, end_date FROM leave_requests WHERE employee_id = :uid AND status = 'Approved' AND YEAR(start_date) = YEAR(CURDATE())");
     $stmt->execute(['uid' => $user_id]);
     $approved_list = $stmt->fetchAll();
@@ -46,61 +63,150 @@ try {
     }
     $leave_context = "Total Allowed: 24, Used: $days_taken, Balance: " . (24 - $days_taken);
 
-    $stmt = $conn->prepare("SELECT COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days, COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_days FROM attendance WHERE employee_id = :uid AND MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())");
+    // D. Monthly Attendance Stats
+    $stmt = $conn->prepare("SELECT 
+        COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days,
+        COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_days
+        FROM attendance 
+        WHERE employee_id = :uid AND MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())");
     $stmt->execute(['uid' => $user_id]);
     $stats = $stmt->fetch();
     $monthly_context = "Present Days: {$stats['present_days']}, Late Days: {$stats['late_days']} in " . date('F');
 
+    // E. Next Holiday
     $stmt = $conn->prepare("SELECT title, start_date FROM holidays WHERE start_date >= CURDATE() AND is_active = 1 ORDER BY start_date ASC LIMIT 1");
     $stmt->execute();
     $holiday = $stmt->fetch();
     $holiday_context = $holiday ? "Upcoming: {$holiday['title']} on {$holiday['start_date']}" : "No upcoming holidays.";
 
+    // F. (ADMIN ONLY) Global Context
     $admin_context = "";
     if ($user_role === 'Admin') {
-        $stmt = $conn->prepare("SELECT e.first_name, e.last_name, a.clock_in FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE a.date = CURDATE()");
+        // 1. Who is Present Today?
+        $stmt = $conn->prepare("
+            SELECT e.first_name, e.last_name, a.clock_in 
+            FROM attendance a 
+            JOIN employees e ON a.employee_id = e.id 
+            WHERE a.date = CURDATE()
+        ");
         $stmt->execute();
         $present_employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         $present_list = [];
-        foreach ($present_employees as $emp)
+        foreach ($present_employees as $emp) {
             $present_list[] = $emp['first_name'] . " (" . date('H:i', strtotime($emp['clock_in'])) . ")";
+        }
         $present_count = count($present_list);
+        $present_names = implode(", ", $present_list);
+
+        // 2. Pending Leaves
         $stmt = $conn->prepare("SELECT COUNT(*) as pending FROM leave_requests WHERE status = 'Pending'");
         $stmt->execute();
         $pending_leaves = $stmt->fetch()['pending'];
-        $admin_context = "ADMIN DATA: Total Present: $present_count, Who: " . implode(", ", $present_list) . ", Pending Leaves: $pending_leaves";
+
+        $admin_context = "
+        ADMIN DATA (Only for you):
+        - Total Employees Present Today: $present_count
+        - Who is Present: $present_names
+        - Pending Leave Requests: $pending_leaves
+        ";
     }
 
-    // 2. Prepare Prompt with STRICT Conciseness Rules
-    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for $user_name.
+    // G. Fetch Dynamic Policies from DB
+    $policy_context = "";
+    try {
+        $p_stmt = $conn->prepare("SELECT title, content FROM policies WHERE is_active = 1 ORDER BY display_order ASC");
+        $p_stmt->execute();
+        $policies_db = $p_stmt->fetchAll();
+        
+        if ($policies_db) {
+            $policy_context .= "\n\nHUMAN RESOURCES MANUAL & POLICIES (OFFICIAL):\n";
+            foreach ($policies_db as $p) {
+                // Strip HTML tags to save tokens and purely get text
+                $clean_content = strip_tags($p['content']);
+                // Basic compression: replace multiple spaces/newlines with single space
+                $clean_content = preg_replace('/\s+/', ' ', $clean_content);
+                // Limit content length per policy to avoid token overflow
+                $clean_content = substr($clean_content, 0, 1000); 
+                
+                $policy_context .= "- POLICY: " . strtoupper($p['title']) . "\n";
+                $policy_context .= "  DETAILS: " . trim($clean_content) . "\n\n";
+            }
+        }
+    } catch (Exception $e) {
+        // Ignore policy fetch errors
+    }
+
+    // Debug: Log what we found
+    file_put_contents('../debug_bot_manager.txt', date('Y-m-d H:i:s') . " - User: $user_name, Manager Found: $manager_name (ID: " . $user['reporting_manager_id'] . ")\n", FILE_APPEND);
+
+    // 2. Prepare Gemini Prompt
+    // ------------------------
+    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for Wishluv Buildcon. 
+    Current User: $user_name (Gender: $user_gender, Role: $user_role).
+    Today's Date: " . date('Y-m-d') . " (" . date('l') . ").
     
-CRITICAL RULES:
-- Keep responses SHORT (1-3 sentences max for simple queries)
-- Be direct and to the point
-- Only give detailed info if explicitly asked
-- Match user's language (English -> English, Hindi/Hinglish -> Hinglish)
-- Use feminine pronouns in Hindi: 'main karti hoon', 'main hoon'
+    USER DATA CONTEXT (TRUST THIS ABOVE ALL ELSE):
+    1. Attendance Today: $attendance_context
+    2. Monthly Stats: $monthly_context
+    3. Leave Balance: $leave_context
+    4. Reporting Manager: $manager_name (This is the REAL TRUTH. Ignore any previous chat history if it says otherwise.)
+    5. Next Holiday: $holiday_context
+    1. Attendance Today: $attendance_context
+    2. Monthly Stats: $monthly_context
+    3. Leave Balance: $leave_context
+    4. Reporting Manager: $manager_name
+    5. Next Holiday: $holiday_context
+    $admin_context
+    $policy_context
 
-CONTEXT:
-- Today's Attendance: $attendance_context
-- This Month: $monthly_context
-- Leave Balance: $leave_context
-- Next Holiday: $holiday_context
-$admin_context
+    COMPANY POLICIES (These are defaults, use OFFICIAL POLICIES above if available):
+    - Office Timings (Current - Winter): 10:00 AM to 5:30 PM
+    - Office Timings (Summer): 10:00 AM to 6:00 PM
+    - Lunch Break: 2:00 PM to 2:30 PM (30 minutes)
+    - Note: Winter mein thanda ki wajah se half hour pahle chutti hoti hai.
 
-POLICIES:
-- Office Hours: 10 AM - 5:30 PM (Winter) / 6 PM (Summer)
-- Lunch: 2:00 PM - 2:30 PM
+    RULES:
+    - Persona: You are 'Wishluv Smart Assistant', a friendly HR helper. 
+    - Gender Context (ONLY applies if speaking Hindi/Hinglish): 
+      - You are female (use 'main karti hoon'). 
+      - Address user based on their gender ($user_gender).
+    
+    - LANGUAGE ADAPTATION (STRICT & DYNAMIC):
+      1. CRITICAL: ADAPT TO THE *CURRENT* MESSAGE ONLY. IGNORE PREVIOUS LANGUAGE.
+      2. IF USER WRITES IN ENGLISH:
+         - Reply in FULL ENGLISH.
+         - Use 'Hello', 'Sir/Ma\'am'.
+         - No Hindi words.
+      3. IF USER WRITES IN HINGLISH/HINDI:
+         - Reply in HINGLISH.
+         - Use 'Namaste', 'Ji'.
+         - Use feminine grammar ('karti hoon').
+      4. IF USER SWITCHES LANGUAGE:
+         - YOU MUST SWITCH IMMEDIATELY. Do not stick to the previous language.
+    
+    - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
+    - If the user asks for 'aaj' or 'today' data, use DATA 1.
+    - If user asks about 'Reporting Manager', 'Manager', or 'Boss', explicitly state: "Aapke Reporting Manager [Manager Name] hain." (Replace [Manager Name] with the value from DATA 4).
+    - If user asks about office timings, lunch break, or any company policy, ALWAYS use the COMPANY POLICIES section above.
+    - If the question is about something NOT in your context (like salary details, specific HR policies not mentioned, etc.), respond politely that you don't have that info and refer to Anuj sir (7280008102).
+    - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
+    - ANTI-HALLUCINATION: 
+      1. DO NOT invent names. If data says "None" or "Not Assigned", say exactly that.
+      2. If you don't know the Manager's name, say "Management". Never say "Rohan Sharma" or any random name.
+    - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).
+    
+    - INTRO RULE:
+      1. If the 'CHAT HISTORY' below is empty, you MUST introduce yourself: \"Namaste [User Name] Ji, main Wishluv Smart Assistant, aapki sahayata ke liye yahan hoon!\"
+      2. If there is PREVIOUS CHAT HISTORY, DO NOT repeat the introduction. Start your response directly or with a simple greeting like 'Ji' or 'Haan' if appropriate.
 
-RESPONSE EXAMPLES:
-❌ BAD (Too long): \"Hi! Lunch time 2-2:30 PM hai. Aap is time pe apna lunch break le sakte hain. Office mein lunch timing strictly follow karni chahiye. Agar aapko kuch aur puchna hai to batayein.\"
-✅ GOOD (Concise): \"Lunch time 2-2:30 PM hai.\"
+    - NATURAL RESPONSE RULE:
+      1. CRITICAL: Never mention \"Chat History\", \"Previous context\", or \"Ending conversation\" in your response. 
+      2. If the user says goodbye or thanks, just reply with a friendly \"Aapka swagat hai!\" or \"Have a great day!\" in the appropriate language without explaining your logic OR mentioning any history.
+    ";
 
-❌ BAD: \"Aapka leave balance check karne ke liye maine system dekha. Aapke paas total 24 leaves hain saal mein, aur aapne abhi tak $days_taken leaves use ki hain, to aapka balance \" . (24 - $days_taken) . \" leaves hai.\"
-✅ GOOD: \"Aapka leave balance \" . (24 - $days_taken) . \" days hai.\"
-
-Remember: Be helpful but BRIEF!";
-
+    // 3. Prepare Chat History for Gemini
+    // ----------------------------------
     $history_context = "";
     if (!empty($_SESSION['chat_history'])) {
         foreach ($_SESSION['chat_history'] as $chat) {
@@ -111,67 +217,63 @@ Remember: Be helpful but BRIEF!";
 
     $final_prompt = $system_prompt . "\n\nCHAT HISTORY:\n" . $history_context . "\nUser: " . $message . "\nAssistant:";
 
-    // 3. Call Gemini API WITH FAILOVER
-    // --------------------------------
-    $models_to_try = [
-        'gemini-1.5-flash',
-        'gemini-2.0-flash-exp', // Added based on history
-        'gemini-1.5-pro',
-        'gemini-pro',
-        'gemini-1.0-pro',
-        'gemini-flash-lite-latest'
-    ];
-
-    $success = false;
-    $last_error = "";
+    // 3. Call Gemini API
+    // ------------------
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
 
     $payload = [
-        "contents" => [["parts" => [["text" => $final_prompt]]]],
-        "generationConfig" => ["temperature" => 0.4, "maxOutputTokens" => 300]
+        "contents" => [
+            [
+                "parts" => [
+                    ["text" => $final_prompt]
+                ]
+            ]
+        ],
+        "generationConfig" => [
+            "temperature" => 0.4,
+            "maxOutputTokens" => 1024
+        ]
     ];
 
-    foreach ($models_to_try as $model) {
-        try {
-            // Using v1beta for widest compatibility
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/" . $model . ":generateContent?key=" . GEMINI_API_KEY;
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
-
-            $response_json = curl_exec($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            if ($http_code === 200) {
-                $result = json_decode($response_json, true);
-                $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, no response.";
-                $response = trim($bot_text);
-                $success = true;
-                break; // Exit loop on success
-            } else {
-                $last_error = "Model $model failed ($http_code): " . $response_json;
-            }
-        } catch (Exception $e) {
-            $last_error = $e->getMessage();
-        }
+    $response_json = curl_exec($ch);
+    if ($response_json === false) {
+        $err = curl_error($ch);
+        curl_close($ch);
+        throw new Exception("CURL Error: " . $err);
     }
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-    if ($success) {
+    if ($http_code === 200) {
+        $result = json_decode($response_json, true);
+        $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
+
+        // DEBUG: Check which model is actually running
+        // $bot_text .= "\n\n(Debug: Using " . GEMINI_MODEL . " on v1beta)";
+
+        $response = trim($bot_text);
+
+        // Save to history
         $_SESSION['chat_history'][] = ["role" => "user", "content" => $message];
         $_SESSION['chat_history'][] = ["role" => "assistant", "content" => $response];
-        if (count($_SESSION['chat_history']) > 20)
+
+        // Keep last 10 exchanges (20 entries)
+        if (count($_SESSION['chat_history']) > 20) {
             $_SESSION['chat_history'] = array_slice($_SESSION['chat_history'], -20);
+        }
     } else {
-        throw new Exception("All models failed. Last error: " . $last_error);
+        throw new Exception("Gemini API Error: " . $response_json);
     }
 
 } catch (Exception $e) {
     file_put_contents('debug_log.txt', date('Y-m-d H:i:s') . " - Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $response = "Sorry, kuch technical problem hai. Thodi der baad try karein ya admin se contact karein.";
+    $response = "DEBUG ERROR: " . $e->getMessage();
 }
 
 echo json_encode(['response' => $response], JSON_UNESCAPED_UNICODE);
-?>
