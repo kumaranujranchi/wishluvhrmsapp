@@ -102,88 +102,86 @@ $requests = $stmt->fetchAll();
     }
 </style>
 
-<div class="main-content">
-    <div class="requests-container">
-        <div class="page-header">
-            <h2>
-                <div class="header-icon">
-                    <i data-lucide="file-text"></i>
-                </div>
-                Regularization History
-            </h2>
-            <a href="regularization_request.php" class="btn-new-request">
-                <i data-lucide="plus"></i> New Request
-            </a>
-        </div>
+<!-- Removed redundant main-content div -->
+<div class="requests-container">
+    <div class="page-header">
+        <h2>
+            <div class="header-icon">
+                <i data-lucide="file-text"></i>
+            </div>
+            Regularization History
+        </h2>
+        <a href="regularization_request.php" class="btn-new-request">
+            <i data-lucide="plus"></i> New Request
+        </a>
+    </div>
 
-        <div class="requests-table-wrap">
-            <?php if (count($requests) > 0): ?>
-                <table>
-                    <thead>
+    <div class="requests-table-wrap">
+        <?php if (count($requests) > 0): ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Requested Times</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Requested On</th>
+                        <th>Reviewed By</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($requests as $req): ?>
                         <tr>
-                            <th>Date</th>
-                            <th>Requested Times</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Requested On</th>
-                            <th>Reviewed By</th>
-                            <th>Remarks</th>
+                            <td>
+                                <?php echo date('d M Y', strtotime($req['attendance_date'])); ?>
+                            </td>
+                            <td>
+                                <strong>In:</strong>
+                                <?php echo $req['requested_clock_in']; ?><br>
+                                <strong>Out:</strong>
+                                <?php echo $req['requested_clock_out']; ?>
+                            </td>
+                            <td>
+                                <?php echo ucwords(str_replace('_', ' ', $req['request_type'])); ?>
+                            </td>
+                            <td>
+                                <span class="status-badge status-<?php echo $req['status']; ?>">
+                                    <i data-lucide="<?php
+                                    echo $req['status'] === 'approved' ? 'check-circle' : ($req['status'] === 'rejected' ? 'x-circle' : 'clock');
+                                    ?>" style="width:14px; height:14px;"></i>
+                                    <?php echo ucfirst($req['status']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <?php echo date('d M Y, h:i A', strtotime($req['requested_at'])); ?>
+                            </td>
+                            <td>
+                                <?php
+                                if ($req['reviewed_by']) {
+                                    echo $req['reviewer_fname'] . ' ' . $req['reviewer_lname'];
+                                } else {
+                                    echo '-';
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <?php echo $req['admin_remarks'] ?: '-'; ?>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($requests as $req): ?>
-                            <tr>
-                                <td>
-                                    <?php echo date('d M Y', strtotime($req['attendance_date'])); ?>
-                                </td>
-                                <td>
-                                    <strong>In:</strong>
-                                    <?php echo $req['requested_clock_in']; ?><br>
-                                    <strong>Out:</strong>
-                                    <?php echo $req['requested_clock_out']; ?>
-                                </td>
-                                <td>
-                                    <?php echo ucwords(str_replace('_', ' ', $req['request_type'])); ?>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-<?php echo $req['status']; ?>">
-                                        <i data-lucide="<?php
-                                        echo $req['status'] === 'approved' ? 'check-circle' : ($req['status'] === 'rejected' ? 'x-circle' : 'clock');
-                                        ?>" style="width:14px; height:14px;"></i>
-                                        <?php echo ucfirst($req['status']); ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <?php echo date('d M Y, h:i A', strtotime($req['requested_at'])); ?>
-                                </td>
-                                <td>
-                                    <?php
-                                    if ($req['reviewed_by']) {
-                                        echo $req['reviewer_fname'] . ' ' . $req['reviewer_lname'];
-                                    } else {
-                                        echo '-';
-                                    }
-                                    ?>
-                                </td>
-                                <td>
-                                    <?php echo $req['admin_remarks'] ?: '-'; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <div class="empty-state">
-                    <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
-                    <h3>No Requests Yet</h3>
-                    <p>You haven't submitted any regularization requests.</p>
-                    <a href="regularization_request.php" class="btn-new-request">
-                        <i data-lucide="plus"></i> Submit Your First Request
-                    </a>
-                </div>
-            <?php endif; ?>
-        </div>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <div class="empty-state">
+                <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
+                <h3>No Requests Yet</h3>
+                <p>You haven't submitted any regularization requests.</p>
+                <a href="regularization_request.php" class="btn-new-request">
+                    <i data-lucide="plus"></i> Submit Your First Request
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
-
 <?php include 'includes/footer.php'; ?>

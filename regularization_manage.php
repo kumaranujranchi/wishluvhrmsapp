@@ -46,9 +46,9 @@ $employees = $stmt->fetchAll();
     .admin-container {
         padding: 2rem;
         max-width: 100%;
-        /* Fill the screen */
         margin: 0;
         animation: fadeIn 0.5s ease-out;
+        font-family: 'Outfit', sans-serif;
     }
 
     @keyframes fadeIn {
@@ -63,7 +63,7 @@ $employees = $stmt->fetchAll();
         }
     }
 
-    /* Stats Section - Force 3 Columns on Wide Screens */
+    /* Stats Section - Vibrant Gradients */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -84,50 +84,70 @@ $employees = $stmt->fetchAll();
     }
 
     .stat-card {
-        background: var(--glass-bg);
-        padding: 1.5rem;
-        border-radius: 20px;
+        background: white;
+        padding: 1.75rem;
+        border-radius: 24px;
         box-shadow: var(--card-shadow);
         display: flex;
         align-items: center;
-        gap: 1.25rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: transform 0.3s ease;
+        gap: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        color: white;
+        /* Text will be white on gradients */
+    }
+
+    .stat-card.stat-pending {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    .stat-card.stat-processed {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .stat-card.stat-critical {
+        background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
     }
 
     .stat-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
     }
 
     .stat-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(4px);
         color: white;
     }
 
     .stat-info h3 {
         margin: 0;
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1e293b;
+        font-size: 2rem;
+        font-weight: 800;
+        color: white;
     }
 
     .stat-info p {
         margin: 0;
-        color: #64748b;
-        font-size: 0.875rem;
-        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     /* Dashboard Main Layout */
     .dashboard-grid {
         display: grid;
-        grid-template-columns: 1fr 380px;
-        /* Left column flexible, right column fixed width */
+        grid-template-columns: 1fr 400px;
         gap: 2rem;
         align-items: start;
     }
@@ -140,24 +160,28 @@ $employees = $stmt->fetchAll();
 
     /* Section Styles */
     .section-card {
-        background: var(--glass-bg);
-        border-radius: 24px;
-        padding: 2rem;
-        margin-bottom: 0;
-        /* Let grid gap handle spacing */
+        background: white;
+        border-radius: 28px;
+        padding: 2.5rem;
         box-shadow: var(--card-shadow);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(10px);
+        border: 1px solid #f1f5f9;
         height: 100%;
     }
 
     .section-header {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #f1f5f9;
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 2px solid #f8fafc;
+    }
+
+    .section-header h3 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
     }
 
     .requests-grid {
@@ -306,194 +330,191 @@ $employees = $stmt->fetchAll();
     }
 </style>
 
-<div class="main-content">
-    <div class="admin-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
-            <h2 style="margin:0; font-weight: 800; font-size: 2rem; display: flex; align-items: center; gap: 15px;">
-                <span
-                    style="background: var(--primary-gradient); color:white; padding: 12px; border-radius: 16px; display: inline-flex;">
-                    <i data-lucide="settings"></i>
+<!-- Removed redundant main-content div -->
+<div class="admin-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
+        <h2 style="margin:0; font-weight: 800; font-size: 2rem; display: flex; align-items: center; gap: 15px;">
+            <span
+                style="background: var(--primary-gradient); color:white; padding: 12px; border-radius: 16px; display: inline-flex;">
+                <i data-lucide="settings"></i>
+            </span>
+            Attendance Regularization
+        </h2>
+    </div>
+
+    <!-- Summary Stats Section -->
+    <div class="stats-grid">
+        <div class="stat-card stat-pending">
+            <div class="stat-icon">
+                <i data-lucide="clock"></i>
+            </div>
+            <div class="stat-info">
+                <h3><?php echo count($pending_requests); ?></h3>
+                <p>Pending Requests</p>
+            </div>
+        </div>
+        <div class="stat-card stat-processed">
+            <div class="stat-icon">
+                <i data-lucide="check-circle-2"></i>
+            </div>
+            <div class="stat-info">
+                <h3><?php
+                $completed = $conn->query("SELECT COUNT(*) FROM attendance_regularization WHERE status != 'pending'")->fetchColumn();
+                echo $completed;
+                ?></h3>
+                <p>Processed Today</p>
+            </div>
+        </div>
+        <div class="stat-card stat-critical">
+            <div class="stat-icon">
+                <i data-lucide="alert-circle"></i>
+            </div>
+            <div class="stat-info">
+                <h3><?php
+                $missed = $conn->query("SELECT COUNT(*) FROM attendance_regularization WHERE request_type = 'both'")->fetchColumn();
+                echo $missed;
+                ?></h3>
+                <p>Critical Missed Punches</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Left Column: Pending Requests -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3><i data-lucide="clock"></i> Pending Requests</h3>
+                <span class="badge badge-pending">
+                    <?php echo count($pending_requests); ?> Pending
                 </span>
-                Attendance Regularization
-            </h2>
-        </div>
-
-        <!-- Summary Stats Section -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--primary-gradient);">
-                    <i data-lucide="clock"></i>
-                </div>
-                <div class="stat-info">
-                    <h3><?php echo count($pending_requests); ?></h3>
-                    <p>Pending Requests</p>
-                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--success-gradient);">
-                    <i data-lucide="check-circle-2"></i>
-                </div>
-                <div class="stat-info">
-                    <h3><?php
-                    $completed = $conn->query("SELECT COUNT(*) FROM attendance_regularization WHERE status != 'pending'")->fetchColumn();
-                    echo $completed;
-                    ?></h3>
-                    <p>Processed Today</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--danger-gradient);">
-                    <i data-lucide="alert-circle"></i>
-                </div>
-                <div class="stat-info">
-                    <h3><?php
-                    $missed = $conn->query("SELECT COUNT(*) FROM attendance_regularization WHERE request_type = 'both'")->fetchColumn();
-                    echo $missed;
-                    ?></h3>
-                    <p>Critical Missed Punches</p>
-                </div>
-            </div>
-        </div>
 
-        <div class="dashboard-grid">
-            <!-- Left Column: Pending Requests -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h3><i data-lucide="clock"></i> Pending Requests</h3>
-                    <span class="badge badge-pending">
-                        <?php echo count($pending_requests); ?> Pending
-                    </span>
-                </div>
-
-                <div class="requests-grid">
-                    <?php if (count($pending_requests) > 0): ?>
-                        <?php foreach ($pending_requests as $req): ?>
-                            <div class="request-card" data-request-id="<?php echo $req['id']; ?>">
-                                <div class="request-header">
-                                    <div class="emp-avatar">
-                                        <?php echo substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1); ?>
-                                    </div>
-                                    <div class="employee-info">
-                                        <h4><?php echo $req['first_name'] . ' ' . $req['last_name']; ?></h4>
-                                        <p><?php echo $req['email']; ?></p>
-                                    </div>
-                                    <span class="badge badge-pending" style="margin-left: auto;">Pending</span>
+            <div class="requests-grid">
+                <?php if (count($pending_requests) > 0): ?>
+                    <?php foreach ($pending_requests as $req): ?>
+                        <div class="request-card" data-request-id="<?php echo $req['id']; ?>">
+                            <div class="request-header">
+                                <div class="emp-avatar">
+                                    <?php echo substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1); ?>
                                 </div>
-
-                                <div class="request-details">
-                                    <div class="detail-item">
-                                        <label>Date</label>
-                                        <strong>
-                                            <?php echo date('d M Y', strtotime($req['attendance_date'])); ?>
-                                        </strong>
-                                    </div>
-                                    <div class="detail-item">
-                                        <label>Clock In</label>
-                                        <strong>
-                                            <?php echo $req['requested_clock_in']; ?>
-                                        </strong>
-                                    </div>
-                                    <div class="detail-item">
-                                        <label>Clock Out</label>
-                                        <strong>
-                                            <?php echo $req['requested_clock_out']; ?>
-                                        </strong>
-                                    </div>
-                                    <div class="detail-item">
-                                        <label>Type</label>
-                                        <strong>
-                                            <?php echo ucwords(str_replace('_', ' ', $req['request_type'])); ?>
-                                        </strong>
-                                    </div>
-                                    <div class="detail-item">
-                                        <label>Requested On</label>
-                                        <strong>
-                                            <?php echo date('d M, h:i A', strtotime($req['requested_at'])); ?>
-                                        </strong>
-                                    </div>
+                                <div class="employee-info">
+                                    <h4><?php echo $req['first_name'] . ' ' . $req['last_name']; ?></h4>
+                                    <p><?php echo $req['email']; ?></p>
                                 </div>
+                                <span class="badge badge-pending" style="margin-left: auto;">Pending</span>
+                            </div>
 
-                                <div class="reason-box">
-                                    <label style="font-size: 0.75rem; color: #666;">Reason:</label>
-                                    <p style="margin: 0.5rem 0 0 0;">
-                                        <?php echo htmlspecialchars($req['reason']); ?>
-                                    </p>
+                            <div class="request-details">
+                                <div class="detail-item">
+                                    <label>Date</label>
+                                    <strong>
+                                        <?php echo date('d M Y', strtotime($req['attendance_date'])); ?>
+                                    </strong>
                                 </div>
-
-                                <div class="form-group">
-                                    <label>Admin Remarks (Optional for approval, Required for rejection)</label>
-                                    <textarea class="admin-remarks" rows="2" placeholder="Add your remarks..."></textarea>
+                                <div class="detail-item">
+                                    <label>Clock In</label>
+                                    <strong>
+                                        <?php echo $req['requested_clock_in']; ?>
+                                    </strong>
                                 </div>
-
-                                <div class="action-buttons">
-                                    <button class="btn btn-approve"
-                                        onclick="processRequest(<?php echo $req['id']; ?>, 'approved')">
-                                        <i data-lucide="check"></i> Approve
-                                    </button>
-                                    <button class="btn btn-reject"
-                                        onclick="processRequest(<?php echo $req['id']; ?>, 'rejected')">
-                                        <i data-lucide="x"></i> Reject
-                                    </button>
+                                <div class="detail-item">
+                                    <label>Clock Out</label>
+                                    <strong>
+                                        <?php echo $req['requested_clock_out']; ?>
+                                    </strong>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Type</label>
+                                    <strong>
+                                        <?php echo ucwords(str_replace('_', ' ', $req['request_type'])); ?>
+                                    </strong>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Requested On</label>
+                                    <strong>
+                                        <?php echo date('d M, h:i A', strtotime($req['requested_at'])); ?>
+                                    </strong>
                                 </div>
                             </div>
+
+                            <div class="reason-box">
+                                <label style="font-size: 0.75rem; color: #666;">Reason:</label>
+                                <p style="margin: 0.5rem 0 0 0;">
+                                    <?php echo htmlspecialchars($req['reason']); ?>
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Admin Remarks (Optional for approval, Required for rejection)</label>
+                                <textarea class="admin-remarks" rows="2" placeholder="Add your remarks..."></textarea>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-approve" onclick="processRequest(<?php echo $req['id']; ?>, 'approved')">
+                                    <i data-lucide="check"></i> Approve
+                                </button>
+                                <button class="btn btn-reject" onclick="processRequest(<?php echo $req['id']; ?>, 'rejected')">
+                                    <i data-lucide="x"></i> Reject
+                                </button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
+                        <h3>No Pending Requests</h3>
+                        <p>All regularization requests have been processed.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Right Column: Direct Regularization -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3><i data-lucide="edit"></i> Direct Regularization</h3>
+            </div>
+
+            <form id="directRegularizationForm">
+                <div class="form-group">
+                    <label>Select Employee *</label>
+                    <select name="employee_id" required>
+                        <option value="">-- Select Employee --</option>
+                        <?php foreach ($employees as $emp): ?>
+                            <option value="<?php echo $emp['id']; ?>">
+                                <?php echo $emp['first_name'] . ' ' . $emp['last_name']; ?>
+                            </option>
                         <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="empty-state">
-                            <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
-                            <h3>No Pending Requests</h3>
-                            <p>All regularization requests have been processed.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Right Column: Direct Regularization -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h3><i data-lucide="edit"></i> Direct Regularization</h3>
+                    </select>
                 </div>
 
-                <form id="directRegularizationForm">
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" name="attendance_date" required max="<?php echo date('Y-m-d'); ?>">
+                </div>
+
+                <div class="form-grid">
                     <div class="form-group">
-                        <label>Select Employee *</label>
-                        <select name="employee_id" required>
-                            <option value="">-- Select Employee --</option>
-                            <?php foreach ($employees as $emp): ?>
-                                <option value="<?php echo $emp['id']; ?>">
-                                    <?php echo $emp['first_name'] . ' ' . $emp['last_name']; ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label>Clock In *</label>
+                        <input type="time" name="clock_in" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Date *</label>
-                        <input type="date" name="attendance_date" required max="<?php echo date('Y-m-d'); ?>">
+                        <label>Clock Out *</label>
+                        <input type="time" name="clock_out" required>
                     </div>
+                </div>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Clock In *</label>
-                            <input type="time" name="clock_in" required>
-                        </div>
+                <div class="form-group">
+                    <label>Reason *</label>
+                    <textarea name="reason" required rows="4"
+                        placeholder="Reason for direct regularization..."></textarea>
+                </div>
 
-                        <div class="form-group">
-                            <label>Clock Out *</label>
-                            <input type="time" name="clock_out" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Reason *</label>
-                        <textarea name="reason" required rows="4"
-                            placeholder="Reason for direct regularization..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
-                        <i data-lucide="save"></i> Regularize Attendance
-                    </button>
-                </form>
-            </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i data-lucide="save"></i> Regularize Attendance
+                </button>
+            </form>
         </div>
     </div>
 </div>

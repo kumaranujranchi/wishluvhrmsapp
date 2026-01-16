@@ -174,71 +174,70 @@ include 'includes/header.php';
     }
 </style>
 
-<div class="main-content">
-    <div class="regularization-container">
-        <div class="page-header">
-            <div class="header-icon-wrap">
-                <i data-lucide="clock" style="width: 32px; height: 32px;"></i>
+<!-- Removed redundant main-content div -->
+<div class="regularization-container">
+    <div class="page-header">
+        <div class="header-icon-wrap">
+            <i data-lucide="clock" style="width: 32px; height: 32px;"></i>
+        </div>
+        <h2>Attendance Regularization</h2>
+        <p>Request adjustments for missed or incorrect punches</p>
+    </div>
+
+    <div class="form-card">
+        <div id="alertContainer"></div>
+
+        <form id="regularizationForm">
+            <div class="form-group">
+                <label for="attendance_date">Select Date *</label>
+                <input type="date" id="attendance_date" name="attendance_date" required
+                    max="<?php echo date('Y-m-d'); ?>">
             </div>
-            <h2>Attendance Regularization</h2>
-            <p>Request adjustments for missed or incorrect punches</p>
-        </div>
 
-        <div class="form-card">
-            <div id="alertContainer"></div>
+            <div id="existingAttendance" style="display: none;" class="existing-attendance">
+                <div class="attendance-icon">
+                    <i data-lucide="info" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="attendance-info">
+                    <h4>Existing Record Found</h4>
+                    <p id="existingData"></p>
+                </div>
+            </div>
 
-            <form id="regularizationForm">
+            <div class="form-group">
+                <label for="request_type">Request Type *</label>
+                <select id="request_type" name="request_type" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="missed_punch_in">Missed Punch In</option>
+                    <option value="missed_punch_out">Missed Punch Out</option>
+                    <option value="both">Both (Missed In & Out)</option>
+                    <option value="correction">Correction (Wrong Time)</option>
+                </select>
+            </div>
+
+            <div class="time-inputs">
                 <div class="form-group">
-                    <label for="attendance_date">Select Date *</label>
-                    <input type="date" id="attendance_date" name="attendance_date" required
-                        max="<?php echo date('Y-m-d'); ?>">
-                </div>
-
-                <div id="existingAttendance" style="display: none;" class="existing-attendance">
-                    <div class="attendance-icon">
-                        <i data-lucide="info" style="width: 24px; height: 24px;"></i>
-                    </div>
-                    <div class="attendance-info">
-                        <h4>Existing Record Found</h4>
-                        <p id="existingData"></p>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="request_type">Request Type *</label>
-                    <select id="request_type" name="request_type" required>
-                        <option value="">-- Select Type --</option>
-                        <option value="missed_punch_in">Missed Punch In</option>
-                        <option value="missed_punch_out">Missed Punch Out</option>
-                        <option value="both">Both (Missed In & Out)</option>
-                        <option value="correction">Correction (Wrong Time)</option>
-                    </select>
-                </div>
-
-                <div class="time-inputs">
-                    <div class="form-group">
-                        <label for="clock_in">Clock In Time *</label>
-                        <input type="time" id="clock_in" name="clock_in" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="clock_out">Clock Out Time *</label>
-                        <input type="time" id="clock_out" name="clock_out" required>
-                    </div>
+                    <label for="clock_in">Clock In Time *</label>
+                    <input type="time" id="clock_in" name="clock_in" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="reason">Reason for Regularization * (Min 20 characters)</label>
-                    <textarea id="reason" name="reason" required minlength="20"
-                        placeholder="Please provide a detailed reason for this regularization request..."></textarea>
-                    <small style="color: #666;">Characters: <span id="charCount">0</span>/20 minimum</small>
+                    <label for="clock_out">Clock Out Time *</label>
+                    <input type="time" id="clock_out" name="clock_out" required>
                 </div>
+            </div>
 
-                <button type="submit" class="btn-submit">
-                    <i data-lucide="send"></i> Submit Request
-                </button>
-            </form>
-        </div>
+            <div class="form-group">
+                <label for="reason">Reason for Regularization * (Min 20 characters)</label>
+                <textarea id="reason" name="reason" required minlength="20"
+                    placeholder="Please provide a detailed reason for this regularization request..."></textarea>
+                <small style="color: #666;">Characters: <span id="charCount">0</span>/20 minimum</small>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i data-lucide="send"></i> Submit Request
+            </button>
+        </form>
     </div>
 </div>
 
