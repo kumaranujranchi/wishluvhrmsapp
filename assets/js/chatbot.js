@@ -16,7 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
             input.focus();
             if (helperText) helperText.style.display = 'none';
             if (body.children.length === 0) {
-                addMessage('bot', "Namaste! Main Wishluv Smart Assistant hoon. Aapki kya help kar sakti hoon?");
+                // Fetch user name from PHP session and create personalized greeting
+                fetch('ajax/get_user_name.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        const userName = data.name || 'User';
+                        addMessage('bot', `Hi! Main Wishluv Smart Assistant hoon, ${userName}. Aaj main kaise madad kar sakti hoon aapki?`);
+                    })
+                    .catch(() => {
+                        addMessage('bot', "Hi! Main Wishluv Smart Assistant hoon. Aaj main kaise madad kar sakti hoon aapki?");
+                    });
             }
         } else {
             if (helperText) helperText.style.display = 'block';
