@@ -23,6 +23,23 @@ if (empty($message)) {
     exit;
 }
 
+// Check daily chat limit (5 messages per day)
+$today = date('Y-m-d');
+$limit_key = 'chat_limit_' . $today;
+if (!isset($_SESSION[$limit_key])) {
+    $_SESSION[$limit_key] = 0;
+}
+
+if ($_SESSION[$limit_key] >= 5) {
+    echo json_encode([
+        'response' => 'Aapne aaj ka chat limit (5 messages) exceed kar liya hai. Kal dobara try karein ya urgent queries ke liye Anuj sir (7280008102) se contact karein.'
+    ]);
+    exit;
+}
+
+// Increment counter
+$_SESSION[$limit_key]++;
+
 try {
     // 1. Fetch ALL relevant context for this user to feed the AI
     // ---------------------------------------------------------
