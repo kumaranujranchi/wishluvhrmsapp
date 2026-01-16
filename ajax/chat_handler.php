@@ -27,14 +27,23 @@ try {
     // 1. Fetch ALL relevant context for this user to feed the AI
     // ---------------------------------------------------------
 
-    // A. Basic Profile & Manager
-    $stmt = $conn->prepare("SELECT e.*, m.first_name as mgr_fname, m.last_name as mgr_lname 
-                           FROM employees e LEFT JOIN employees m ON e.reporting_manager_id = m.id WHERE e.id = :uid");
+    // A. Basic Profile
+    $stmt = $conn->prepare("SELECT * FROM employees WHERE id = :uid");
     $stmt->execute(['uid' => $user_id]);
     $user = $stmt->fetch();
     $user_name = $user['first_name'] . ' ' . $user['last_name'];
-    $user_gender = $user['gender'] ?? 'Male'; // Default to Male if not set
-    $manager_name = ($user['mgr_fname']) ? $user['mgr_fname'] . ' ' . $user['mgr_lname'] : "None (Super Admin)";
+    $user_gender = $user['gender'] ?? 'Male';
+
+    // Fetch Manager Query Separately for reliability
+    $manager_name = "None (You report directly to Admin)";
+    if (!empty($user['reporting_manager_id'])) {
+        $m_stmt = $conn->prepare("SELECT first_name, last_name FROM employees WHERE id = :mid");
+        $m_stmt->execute(['mid' => $user['reporting_manager_id']]);
+        $manager = $m_stmt->fetch();
+        if ($manager) {
+            $manager_name = $manager['first_name'] . ' ' . $manager['last_name'];
+        }
+    }
 
     // B. Today's Attendance
     $stmt = $conn->prepare("SELECT clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date = CURDATE()");
@@ -144,6 +153,7 @@ try {
     
     - If the user asks for 'iss mahine' or 'monthly' data, use DATA 2.
     - If the user asks for 'aaj' or 'today' data, use DATA 1.
+    - If user asks about 'Reporting Manager', 'Manager', or 'Boss', explicitly state: "Aapke Reporting Manager [Manager Name] hain." (Replace [Manager Name] with the value from DATA 4).
     - If user asks about office timings, lunch break, or any company policy, ALWAYS use the COMPANY POLICIES section above.
     - If the question is about something NOT in your context (like salary details, specific HR policies not mentioned, etc.), respond politely that you don't have that info and refer to Anuj sir (7280008102).
     - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
