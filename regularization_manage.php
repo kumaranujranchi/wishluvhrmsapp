@@ -35,18 +35,90 @@ $employees = $stmt->fetchAll();
 ?>
 
 <style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --success-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+        --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --glass-bg: rgba(255, 255, 255, 0.95);
+    }
+
     .admin-container {
         padding: 2rem;
         max-width: 1400px;
         margin: 0 auto;
+        animation: fadeIn 0.5s ease-out;
     }
 
-    .section-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Stats Section */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
         margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card {
+        background: var(--glass-bg);
+        padding: 1.5rem;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .stat-info h3 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .stat-info p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    /* Section Styles */
+    .section-card {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
     }
 
     .section-header {
@@ -206,7 +278,52 @@ $employees = $stmt->fetchAll();
 
 <div class="main-content">
     <div class="admin-container">
-        <h2><i data-lucide="settings"></i> Attendance Regularization Management</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
+            <h2 style="margin:0; font-weight: 800; font-size: 2rem; display: flex; align-items: center; gap: 15px;">
+                <span
+                    style="background: var(--primary-gradient); color:white; padding: 12px; border-radius: 16px; display: inline-flex;">
+                    <i data-lucide="settings"></i>
+                </span>
+                Attendance Regularization
+            </h2>
+        </div>
+
+        <!-- Summary Stats Section -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--primary-gradient);">
+                    <i data-lucide="clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><?php echo count($pending_requests); ?></h3>
+                    <p>Pending Requests</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--success-gradient);">
+                    <i data-lucide="check-circle-2"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><?php
+                    $completed = $conn->query("SELECT COUNT(*) FROM attendance_regularization WHERE status != 'pending'")->fetchColumn();
+                    echo $completed;
+                    ?></h3>
+                    <p>Processed Today</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--danger-gradient);">
+                    <i data-lucide="alert-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><?php
+                    $missed = $conn->query("SELECT COUNT(*) FROM attendance_regularization WHERE request_type = 'both'")->fetchColumn();
+                    echo $missed;
+                    ?></h3>
+                    <p>Critical Missed Punches</p>
+                </div>
+            </div>
+        </div>
 
         <!-- Pending Requests Section -->
         <div class="section-card">
@@ -222,16 +339,14 @@ $employees = $stmt->fetchAll();
                     <?php foreach ($pending_requests as $req): ?>
                         <div class="request-card" data-request-id="<?php echo $req['id']; ?>">
                             <div class="request-header">
-                                <div class="employee-info">
-                                    <h4>
-                                        <?php echo $req['first_name'] . ' ' . $req['last_name']; ?>
-                                    </h4>
-                                    <p>
-                                        <?php echo 'Employee'; ?> •
-                                        <?php echo $req['email']; ?>
-                                    </p>
+                                <div class="emp-avatar">
+                                    <?php echo substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1); ?>
                                 </div>
-                                <span class="badge badge-pending">Pending</span>
+                                <div class="employee-info">
+                                    <h4><?php echo $req['first_name'] . ' ' . $req['last_name']; ?></h4>
+                                    <p><?php echo $req['email']; ?></p>
+                                </div>
+                                <span class="badge badge-pending" style="margin-left: auto;">Pending</span>
                             </div>
 
                             <div class="request-details">

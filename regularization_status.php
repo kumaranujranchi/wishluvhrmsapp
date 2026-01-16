@@ -27,26 +27,15 @@ $requests = $stmt->fetchAll();
 ?>
 
 <style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
     .requests-container {
-        padding: 2rem;
-        max-width: 1200px;
+        padding: 3rem 2rem;
+        max-width: 1300px;
         margin: 0 auto;
-    }
-
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .status-approved {
-        background: #d4edda;
         color: #155724;
     }
 
@@ -115,13 +104,19 @@ $requests = $stmt->fetchAll();
 
 <div class="main-content">
     <div class="requests-container">
-        <h2><i data-lucide="file-text"></i> My Regularization Requests</h2>
+        <div class="page-header">
+            <h2>
+                <div class="header-icon">
+                    <i data-lucide="file-text"></i>
+                </div>
+                Regularization History
+            </h2>
+            <a href="regularization_request.php" class="btn-new-request">
+                <i data-lucide="plus"></i> New Request
+            </a>
+        </div>
 
-        <a href="regularization_request.php" class="btn-new-request">
-            <i data-lucide="plus"></i> New Request
-        </a>
-
-        <div class="requests-table">
+        <div class="requests-table-wrap">
             <?php if (count($requests) > 0): ?>
                 <table>
                     <thead>
@@ -152,6 +147,9 @@ $requests = $stmt->fetchAll();
                                 </td>
                                 <td>
                                     <span class="status-badge status-<?php echo $req['status']; ?>">
+                                        <i data-lucide="<?php
+                                        echo $req['status'] === 'approved' ? 'check-circle' : ($req['status'] === 'rejected' ? 'x-circle' : 'clock');
+                                        ?>" style="width:14px; height:14px;"></i>
                                         <?php echo ucfirst($req['status']); ?>
                                     </span>
                                 </td>

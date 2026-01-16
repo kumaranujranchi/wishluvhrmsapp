@@ -17,21 +17,74 @@ include 'includes/header.php';
 ?>
 
 <style>
-    .regularization-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 2rem;
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+        --card-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 12px -6px rgba(0, 0, 0, 0.05);
     }
 
+    .regularization-container {
+        max-width: 900px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Page Header */
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-header h2 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: #64748b;
+        font-size: 1.1rem;
+    }
+
+    .header-icon-wrap {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 12px;
+        border-radius: 18px;
+        display: inline-flex;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+    }
+
+    /* Form Card */
     .form-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        padding: 3rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
 
     .form-group label {
@@ -123,7 +176,13 @@ include 'includes/header.php';
 
 <div class="main-content">
     <div class="regularization-container">
-        <h2><i data-lucide="clock"></i> Request Attendance Regularization</h2>
+        <div class="page-header">
+            <div class="header-icon-wrap">
+                <i data-lucide="clock" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h2>Attendance Regularization</h2>
+            <p>Request adjustments for missed or incorrect punches</p>
+        </div>
 
         <div class="form-card">
             <div id="alertContainer"></div>
@@ -136,8 +195,13 @@ include 'includes/header.php';
                 </div>
 
                 <div id="existingAttendance" style="display: none;" class="existing-attendance">
-                    <h4>Existing Attendance Record:</h4>
-                    <p id="existingData"></p>
+                    <div class="attendance-icon">
+                        <i data-lucide="info" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="attendance-info">
+                        <h4>Existing Record Found</h4>
+                        <p id="existingData"></p>
+                    </div>
                 </div>
 
                 <div class="form-group">
