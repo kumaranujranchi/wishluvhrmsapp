@@ -89,22 +89,7 @@ $dept_stats = $conn->query($sql_dept)->fetchAll();
             </div>
         </div>
 
-        <!-- Card 2: Present Today (Replaced Projects) -->
-        <div class="card stats-card" style="border-left: 4px solid #10b981;">
-            <div class="stats-icon-wrapper">
-                <i data-lucide="user-check" class="icon"
-                    style="color: hsl(150, 70%, 40%); width:24px; height:24px;"></i>
-            </div>
-            <div class="stats-info">
-                <span class="stats-title">Present Today</span>
-                <div class="stats-value-row">
-                    <h3 class="stats-value"><?= $present_today ?></h3>
-                    <span class="stats-trend positive" style="font-size: 0.8rem; color: #64748b;">
-                        / <?= $total_employees ?>
-                    </span>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Card 3: On Time % -->
         <div class="card stats-card" style="border-left: 4px solid #8b5cf6;">
