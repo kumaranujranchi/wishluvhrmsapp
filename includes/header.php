@@ -208,23 +208,98 @@
                 display: none !important;
             }
 
-            /* Force Hide Sidebar by default, but allow override */
+            /* Force Hide Sidebar by default */
             .sidebar {
-                display: none; /* Changed from !important to allow toggle */
+                display: none;
             }
+
+            /* Mobile Sidebar Open State - FORCE EXPANDED LOOK */
             .sidebar.mobile-open {
-                display: block !important;
+                display: flex !important;
+                flex-direction: column;
                 position: fixed;
                 top: 0;
                 left: 0;
                 height: 100vh;
-                z-index: 10001; /* Above header */
-                width: 250px;
-                box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-                animation: slideInLeft 0.3s ease-out;
+                width: 280px !important;
+                /* Force full width */
+                z-index: 10001;
+                background: #ffffff !important;
+                /* Clean white background */
+                box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
+                animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border-right: 1px solid #f1f5f9;
+                padding-bottom: 20px;
             }
 
-            /* Ensure Main Content is Visible */
+            /* Override Collapsed Styles on Mobile */
+            .sidebar.mobile-open .sidebar-inner {
+                width: 100% !important;
+                padding: 0 !important;
+            }
+
+            .sidebar.mobile-open .brand-info,
+            .sidebar.mobile-open .nav-item span,
+            .sidebar.mobile-open .sub-nav-item span,
+            .sidebar.mobile-open .user-details,
+            .sidebar.mobile-open .sidebar-footer a[title="Logout"],
+            .sidebar.mobile-open .chevron-icon {
+                display: block !important;
+                /* Force text to show */
+                opacity: 1 !important;
+                visibility: visible !important;
+                width: auto !important;
+            }
+
+            .sidebar.mobile-open .sidebar-header {
+                padding: 20px 24px !important;
+                justify-content: flex-start !important;
+                border-bottom: 1px solid #f1f5f9;
+                gap: 12px;
+            }
+
+            .sidebar.mobile-open .logo-text {
+                font-size: 1.25rem !important;
+                color: #1e293b !important;
+            }
+
+            .sidebar.mobile-open .sidebar-nav {
+                padding: 16px !important;
+                overflow-y: auto;
+            }
+
+            /* Fix nav items spacing in mobile */
+            .sidebar.mobile-open .nav-item {
+                justify-content: flex-start !important;
+                padding: 12px 16px !important;
+                margin-bottom: 4px;
+                border-radius: 12px;
+            }
+
+            .sidebar.mobile-open .nav-item .icon {
+                margin-right: 12px !important;
+                margin-left: 0 !important;
+            }
+
+            .sidebar.mobile-open .sub-nav {
+                padding-left: 0 !important;
+                background: #f8fafc;
+                border-radius: 12px;
+                margin-top: 4px;
+            }
+
+            .sidebar.mobile-open .sub-nav-item {
+                padding-left: 48px !important;
+                /* Indent sub items */
+                color: #64748b !important;
+            }
+
+            /* Hide the desktop toggle button on mobile sidebar */
+            .sidebar.mobile-open .sidebar-toggle-btn {
+                display: none !important;
+            }
+
+            /* Main Content Reset */
             .main-content {
                 margin-left: 0 !important;
                 padding: 0 !important;
@@ -232,6 +307,7 @@
                 display: block !important;
             }
 
+            /* Header Adjustments */
             .header {
                 padding: 12px 15px !important;
                 background: white !important;
@@ -255,7 +331,17 @@
                 align-items: center;
                 gap: 8px;
             }
-            
+
+            /* Profile specific corrections */
+            .sidebar.mobile-open .user-info {
+                padding: 16px !important;
+                background: #f8fafc;
+                margin: 0 16px;
+                border-radius: 16px;
+                display: flex !important;
+                gap: 12px;
+            }
+
             /* Sidebar Overlay */
             .sidebar-overlay {
                 display: none;
@@ -264,22 +350,35 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0,0,0,0.5);
-                backdrop-filter: blur(2px);
-                z-index: 10000; /* Below sidebar, above header */
+                background: rgba(15, 23, 42, 0.6);
+                /* Darker blur overlay */
+                backdrop-filter: blur(4px);
+                z-index: 10000;
                 animation: fadeIn 0.3s ease-out;
             }
+
             .sidebar-overlay.active {
                 display: block;
             }
 
             @keyframes slideInLeft {
-                from { transform: translateX(-100%); }
-                to { transform: translateX(0); }
+                from {
+                    transform: translateX(-100%);
+                }
+
+                to {
+                    transform: translateX(0);
+                }
             }
+
             @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
             }
         }
     </style>
@@ -297,7 +396,7 @@
             overlay.classList.toggle('active');
         }
     </script>
-    
+
     <!-- Mobile Sidebar Overlay -->
     <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 </head>
