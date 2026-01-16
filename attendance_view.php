@@ -1,5 +1,6 @@
 <?php
 require_once 'config/db.php';
+require_once 'config/ai_config.php'; // Load environment variables from .env
 include 'includes/header.php';
 
 // Ensure user is logged in
@@ -690,12 +691,15 @@ foreach ($history as $h) {
 
                 statusDiv.innerHTML = 'Location Locked. Getting Address...';
 
+
                 try {
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
                     // Use Google Maps Geocoding API for precise location
                     const apiKey = '<?= getenv("GOOGLE_MAPS_API_KEY") ?>';
+                    console.log('API Key loaded:', apiKey ? 'Yes (length: ' + apiKey.length + ')' : 'No - EMPTY!');
+                    
                     const response = await fetch(
                         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`,
                         { signal: controller.signal }
@@ -703,6 +707,7 @@ foreach ($history as $h) {
                     clearTimeout(timeoutId);
 
                     const data = await response.json();
+                    console.log('Geocoding API Response:', data);
 
                     if (data.status === 'OK' && data.results[0]) {
                         const addressComponents = data.results[0].address_components;
@@ -736,15 +741,18 @@ foreach ($history as $h) {
                             ? locationParts.join(', ')
                             : data.results[0].formatted_address;
 
+                        console.log('Final address:', shortAddress);
                         document.getElementById('addrInput').value = shortAddress;
                     } else {
+                        console.error('Geocoding API Error - Status:', data.status, 'Error:', data.error_message);
                         throw new Error('Geocoding failed: ' + data.status);
                     }
                 } catch (e) {
-                    console.warn('Geocoding failed:', e);
+                    console.error('Geocoding failed:', e);
                     // Fallback: Use a more readable format
                     document.getElementById('addrInput').value = `Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
                 }
+
 
                 form.submit();
             };
