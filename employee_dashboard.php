@@ -250,13 +250,13 @@ $latest_notices = $notice_q->fetchAll();
         }
 
         .m-card {
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 16px;
             color: white;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            min-height: 160px;
+            box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.15);
+            min-height: 140px;
         }
 
         .m-card-content {
@@ -265,7 +265,7 @@ $latest_notices = $notice_q->fetchAll();
         }
 
         .m-label {
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
             font-weight: 700;
             letter-spacing: 0.05em;
@@ -273,36 +273,36 @@ $latest_notices = $notice_q->fetchAll();
         }
 
         .m-value {
-            font-size: 2.25rem;
+            font-size: 2rem;
             font-weight: 700;
             margin-top: 4px;
             line-height: 1;
         }
 
         .m-desc {
-            font-size: 11px;
-            margin-top: 8px;
+            font-size: 10px;
+            margin-top: 6px;
             opacity: 0.9;
             line-height: 1.2;
         }
 
         .m-footer {
-            margin-top: 16px;
+            margin-top: 12px;
             display: flex;
             align-items: center;
             gap: 4px;
             opacity: 0.85;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
         }
 
         .m-bg-icon {
             position: absolute;
-            bottom: -15px;
-            right: -10px;
+            bottom: -12px;
+            right: -8px;
             opacity: 0.15;
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             transform: rotate(-10deg);
         }
 
