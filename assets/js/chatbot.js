@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input.focus();
             if (helperText) helperText.style.display = 'none';
             if (body.children.length === 0) {
-                addMessage('bot', "Hello! main Wishluv Smart Assistant hoon. Aapki HR se judi help kaise kar sakti hoon? Aap mujhse apni leave balance, attendance, ya holidays ke baare mein pooch sakte hain.");
+                addMessage('bot', "Namaste! Main Wishluv Smart Assistant hoon. Aapki kya help kar sakti hoon?");
             }
         } else {
             if (helperText) helperText.style.display = 'block';
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => {
             hideTyping();
-            addMessage('bot', "Sorry, I encountered an error. Please try again later.");
+            addMessage('bot', "Sorry, kuch technical issue aa gayi. Thodi der baad try karein.");
             console.error(err);
         });
     };

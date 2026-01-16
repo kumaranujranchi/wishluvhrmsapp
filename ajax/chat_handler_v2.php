@@ -71,12 +71,35 @@ try {
         $admin_context = "ADMIN DATA: Total Present: $present_count, Who: " . implode(", ", $present_list) . ", Pending Leaves: $pending_leaves";
     }
 
-    // 2. Prepare Prompt
-    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper. User: $user_name ($user_gender). 
-    Context: Today: $attendance_context. Month: $monthly_context. LeaveBal: $leave_context. NextHoliday: $holiday_context. $admin_context.
-    Policies: Office 10-5:30(Winter)/6(Summer). Lunch 2-2:30.
-    Persona: Friendly female AI. If English -> English. If Hindi/Hinglish -> Hinglish. Use 'main karti hoon'.
-    Answer concisely.";
+    // 2. Prepare Prompt with STRICT Conciseness Rules
+    $system_prompt = "You are 'Wishluv Smart Assistant', a friendly female HR helper for $user_name.
+    
+CRITICAL RULES:
+- Keep responses SHORT (1-3 sentences max for simple queries)
+- Be direct and to the point
+- Only give detailed info if explicitly asked
+- Match user's language (English -> English, Hindi/Hinglish -> Hinglish)
+- Use feminine pronouns in Hindi: 'main karti hoon', 'main hoon'
+
+CONTEXT:
+- Today's Attendance: $attendance_context
+- This Month: $monthly_context
+- Leave Balance: $leave_context
+- Next Holiday: $holiday_context
+$admin_context
+
+POLICIES:
+- Office Hours: 10 AM - 5:30 PM (Winter) / 6 PM (Summer)
+- Lunch: 2:00 PM - 2:30 PM
+
+RESPONSE EXAMPLES:
+❌ BAD (Too long): \"Hi! Lunch time 2-2:30 PM hai. Aap is time pe apna lunch break le sakte hain. Office mein lunch timing strictly follow karni chahiye. Agar aapko kuch aur puchna hai to batayein.\"
+✅ GOOD (Concise): \"Lunch time 2-2:30 PM hai.\"
+
+❌ BAD: \"Aapka leave balance check karne ke liye maine system dekha. Aapke paas total 24 leaves hain saal mein, aur aapne abhi tak $days_taken leaves use ki hain, to aapka balance \" . (24 - $days_taken) . \" leaves hai.\"
+✅ GOOD: \"Aapka leave balance \" . (24 - $days_taken) . \" days hai.\"
+
+Remember: Be helpful but BRIEF!";
 
     $history_context = "";
     if (!empty($_SESSION['chat_history'])) {
@@ -104,7 +127,7 @@ try {
 
     $payload = [
         "contents" => [["parts" => [["text" => $final_prompt]]]],
-        "generationConfig" => ["temperature" => 0.4, "maxOutputTokens" => 1024]
+        "generationConfig" => ["temperature" => 0.4, "maxOutputTokens" => 300]
     ];
 
     foreach ($models_to_try as $model) {
@@ -147,7 +170,7 @@ try {
 
 } catch (Exception $e) {
     file_put_contents('debug_log.txt', date('Y-m-d H:i:s') . " - Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $response = "DEBUG ERROR: " . $e->getMessage();
+    $response = "Sorry, kuch technical problem hai. Thodi der baad try karein ya admin se contact karein.";
 }
 
 echo json_encode(['response' => $response], JSON_UNESCAPED_UNICODE);
