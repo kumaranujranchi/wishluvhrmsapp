@@ -217,75 +217,66 @@ try {
 
     $final_prompt = $system_prompt . "\n\nCHAT HISTORY:\n" . $history_context . "\nUser: " . $message . "\nAssistant:";
 
-    // 3. Call Gemini API with Fallback Models
+    // 3. Call OpenAI GPT API
     // ------------------
-    $models_to_try = [
-        'gemini-1.5-flash-latest',
-        'gemini-1.5-pro-latest',
-        'gemini-pro',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro'
-    ];
+    $url = "https://api.openai.com/v1/chat/completions";
 
-    $response = null;
-    $last_error = null;
+    // Build messages array for OpenAI
+    $messages = [["role" => "system", "content" => $system_prompt]];
 
-    foreach ($models_to_try as $model) {
-        $url = "https://generativelanguage.googleapis.com/v1/models/" . $model . ":generateContent?key=" . GEMINI_API_KEY;
-
-        $payload = [
-            "contents" => [
-                [
-                    "parts" => [
-                        ["text" => $final_prompt]
-                    ]
-                ]
-            ],
-            "generationConfig" => [
-                "temperature" => 0.4,
-                "maxOutputTokens" => 1024
-            ]
-        ];
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8']);
-
-        $response_json = curl_exec($ch);
-        if ($response_json === false) {
-            $last_error = curl_error($ch);
-            curl_close($ch);
-            continue; // Try next model
-        }
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($http_code === 200) {
-            $result = json_decode($response_json, true);
-            $bot_text = $result['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
-            $response = trim($bot_text);
-
-            // Save to history
-            $_SESSION['chat_history'][] = ["role" => "user", "content" => $message];
-            $_SESSION['chat_history'][] = ["role" => "assistant", "content" => $response];
-
-            // Keep last 10 exchanges (20 entries)
-            if (count($_SESSION['chat_history']) > 20) {
-                $_SESSION['chat_history'] = array_slice($_SESSION['chat_history'], -20);
-            }
-            break; // Success! Exit loop
-        } else {
-            // Model not found or other error, try next
-            $last_error = $response_json;
-            continue;
+    // Add chat history
+    if (!empty($_SESSION['chat_history'])) {
+        foreach ($_SESSION['chat_history'] as $chat) {
+            $messages[] = [
+                "role" => $chat['role'] === 'user' ? 'user' : 'assistant',
+                "content" => $chat['content']
+            ];
         }
     }
 
-    // If all models failed
-    if ($response === null) {
-        throw new Exception("All Gemini models failed. Last error: " . $last_error);
+    // Add current message
+    $messages[] = ["role" => "user", "content" => $message];
+
+    $payload = [
+        "model" => "gpt-4o-mini",
+        "messages" => $messages,
+        "temperature" => 0.4,
+        "max_tokens" => 1024
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . OPENAI_API_KEY
+    ]);
+
+    $response_json = curl_exec($ch);
+    if ($response_json === false) {
+        $err = curl_error($ch);
+        curl_close($ch);
+        throw new Exception("CURL Error: " . $err);
+    }
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($http_code === 200) {
+        $result = json_decode($response_json, true);
+        $bot_text = $result['choices'][0]['message']['content'] ?? "Sorry, main abhi process nahi kar paa raha hun.";
+        $response = trim($bot_text);
+
+        // Save to history
+        $_SESSION['chat_history'][] = ["role" => "user", "content" => $message];
+        $_SESSION['chat_history'][] = ["role" => "assistant", "content" => $response];
+
+        // Keep last 10 exchanges (20 entries)
+        if (count($_SESSION['chat_history']) > 20) {
+            $_SESSION['chat_history'] = array_slice($_SESSION['chat_history'], -20);
+        }
+    } else {
+        throw new Exception("OpenAI API Error (HTTP $http_code): " . $response_json);
     }
 
 } catch (Exception $e) {
