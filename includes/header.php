@@ -353,7 +353,10 @@
                 display: flex !important;
                 align-items: center;
                 gap: 12px;
-                width: 100%;
+                flex: 1;
+                /* Allow flexible width to share space */
+                min-width: 0;
+                /* Enable text truncation/wrapping inside flex child */
             }
 
             .sidebar.mobile-open .user-details {
