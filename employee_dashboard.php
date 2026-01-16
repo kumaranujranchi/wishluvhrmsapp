@@ -491,7 +491,7 @@ $latest_notices = $notice_q->fetchAll();
             <div class="m-card" style="background: #FFA000;">
                 <div class="m-card-content">
                     <p class="m-label">Late Marks</p>
-                    <p class="m-value"><?= $stats['late_days'] ?></p>
+                    <p class="m-value"><?= $stats['late_count'] ?></p>
                     <p class="m-desc">Arrivals after 10:00 AM</p>
                     <div class="m-footer">
                         <i data-lucide="zap" style="width: 14px;"></i> Stay Punctual!
