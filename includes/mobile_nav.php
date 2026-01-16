@@ -91,7 +91,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <nav class="m-bottom-nav">
         <?php
         // Determine user role
-        $is_admin = isset($_SESSION['role']) && $_SESSION['role'] === 'Admin';
+        // Fix: Use 'user_role' instead of 'role' as set in login.php
+        $user_role = $_SESSION['user_role'] ?? '';
+        $is_admin = strcasecmp(trim($user_role), 'Admin') === 0;
+
         $home_page = $is_admin ? 'index.php' : 'employee_dashboard.php';
         $attendance_page = $is_admin ? 'attendance.php' : 'attendance_view.php';
         ?>
