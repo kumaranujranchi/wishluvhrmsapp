@@ -53,6 +53,23 @@ try {
         "Status: {$today['status']}, In: {$today['clock_in']}, Out: " . ($today['clock_out'] ?: 'N/A') . ", Hours: {$today['total_hours']}" :
         "Not punched in yet for today.";
 
+    // B2. Yesterday's Attendance
+    $stmt = $conn->prepare("SELECT date, clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date = DATE_SUB(CURDATE(), INTERVAL 1 DAY)");
+    $stmt->execute(['uid' => $user_id]);
+    $yesterday = $stmt->fetch();
+    $yesterday_context = $yesterday ?
+        "Date: {$yesterday['date']}, Status: {$yesterday['status']}, In: {$yesterday['clock_in']}, Out: " . ($yesterday['clock_out'] ?: 'N/A') . ", Hours: {$yesterday['total_hours']}" :
+        "No attendance record for yesterday.";
+
+    // B3. Last 7 Days Attendance (for historical queries)
+    $stmt = $conn->prepare("SELECT date, clock_in, clock_out, status, total_hours FROM attendance WHERE employee_id = :uid AND date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) ORDER BY date DESC");
+    $stmt->execute(['uid' => $user_id]);
+    $last_7_days = $stmt->fetchAll();
+    $history_context = "Last 7 Days:\n";
+    foreach ($last_7_days as $record) {
+        $history_context .= "  - {$record['date']}: In={$record['clock_in']}, Out=" . ($record['clock_out'] ?: 'N/A') . ", Hours={$record['total_hours']}\n";
+    }
+
     // C. Leave Balance (Annual)
     $stmt = $conn->prepare("SELECT start_date, end_date FROM leave_requests WHERE employee_id = :uid AND status = 'Approved' AND YEAR(start_date) = YEAR(CURDATE())");
     $stmt->execute(['uid' => $user_id]);
@@ -148,15 +165,12 @@ try {
     
     USER DATA CONTEXT (TRUST THIS ABOVE ALL ELSE):
     1. Attendance Today: $attendance_context
-    2. Monthly Stats: $monthly_context
-    3. Leave Balance: $leave_context
-    4. Reporting Manager: $manager_name (This is the REAL TRUTH. Ignore any previous chat history if it says otherwise.)
-    5. Next Holiday: $holiday_context
-    1. Attendance Today: $attendance_context
-    2. Monthly Stats: $monthly_context
-    3. Leave Balance: $leave_context
-    4. Reporting Manager: $manager_name
-    5. Next Holiday: $holiday_context
+    2. Attendance Yesterday: $yesterday_context
+    3. Attendance History: $history_context
+    4. Monthly Stats: $monthly_context
+    5. Leave Balance: $leave_context
+    6. Reporting Manager: $manager_name (This is the REAL TRUTH. Ignore any previous chat history if it says otherwise.)
+    7. Next Holiday: $holiday_context
     $admin_context
     $policy_context
 
