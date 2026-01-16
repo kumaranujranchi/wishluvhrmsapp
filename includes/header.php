@@ -138,7 +138,6 @@
             font-size: 0.65rem;
             font-weight: 800;
             border: 2px solid white;
-            animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
