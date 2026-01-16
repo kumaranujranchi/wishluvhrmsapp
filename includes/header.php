@@ -537,9 +537,6 @@
                         ?>
                     </h2>
                     <div class="header-date">
-                        <i data-lucide="calendar" class="mobile-only"></i>
-                        <span class="mobile-only"><?= date('D, d M') ?></span>
-
                         <i data-lucide="calendar-days" class="desktop-only"></i>
                         <span class="desktop-only"><?= date('l, d F Y') ?></span>
                         <span class="date-separator desktop-only"></span>
@@ -571,7 +568,8 @@
 
                     <!-- Profile/Logout Section -->
                     <div class="desktop-only" style="margin-left: 8px;">
-                        <a href="logout.php" class="action-icon-btn" title="Logout" style="color: #ef4444; background: #fee2e2;">
+                        <a href="logout.php" class="action-icon-btn" title="Logout"
+                            style="color: #ef4444; background: #fee2e2;">
                             <i data-lucide="log-out"></i>
                         </a>
                     </div>
@@ -580,7 +578,7 @@
 
             <script>
                 // Ensure icons are created even if script loads late or page crashes partially
-                (function() {
+                (function () {
                     function initLucide() {
                         if (typeof lucide !== 'undefined') {
                             lucide.createIcons();
