@@ -607,7 +607,21 @@ foreach ($history as $h) {
     updateClock();
 
     // Geolocation Logic
-    const assignedLocations = <?= json_encode($assigned_locations) ?>;
+    const assignedLocations = <?= json_encode($assigned_locations) ?> || [];
+    console.log("Assigned Locations:", assignedLocations);
+
+    // Update UI status if geofencing is active
+    if (assignedLocations.length > 0) {
+        const statusDiv = document.getElementById('locationStatus');
+        if(statusDiv) {
+             statusDiv.innerHTML += ' <span style="color:#10b981; font-weight:600;">(Geofencing Active)</span>';
+        }
+    } else {
+        const statusDiv = document.getElementById('locationStatus');
+        if(statusDiv) {
+             statusDiv.innerHTML += ' <span style="color:#94a3b8;">(Geofencing Inactive - Open Punch)</span>';
+        }
+    }
 
     function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371; // Radius of the earth in km
@@ -628,7 +642,13 @@ foreach ($history as $h) {
         statusDiv.innerHTML = '<span class="spin" style="display:inline-block;">⌛</span> Detecting Location...';
 
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async (position) => {
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 30000
+            };
+
+            const successCallback = async (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
@@ -678,19 +698,31 @@ foreach ($history as $h) {
                 }
 
                 form.submit();
-            }, (error) => {
+            };
+
+            const errorCallback = (error) => {
+                // FALLBACK: Try again with low accuracy if first attempt failed
+                if (options.enableHighAccuracy) {
+                     statusDiv.innerHTML = '<span class="spin" style="display:inline-block;">⌛</span> GPS weak, trying standard network location...';
+                     options.enableHighAccuracy = false;
+                     options.timeout = 20000; // Give 20s for network location
+                     navigator.geolocation.getCurrentPosition(successCallback, finalErrorCallback, options);
+                     return;
+                }
+                finalErrorCallback(error);
+            };
+
+            const finalErrorCallback = (error) => {
                 let errorMsg = "Location Access Denied.";
                 if (error.code === 1) errorMsg = "Location Access Denied. Please allow location in your browser settings.";
                 else if (error.code === 2) errorMsg = "Location unavailable. Please check your GPS/Internet.";
-                else if (error.code === 3) errorMsg = "Location request timed out. Please try again.";
+                else if (error.code === 3) errorMsg = "Location request timed out. Please try refreshing.";
 
                 statusDiv.innerHTML = `<span style="color:#ef4444;">${errorMsg}</span>`;
                 alert(errorMsg);
-            }, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            });
+            };
+
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
         } else {
             alert("Geolocation not supported by this browser.");
         }

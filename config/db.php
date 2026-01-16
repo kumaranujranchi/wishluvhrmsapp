@@ -9,6 +9,12 @@ $db_name = 'u743570205_wishluvhrmsapp';
 $username = 'u743570205_wishluvhrmsapp';
 $password = 'Anuj@2025@2026';
 
+// Local
+// $host = '127.0.0.1';
+// $db_name = 'hrms_db'; // Assuming local db name
+// $username = 'root';
+// $password = 'root'; // Or empty
+
 try {
     $conn = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8mb4", $username, $password);
 
