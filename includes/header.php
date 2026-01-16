@@ -112,10 +112,7 @@
 
         @media (max-width: 768px) {
             .header-date {
-                font-size: 0.7rem;
-                padding: 6px 10px;
-                gap: 4px;
-                margin-top: 4px;
+                display: none !important;
             }
         }
 
