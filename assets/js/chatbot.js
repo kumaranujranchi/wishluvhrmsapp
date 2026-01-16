@@ -15,8 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.classList.contains('active')) {
             input.focus();
             if (helperText) helperText.style.display = 'none';
-            if (body.children.length === 0) {
-                // Fetch user name from PHP session and create personalized greeting
+            
+            // Load chat history from localStorage
+            const savedMessages = localStorage.getItem('chatMessages');
+            if (savedMessages) {
+                const messages = JSON.parse(savedMessages);
+                messages.forEach(msg => {
+                    addMessage(msg.type, msg.text, false); // false = don't save again
+                });
+            } else if (body.children.length === 0) {
+                // First time - show greeting
                 fetch('ajax/get_user_name.php')
                     .then(res => res.json())
                     .then(data => {
@@ -98,12 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return formatted;
     }
 
-    function addMessage(type, text) {
+    function addMessage(type, text, save = true) {
         const div = document.createElement('div');
         div.className = `message ${type}-msg`;
         div.innerHTML = formatMessage(text);
         body.appendChild(div);
         body.scrollTop = body.scrollHeight;
+        
+        // Save to localStorage
+        if (save) {
+            const savedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+            savedMessages.push({ type, text });
+            // Keep last 20 messages
+            if (savedMessages.length > 20) {
+                savedMessages.shift();
+            }
+            localStorage.setItem('chatMessages', JSON.stringify(savedMessages));
+        }
     }
 
     function showTyping() {
