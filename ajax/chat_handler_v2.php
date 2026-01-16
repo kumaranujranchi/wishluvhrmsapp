@@ -231,7 +231,7 @@ try {
     $last_error = null;
 
     foreach ($models_to_try as $model) {
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/" . $model . ":generateContent?key=" . GEMINI_API_KEY;
+        $url = "https://generativelanguage.googleapis.com/v1/models/" . $model . ":generateContent?key=" . GEMINI_API_KEY;
 
         $payload = [
             "contents" => [
