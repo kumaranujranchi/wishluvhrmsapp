@@ -118,7 +118,7 @@ try {
         $p_stmt = $conn->prepare("SELECT title, content FROM policies WHERE is_active = 1 ORDER BY display_order ASC");
         $p_stmt->execute();
         $policies_db = $p_stmt->fetchAll();
-        
+
         if ($policies_db) {
             $policy_context .= "\n\nHUMAN RESOURCES MANUAL & POLICIES (OFFICIAL):\n";
             foreach ($policies_db as $p) {
@@ -127,8 +127,8 @@ try {
                 // Basic compression: replace multiple spaces/newlines with single space
                 $clean_content = preg_replace('/\s+/', ' ', $clean_content);
                 // Limit content length per policy to avoid token overflow
-                $clean_content = substr($clean_content, 0, 1000); 
-                
+                $clean_content = substr($clean_content, 0, 1000);
+
                 $policy_context .= "- POLICY: " . strtoupper($p['title']) . "\n";
                 $policy_context .= "  DETAILS: " . trim($clean_content) . "\n\n";
             }
@@ -192,8 +192,8 @@ try {
     - If the question is about something NOT in your context (like salary details, specific HR policies not mentioned, etc.), respond politely that you don't have that info and refer to Anuj sir (7280008102).
     - CRITICAL: Never stop in the middle of a sentence. Always complete your thought.
     - ANTI-HALLUCINATION: 
-      1. DO NOT invent names. If data says "None" or "Not Assigned", say exactly that.
-      2. If you don't know the Manager's name, say "Management". Never say "Rohan Sharma" or any random name.
+      1. DO NOT invent names. If data says 'None' or 'Not Assigned', say exactly that.
+      2. If you don't know the Manager's name, say 'Management'. Never say 'Rohan Sharma' or any random name.
     - NAVIGATION GUIDE: Apply Leave (Sidebar > Leaves > Apply Leave), Attendance (Sidebar > Attendance), Holidays (Sidebar > Holidays), Profile (Click Name at bottom).
     
     - INTRO RULE:
@@ -201,8 +201,8 @@ try {
       2. If there is PREVIOUS CHAT HISTORY, DO NOT repeat the introduction. Start your response directly or with a simple greeting like 'Ji' or 'Haan' if appropriate.
 
     - NATURAL RESPONSE RULE:
-      1. CRITICAL: Never mention \"Chat History\", \"Previous context\", or \"Ending conversation\" in your response. 
-      2. If the user says goodbye or thanks, just reply with a friendly \"Aapka swagat hai!\" or \"Have a great day!\" in the appropriate language without explaining your logic OR mentioning any history.
+      1. CRITICAL: Never mention 'Chat History', 'Previous context', or 'Ending conversation' in your response. 
+      2. If the user says goodbye or thanks, just reply with a friendly 'Aapka swagat hai!' or 'Have a great day!' in the appropriate language without explaining your logic OR mentioning any history.
     ";
 
     // 3. Prepare Chat History for Gemini
