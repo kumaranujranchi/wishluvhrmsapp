@@ -24,63 +24,61 @@ include 'includes/header.php';
     }
 
     .regularization-container {
-        max-width: 900px;
-        margin: 3rem auto;
-        padding: 0 1.5rem;
+        max-width: 100%;
+        margin: 0;
+        padding: 2rem;
         animation: fadeIn 0.5s ease-out;
+        font-family: 'Outfit', sans-serif;
     }
 
     @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(15px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     /* Page Header */
     .page-header {
-        text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
     }
 
     .page-header h2 {
-        font-size: 2.25rem;
+        font-size: 2rem;
         font-weight: 800;
         color: #1e293b;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 0.5rem;
-    }
-
-    .page-header p {
-        color: #64748b;
-        font-size: 1.1rem;
+        margin: 0;
     }
 
     .header-icon-wrap {
         background: var(--primary-gradient);
         color: white;
         padding: 12px;
-        border-radius: 18px;
+        border-radius: 16px;
         display: inline-flex;
         box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
     }
 
+    /* Dashboard Layout */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+        .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
     /* Form Card */
     .form-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border-radius: 30px;
-        padding: 3rem;
+        background: white;
+        border-radius: 28px;
+        padding: 2.5rem;
         box-shadow: var(--card-shadow);
-        border: 1px solid rgba(255, 255, 255, 0.4);
+        border: 1px solid #f1f5f9;
     }
 
     .form-group {
@@ -89,60 +87,123 @@ include 'includes/header.php';
 
     .form-group label {
         display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: #333;
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+        color: #334155;
+        font-size: 0.95rem;
     }
 
     .form-group input,
     .form-group select,
     .form-group textarea {
         width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        background: #f8fafc;
+        border: 2px solid transparent;
+        border-radius: 16px;
         font-size: 1rem;
+        color: #1e293b;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: inherit;
     }
 
-    .form-group textarea {
-        min-height: 100px;
-        resize: vertical;
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        background: white;
+        border-color: #6366f1;
+        outline: none;
+        box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.1);
     }
 
     .time-inputs {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+        gap: 1.5rem;
     }
 
+    /* Sidebar Styles */
+    .info-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .sidebar-card {
+        background: white;
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+    }
+
+    .sidebar-card h4 {
+        margin: 0 0 1rem 0;
+        color: #1e293b;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .guideline-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .guideline-list li {
+        padding-left: 1.5rem;
+        position: relative;
+        margin-bottom: 0.75rem;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .guideline-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 6px;
+        height: 6px;
+        background: #6366f1;
+        border-radius: 50%;
+    }
+
+    /* Existing Attendance Context */
     .existing-attendance {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        border-left: 4px solid #007bff;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 1.25rem;
+        border-radius: 20px;
+        border: 1px dashed #cbd5e1;
     }
 
-    .existing-attendance h4 {
-        margin: 0 0 0.5rem 0;
-        color: #007bff;
-    }
+    .existing-attendance h4 { color: #6366f1; margin-bottom: 0.5rem; }
+    #existingData { font-weight: 600; color: #334155; line-height: 1.4; }
 
     .btn-submit {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         color: white;
-        padding: 1rem 2rem;
+        padding: 1.25rem 2rem;
         border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
+        border-radius: 18px;
+        font-size: 1.1rem;
+        font-weight: 700;
         cursor: pointer;
         width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
     }
 
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
     }
 
     .alert {
@@ -180,64 +241,84 @@ include 'includes/header.php';
         <div class="header-icon-wrap">
             <i data-lucide="clock" style="width: 32px; height: 32px;"></i>
         </div>
-        <h2>Attendance Regularization</h2>
-        <p>Request adjustments for missed or incorrect punches</p>
+        <div>
+            <h2>Attendance Regularization</h2>
+            <p style="color: #64748b; margin: 0;">Request adjustments for missed or incorrect punches</p>
+        </div>
     </div>
 
-    <div class="form-card">
-        <div id="alertContainer"></div>
+    <div class="dashboard-grid">
+        <!-- Main Form Column -->
+        <div class="form-card">
+            <div id="alertContainer"></div>
 
-        <form id="regularizationForm">
-            <div class="form-group">
-                <label for="attendance_date">Select Date *</label>
-                <input type="date" id="attendance_date" name="attendance_date" required
-                    max="<?php echo date('Y-m-d'); ?>">
-            </div>
-
-            <div id="existingAttendance" style="display: none;" class="existing-attendance">
-                <div class="attendance-icon">
-                    <i data-lucide="info" style="width: 24px; height: 24px;"></i>
-                </div>
-                <div class="attendance-info">
-                    <h4>Existing Record Found</h4>
-                    <p id="existingData"></p>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="request_type">Request Type *</label>
-                <select id="request_type" name="request_type" required>
-                    <option value="">-- Select Type --</option>
-                    <option value="missed_punch_in">Missed Punch In</option>
-                    <option value="missed_punch_out">Missed Punch Out</option>
-                    <option value="both">Both (Missed In & Out)</option>
-                    <option value="correction">Correction (Wrong Time)</option>
-                </select>
-            </div>
-
-            <div class="time-inputs">
+            <form id="regularizationForm">
                 <div class="form-group">
-                    <label for="clock_in">Clock In Time *</label>
-                    <input type="time" id="clock_in" name="clock_in" required>
+                    <label for="attendance_date">Select Date *</label>
+                    <input type="date" id="attendance_date" name="attendance_date" required
+                        max="<?php echo date('Y-m-d'); ?>">
                 </div>
 
                 <div class="form-group">
-                    <label for="clock_out">Clock Out Time *</label>
-                    <input type="time" id="clock_out" name="clock_out" required>
+                    <label for="request_type">Request Type *</label>
+                    <select id="request_type" name="request_type" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="missed_punch_in">Missed Punch In</option>
+                        <option value="missed_punch_out">Missed Punch Out</option>
+                        <option value="both">Both (Missed In & Out)</option>
+                        <option value="correction">Correction (Wrong Time)</option>
+                    </select>
                 </div>
+
+                <div class="time-inputs">
+                    <div class="form-group">
+                        <label for="clock_in">Clock In Time *</label>
+                        <input type="time" id="clock_in" name="clock_in" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clock_out">Clock Out Time *</label>
+                        <input type="time" id="clock_out" name="clock_out" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Reason for Regularization *</label>
+                    <textarea id="reason" name="reason" required minlength="20" rows="4"
+                        placeholder="Please provide a detailed reason for this regularization request..."></textarea>
+                    <small style="color: #64748b; display: block; margin-top: 0.5rem;">
+                        <i data-lucide="info" style="width:12px; height:12px;"></i> Characters: <span id="charCount">0</span>/20 minimum
+                    </small>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i data-lucide="send"></i> Submit Request
+                </button>
+            </form>
+        </div>
+
+        <!-- Sidebar Info Column -->
+        <div class="info-sidebar">
+            <div id="existingAttendance" style="display: none;" class="sidebar-card existing-attendance">
+                <h4><i data-lucide="info"></i> Selection Context</h4>
+                <p id="existingData"></p>
             </div>
 
-            <div class="form-group">
-                <label for="reason">Reason for Regularization * (Min 20 characters)</label>
-                <textarea id="reason" name="reason" required minlength="20"
-                    placeholder="Please provide a detailed reason for this regularization request..."></textarea>
-                <small style="color: #666;">Characters: <span id="charCount">0</span>/20 minimum</small>
+            <div class="sidebar-card">
+                <h4><i data-lucide="list-checks"></i> Guidelines</h4>
+                <ul class="guideline-list">
+                    <li>Requests can be submitted for the last 30 days.</li>
+                    <li>Detailed reason (min 20 characters) is mandatory.</li>
+                    <li>Requested times should match your shift hours.</li>
+                    <li>Admin approval is required for all changes.</li>
+                </ul>
             </div>
 
-            <button type="submit" class="btn-submit">
-                <i data-lucide="send"></i> Submit Request
-            </button>
-        </form>
+            <div class="sidebar-card" style="background: var(--accent-gradient); color: white;">
+                <h4 style="color: white;"><i data-lucide="help-circle"></i> Need Help?</h4>
+                <p style="margin: 0; opacity: 0.9;">If you're unsure about punch times, check your monthly attendance report first.</p>
+            </div>
+        </div>
     </div>
 </div>
 
