@@ -75,7 +75,7 @@
             padding: 15px 25px;
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 9999;
             background: white;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow: visible;
