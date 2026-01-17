@@ -573,13 +573,6 @@
                         <?php endif; ?>
                     </a>
 
-                    <!-- Profile/Logout Section -->
-                    <div class="desktop-only" style="margin-left: 8px;">
-                        <a href="logout.php" class="action-icon-btn" title="Logout"
-                            style="color: #ef4444; background: #fee2e2;">
-                            <i data-lucide="log-out"></i>
-                        </a>
-                    </div>
                 </div>
             </header>
 
