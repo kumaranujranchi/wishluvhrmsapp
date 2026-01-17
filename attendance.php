@@ -234,9 +234,10 @@ for ($i = 6; $i >= 0; $i--) {
                                     <div style="display:flex; align-items:center; gap:10px;">
                                         <div
                                             style="width:32px; height:32px; border-radius:8px; background:#e2e8f0; overflow:hidden; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#64748b; font-size:0.8rem;">
-                                            <?php if ($row['avatar']): ?>
-                                                <img src="<?= $row['avatar'] ?>"
-                                                    style="width:100%; height:100%; object-fit:cover;">
+                                            <?php if ($row['avatar'] && !empty($row['avatar'])): ?>
+                                                <img src="<?= htmlspecialchars($row['avatar']) ?>"
+                                                    style="width:100%; height:100%; object-fit:cover;"
+                                                    onerror="this.style.display='none'; this.parentElement.innerHTML='<?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>';">
                                             <?php else: ?>
                                                 <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
                                             <?php endif; ?>
@@ -344,8 +345,10 @@ for ($i = 6; $i >= 0; $i--) {
                                 <div style="display:flex; align-items:center; gap:12px; flex:1;">
                                     <div
                                         style="width:40px; height:40px; background:#e0e7ff; border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:700; color:#4f46e5; font-size:0.9rem;">
-                                        <?php if ($row['avatar']): ?>
-                                            <img src="<?= $row['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
+                                        <?php if ($row['avatar'] && !empty($row['avatar'])): ?>
+                                            <img src="<?= htmlspecialchars($row['avatar']) ?>"
+                                                style="width:100%; height:100%; object-fit:cover;"
+                                                onerror="this.style.display='none'; this.parentElement.innerHTML='<?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>';">
                                         <?php else: ?>
                                             <?= strtoupper(substr($row['first_name'], 0, 1) . substr($row['last_name'], 0, 1)) ?>
                                         <?php endif; ?>
