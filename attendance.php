@@ -1,9 +1,46 @@
 <?php
 require_once 'config/db.php';
-include 'includes/header.php';
 
 // Date Filter
 $filter_date = $_GET['date'] ?? date('Y-m-d');
+
+// --- ATTENDANCE LIST (Needed for both export and display) ---
+$sql = "SELECT a.*, e.first_name, e.last_name, e.employee_code, e.avatar, d.name as dept_name 
+        FROM attendance a 
+        JOIN employees e ON a.employee_id = e.id 
+        LEFT JOIN departments d ON e.department_id = d.id 
+        WHERE a.date = :date 
+        ORDER BY a.clock_in DESC";
+$stmt = $conn->prepare($sql);
+$stmt->execute(['date' => $filter_date]);
+$attendance_records = $stmt->fetchAll();
+
+// CSV Export Logic (Must be BEFORE any HTML output)
+if (isset($_POST['export_csv'])) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="attendance_' . $filter_date . '.csv"');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Employee', 'Code', 'Department', 'Date', 'Status', 'Clock In', 'Location In', 'Clock Out', 'Location Out', 'Total Hours']);
+
+    foreach ($attendance_records as $row) {
+        fputcsv($output, [
+            $row['first_name'] . ' ' . $row['last_name'],
+            $row['employee_code'],
+            $row['dept_name'],
+            $row['date'],
+            $row['status'],
+            $row['clock_in'],
+            $row['clock_in_address'],
+            $row['clock_out'],
+            $row['clock_out_address'],
+            $row['total_hours']
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
+include 'includes/header.php';
 
 // --- STATS CALCULATION ---
 $total_employees = $conn->query("SELECT COUNT(*) FROM employees")->fetchColumn();
@@ -38,44 +75,6 @@ for ($i = 6; $i >= 0; $i--) {
     $l = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND status = 'Late'");
     $l->execute(['d' => $d]);
     $chart_late[] = $l->fetchColumn();
-}
-
-
-// --- ATTENDANCE LIST ---
-// Fetch attendance combined with employee details
-$sql = "SELECT a.*, e.first_name, e.last_name, e.employee_code, e.avatar, d.name as dept_name 
-        FROM attendance a 
-        JOIN employees e ON a.employee_id = e.id 
-        LEFT JOIN departments d ON e.department_id = d.id 
-        WHERE a.date = :date 
-        ORDER BY a.clock_in DESC";
-$stmt = $conn->prepare($sql);
-$stmt->execute(['date' => $filter_date]);
-$attendance_records = $stmt->fetchAll();
-
-// CSV Export Logic
-if (isset($_POST['export_csv'])) {
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="attendance_' . $filter_date . '.csv"');
-    $output = fopen('php://output', 'w');
-    fputcsv($output, ['Employee', 'Code', 'Department', 'Date', 'Status', 'Clock In', 'Location In', 'Clock Out', 'Location Out', 'Total Hours']);
-
-    foreach ($attendance_records as $row) {
-        fputcsv($output, [
-            $row['first_name'] . ' ' . $row['last_name'],
-            $row['employee_code'],
-            $row['dept_name'],
-            $row['date'],
-            $row['status'],
-            $row['clock_in'],
-            $row['clock_in_address'],
-            $row['clock_out'],
-            $row['clock_out_address'],
-            $row['total_hours']
-        ]);
-    }
-    fclose($output);
-    exit;
 }
 ?>
 
