@@ -5,4 +5,16 @@ config/db_local.php
 uploads/
 config/email_credentials.php
 .env
-.env
+
+# Mobile App Files (Capacitor) - Don't deploy to Hostinger
+node_modules/
+android/
+ios/
+www/
+package.json
+package-lock.json
+capacitor.config.json
+sync-www.sh
+BUILD_GUIDE.md
+PLAYSTORE_DEPLOYMENT.md
+MOBILE_APP_README.md
