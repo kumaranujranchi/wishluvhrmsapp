@@ -233,6 +233,7 @@
                 animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 border-right: 1px solid #f1f5f9;
                 padding-bottom: 20px;
+                padding-top: env(safe-area-inset-top) !important;
             }
 
             /* Override Collapsed Styles on Mobile */
