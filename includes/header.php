@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/logo.png">
@@ -422,7 +422,10 @@
 
             /* Header Adjustments */
             .header {
-                padding: 12px 15px !important;
+                padding-top: calc(12px + env(safe-area-inset-top)) !important;
+                padding-bottom: 12px !important;
+                padding-left: 15px !important;
+                padding-right: 15px !important;
                 background: white !important;
                 position: sticky;
                 top: 0;
