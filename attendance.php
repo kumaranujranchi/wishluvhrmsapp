@@ -22,7 +22,14 @@ function formatDuration($total_minutes)
         return '-';
     $hours = floor($total_minutes / 60);
     $minutes = $total_minutes % 60;
-    return sprintf('%d:%02d', $hours, $minutes);
+
+    if ($hours > 0 && $minutes > 0) {
+        return $hours . ' hr ' . $minutes . ' min';
+    } elseif ($hours > 0) {
+        return $hours . ' hr';
+    } else {
+        return $minutes . ' min';
+    }
 }
 
 
