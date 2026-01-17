@@ -20,6 +20,10 @@ if (isset($_POST['export_csv'])) {
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="attendance_' . $filter_date . '.csv"');
     $output = fopen('php://output', 'w');
+
+    // Add UTF-8 BOM for Excel compatibility with special characters (Hindi)
+    fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
     fputcsv($output, ['Employee', 'Code', 'Department', 'Date', 'Status', 'Clock In', 'Location In', 'Clock Out', 'Location Out', 'Total Hours']);
 
     foreach ($attendance_records as $row) {
