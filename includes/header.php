@@ -192,6 +192,12 @@
         }
 
         .desktop-only {
+            display: block !important;
+        }
+
+        span.desktop-only,
+        a.desktop-only,
+        i.desktop-only {
             display: inline-block !important;
         }
 

@@ -245,10 +245,10 @@ if (isset($_POST['export_csv'])) {
                                 <td style="font-weight:500;"><?= date('h:i A', strtotime($row['clock_in'])) ?></td>
                                 <td>
                                     <div style="display:flex; align-items:flex-start; gap:6px;">
-                                        <div style="font-size:0.8rem; min-width:180px;"
+                                        <div style="font-size:0.8rem; color: #475569; line-height: 1.4;"
                                             title="<?= htmlspecialchars($row['clock_in_address']) ?>">
                                             <i data-lucide="map-pin"
-                                                style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                                style="width:12px; vertical-align:middle; color:#94a3b8; margin-right: 4px;"></i>
                                             <?= htmlspecialchars($row['clock_in_address'] ?? '-') ?>
                                         </div>
                                         <?php if ($row['clock_in_lat']): ?>
@@ -270,11 +270,11 @@ if (isset($_POST['export_csv'])) {
                                 </td>
                                 <td>
                                     <div style="display:flex; align-items:flex-start; gap:6px;">
-                                        <div style="font-size:0.8rem; min-width:180px;"
+                                        <div style="font-size:0.8rem; color: #475569; line-height: 1.4;"
                                             title="<?= htmlspecialchars($row['clock_out_address']) ?>">
                                             <?php if ($row['clock_out_address']): ?>
                                                 <i data-lucide="map-pin"
-                                                    style="width:12px; vertical-align:middle; color:#64748b;"></i>
+                                                    style="width:12px; vertical-align:middle; color:#94a3b8; margin-right: 4px;"></i>
                                                 <?= htmlspecialchars($row['clock_out_address']) ?>
                                             <?php else: ?>
                                                 <span style="color:#cbd5e1;">-</span>
