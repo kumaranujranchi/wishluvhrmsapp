@@ -54,12 +54,12 @@ try {
         $clock_in = $request['requested_clock_in'];
         $clock_out = $request['requested_clock_out'];
 
-        // Calculate total hours
+        // Calculate total minutes
         $in_time = new DateTime($clock_in);
         $out_time = new DateTime($clock_out);
         $interval = $in_time->diff($out_time);
-        $total_hours = $interval->h + ($interval->i / 60);
-        $total_hours = round($total_hours, 2);
+        $total_minutes = ($interval->h * 60) + $interval->i;
+
 
         // Determine status based on clock-in time
         $status = 'On Time';
@@ -85,7 +85,7 @@ try {
             $stmt->execute([
                 'clock_in' => $clock_in,
                 'clock_out' => $clock_out,
-                'hours' => $total_hours,
+                'hours' => $total_minutes,
                 'status' => $status,
                 'admin_id' => $admin_id,
                 'remarks' => $remarks,
@@ -103,7 +103,7 @@ try {
                 'date' => $request['attendance_date'],
                 'clock_in' => $clock_in,
                 'clock_out' => $clock_out,
-                'hours' => $total_hours,
+                'hours' => $total_minutes,
                 'status' => $status,
                 'admin_id' => $admin_id,
                 'remarks' => $remarks

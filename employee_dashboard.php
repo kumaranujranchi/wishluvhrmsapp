@@ -41,6 +41,17 @@ if ($stats['present_days'] > 0) {
     $stats['avg_hours'] = 0.0;
 }
 
+// Helper function to format duration from minutes to hours:minutes
+function formatDuration($total_minutes)
+{
+    if (!$total_minutes || $total_minutes == 0)
+        return '-';
+    $hours = floor($total_minutes / 60);
+    $minutes = $total_minutes % 60;
+    return sprintf('%d:%02d', $hours, $minutes);
+}
+
+
 // 2. Fetch Leave Balance
 $leave_q = $conn->prepare("SELECT COUNT(*) FROM leave_requests WHERE employee_id = :uid AND status = 'Approved'");
 $leave_q->execute(['uid' => $user_id]);
@@ -504,11 +515,11 @@ $latest_notices = $notice_q->fetchAll();
             <div class="m-card" style="background: #00BFA5;">
                 <div class="m-card-content">
                     <p class="m-label">Avg. Hours</p>
-                    <p class="m-value"><?= round($stats['total_hours'] / ($stats['present_days'] ?: 1), 1) ?></p>
+                    <p class="m-value"><?= formatDuration($stats['avg_hours']) ?></p>
                     <p class="m-desc">Average Daily Work Hours</p>
                     <div class="m-footer">
                         <i data-lucide="bar-chart-2" style="width: 14px;"></i> Total:
-                        <?= round($stats['total_hours'], 1) ?> hrs
+                        <?= formatDuration($stats['total_hours']) ?>
                     </div>
                 </div>
                 <i data-lucide="timer" class="m-bg-icon"></i>
@@ -661,14 +672,14 @@ $latest_notices = $notice_q->fetchAll();
                 <div class="card-header">
                     <span class="card-title">AVG. HOURS</span>
                 </div>
-                <div class="card-value"><?php echo number_format($stats['avg_hours'], 1); ?></div>
+                <div class="card-value"><?php echo formatDuration($stats['avg_hours']); ?></div>
                 <div class="card-subtitle">
                     <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
                     Average Daily Work Hours
                 </div>
                 <div class="card-footer">
                     <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
-                    Total: <?php echo number_format($stats['avg_hours'] * $stats['present_days'], 1); ?> hrs
+                    Total: <?php echo formatDuration($stats['total_hours']); ?>
                 </div>
             </div>
 

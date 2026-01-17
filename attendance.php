@@ -15,6 +15,17 @@ $stmt = $conn->prepare($sql);
 $stmt->execute(['date' => $filter_date]);
 $attendance_records = $stmt->fetchAll();
 
+// Helper function to format duration from minutes to hours:minutes
+function formatDuration($total_minutes)
+{
+    if (!$total_minutes || $total_minutes == 0)
+        return '-';
+    $hours = floor($total_minutes / 60);
+    $minutes = $total_minutes % 60;
+    return sprintf('%d:%02d', $hours, $minutes);
+}
+
+
 // CSV Export Logic (Must be BEFORE any HTML output)
 if (isset($_POST['export_csv'])) {
     header('Content-Type: text/csv');
@@ -37,7 +48,7 @@ if (isset($_POST['export_csv'])) {
             $row['clock_in_address'],
             $row['clock_out'],
             $row['clock_out_address'],
-            $row['total_hours']
+            formatDuration($row['total_hours'])
         ]);
     }
     fclose($output);
@@ -59,7 +70,9 @@ $late_count = $late_count->fetchColumn();
 // Avg Hours
 $avg_hours = $conn->prepare("SELECT AVG(total_hours) FROM attendance WHERE date = :date AND total_hours > 0");
 $avg_hours->execute(['date' => $filter_date]);
-$avg = round($avg_hours->fetchColumn(), 1);
+$avg_minutes = round($avg_hours->fetchColumn());
+$avg = formatDuration($avg_minutes);
+
 
 // --- CHART DATA (Last 7 Days) ---
 $chart_labels = [];
@@ -146,7 +159,7 @@ for ($i = 6; $i >= 0; $i--) {
         <div class="card stats-card" style="border-left: 4px solid #8b5cf6;">
             <div class="stats-info">
                 <span class="stats-title">Avg. Hours</span>
-                <h3 class="stats-value"><?= $avg ?> hr</h3>
+                <h3 class="stats-value"><?= $avg ?></h3>
             </div>
             <div class="stats-icon-wrapper"><i data-lucide="timer" class="icon" style="color:#8b5cf6;"></i></div>
         </div>
@@ -291,8 +304,7 @@ for ($i = 6; $i >= 0; $i--) {
                                         <?php endif; ?>
                                     </div>
                                 </td>
-                                <td style="font-weight:600;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?>
-                                </td>
+                                <td style="font-weight:600;"><?= formatDuration($row['total_hours']) ?></td>
                             </tr>
                         <?php endforeach; ?>
 
@@ -413,7 +425,7 @@ for ($i = 6; $i >= 0; $i--) {
                                     <div class="mobile-field" style="margin:0;">
                                         <span class="mobile-label">Working Hours</span>
                                         <span class="mobile-value"
-                                            style="color:#6366f1; font-weight:700; font-size:1.1rem;"><?= $row['total_hours'] ? $row['total_hours'] . ' hr' : '-' ?></span>
+                                            style="color:#6366f1; font-weight:700; font-size:1.1rem;"><?= formatDuration($row['total_hours']) ?></span>
                                     </div>
                                 </div>
                             </div>

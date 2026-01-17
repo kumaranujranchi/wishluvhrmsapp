@@ -108,11 +108,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($row) {
             $clock_in_time = strtotime($row['clock_in']);
             $clock_out_time = strtotime($current_time);
-            $hours = round(abs($clock_out_time - $clock_in_time) / 3600, 2);
+            // Calculate total minutes instead of decimal hours
+            $total_minutes = round(abs($clock_out_time - $clock_in_time) / 60);
+            $hours = floor($total_minutes / 60);
+            $minutes = $total_minutes % 60;
+            $hours_display = sprintf('%d:%02d', $hours, $minutes);
 
             $sql = "UPDATE attendance SET 
                     clock_out = :time, 
-                    total_hours = :hours,
+                    total_hours = :total_minutes,
                     clock_out_lat = :lat,
                     clock_out_lng = :lng,
                     clock_out_address = :addr,
@@ -127,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 'time' => $current_time,
-                'hours' => $hours,
+                'total_minutes' => $total_minutes,
                 'lat' => $lat,
                 'lng' => $lng,
                 'addr' => $address,
@@ -137,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'uid' => $user_id,
                 'date' => $date
             ]);
-            $message = "<div class='alert success-glass'>Checked Out Successfully at " . date('h:i A', strtotime($current_time)) . ". Total Hours: $hours</div>";
+            $message = "<div class='alert success-glass'>Checked Out Successfully at " . date('h:i A', strtotime($current_time)) . ". Total Hours: $hours_display</div>";
         }
     }
 }
@@ -181,6 +185,17 @@ foreach ($history as $h) {
         $late_days++;
     $total_work_hours += $h['total_hours'];
 }
+
+// Helper function to format duration from minutes to hours:minutes
+function formatDuration($total_minutes)
+{
+    if (!$total_minutes || $total_minutes == 0)
+        return '-';
+    $hours = floor($total_minutes / 60);
+    $minutes = $total_minutes % 60;
+    return sprintf('%d:%02d', $hours, $minutes);
+}
+
 ?>
 
 <style>
@@ -631,7 +646,8 @@ foreach ($history as $h) {
                         <span>Completed</span>
                     </button>
                     <div class="status-capsule">
-                        <i data-lucide="check" style="width:14px;"></i> Total: <?= $today_record['total_hours'] ?> Hours
+                        <i data-lucide="check" style="width:14px;"></i> Total:
+                        <?= formatDuration($today_record['total_hours']) ?>
                     </div>
                 <?php endif; ?>
             </form>
@@ -655,7 +671,7 @@ foreach ($history as $h) {
             </div>
             <div class="mini-stat-card">
                 <div style="color:#3b82f6;"><i data-lucide="timer"></i></div>
-                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= round($total_work_hours, 1) ?></h2>
+                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= formatDuration($total_work_hours) ?></h2>
                 <span style="color:#64748b; font-size:0.85rem;">Total Hours</span>
             </div>
         </div>
@@ -758,7 +774,7 @@ foreach ($history as $h) {
                     </div>
                     <div style="text-align:right; min-width:60px;">
                         <span
-                            style="display:block; font-size:1.1rem; font-weight:800; color:#3b82f6;"><?= $row['total_hours'] ?: '0' ?></span>
+                            style="display:block; font-size:1.1rem; font-weight:800; color:#3b82f6;"><?= formatDuration($row['total_hours']) ?></span>
                         <span
                             style="font-size:0.7rem; color:#94a3b8; font-weight: 600; text-transform: uppercase;">Hours</span>
                     </div>
