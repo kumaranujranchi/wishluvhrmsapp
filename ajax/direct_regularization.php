@@ -41,9 +41,9 @@ try {
     $total_hours = round($total_hours, 2);
 
     // Determine status
-    $status = 'Present';
-    $in_hour = (int) date('H', strtotime($clock_in));
-    if ($in_hour >= 10) {
+    $status = 'On Time';
+    $in_time_val = strtotime($clock_in);
+    if (date('H:i', $in_time_val) >= '10:00') {
         $status = 'Late';
     }
 
