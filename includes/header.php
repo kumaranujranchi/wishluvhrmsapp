@@ -423,7 +423,7 @@
 
             /* Header Adjustments */
             .header {
-                padding-top: calc(12px + env(safe-area-inset-top)) !important;
+                padding-top: calc(25px + env(safe-area-inset-top)) !important;
                 padding-bottom: 12px !important;
                 padding-left: 15px !important;
                 padding-right: 15px !important;
