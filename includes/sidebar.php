@@ -155,113 +155,143 @@ $userInitials = strtoupper(substr($userName, 0, 2));
 
 
             <?php else: ?>
-                <!-- ADMIN MENU (Existing) -->
+                <!-- ADMIN MENU -->
                 <a href="index.php" class="nav-item <?php echo isActive('index'); ?>">
                     <i data-lucide="layout-dashboard" class="icon"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <!-- Admin Leave Group -->
+                <!-- Attendance & Leave Group -->
                 <div class="nav-group">
                     <?php
-                    $adminLeavePages = ['leave_admin', 'leave'];
-                    $adminLeaveState = isGroupOpen($adminLeavePages);
+                    // pages for the parent group to be open
+                    $attendanceLeavePages = ['attendance', 'regularization_manage', 'leave_admin', 'leave'];
+                    $attendanceLeaveState = isGroupOpen($attendanceLeavePages);
                     ?>
-                    <button class="nav-item dropdown-btn <?= $adminLeaveState ?>"
-                        onclick="toggleSubNav('adminLeaveSubNav', this)">
-                        <i data-lucide="palmtree" class="icon"></i>
-                        <span>Leave Management</span>
-                        <i data-lucide="chevron-right" class="icon chevron-icon"
-                            style="transition: transform 0.2s; transform: <?= strpos($adminLeaveState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
-                    </button>
-                    <div id="adminLeaveSubNav"
-                        class="sub-nav <?= strpos($adminLeaveState, 'open') !== false ? 'open' : '' ?>">
-                        <a href="leave_admin.php" class="sub-nav-item <?php echo isActive('leave_admin'); ?>">
-                            <i data-lucide="shield-check" class="icon" style="width:16px;height:16px;"></i>
-                            <span>Pending Approvals</span>
-                        </a>
-                        <a href="leave.php" class="sub-nav-item <?php echo isActive('leave'); ?>">
-                            <i data-lucide="history" class="icon" style="width:16px;height:16px;"></i>
-                            <span>Leave History</span>
-                        </a>
-                    </div>
-                </div>
-
-                <a href="admin_resignations.php" class="nav-item <?php echo isActive('admin_resignations'); ?>">
-                    <i data-lucide="user-x" class="icon"></i>
-                    <span>Resignations</span>
-                </a>
-
-                <!-- Employee Onboarding Group -->
-                <div class="nav-group">
-                    <?php
-                    $onboardingPages = ['designation', 'department', 'employees', 'add_employee'];
-                    $onboardingState = isGroupOpen($onboardingPages);
-                    ?>
-                    <button class="nav-item dropdown-btn <?= $onboardingState ?>"
-                        onclick="toggleSubNav('employeeSubNav', this)">
-                        <i data-lucide="users" class="icon"></i>
-                        <span>Onboarding</span>
-                        <i data-lucide="chevron-right" class="icon chevron-icon"
-                            style="transition: transform 0.2s; transform: <?= strpos($onboardingState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
-                    </button>
-                    <div id="employeeSubNav"
-                        class="sub-nav <?= strpos($onboardingState, 'open') !== false ? 'open' : '' ?>">
-                        <a href="designation.php" class="sub-nav-item <?php echo isActive('designation'); ?>">
-                            <i data-lucide="briefcase" class="icon" style="width:16px;height:16px;"></i>
-                            <span>Designation</span>
-                        </a>
-                        <a href="department.php" class="sub-nav-item <?php echo isActive('department'); ?>">
-                            <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
-                            <span>Department</span>
-                        </a>
-                        <a href="employees.php"
-                            class="sub-nav-item <?php echo isActive('employees') || isActive('add_employee'); ?>">
-                            <i data-lucide="users" class="icon" style="width:16px;height:16px;"></i>
-                            <span>Employees</span>
-                        </a>
-                    </div>
-                </div>
-
-
-                <!-- Admin Attendance Group -->
-                <div class="nav-group">
-                    <?php
-                    $adminAttendancePages = ['attendance', 'regularization_manage'];
-                    $adminAttendanceState = isGroupOpen($adminAttendancePages);
-                    ?>
-                    <button
-                        class="nav-item nav-group-toggle <?= strpos($adminAttendanceState, 'active') !== false ? 'active' : '' ?>"
-                        onclick="toggleSubNav('adminAttendanceSubNav', this)">
+                    <button class="nav-item dropdown-btn <?= $attendanceLeaveState ?>"
+                        onclick="toggleSubNav('attendanceLeaveSubNav', this)">
                         <i data-lucide="calendar-check" class="icon"></i>
-                        <span>Attendance</span>
+                        <span>Attendance & Leave</span>
                         <i data-lucide="chevron-right" class="icon chevron-icon"
-                            style="transition: transform 0.2s; transform: <?= strpos($adminAttendanceState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                            style="transition: transform 0.2s; transform: <?= strpos($attendanceLeaveState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                     </button>
-                    <div id="adminAttendanceSubNav"
-                        class="sub-nav <?= strpos($adminAttendanceState, 'open') !== false ? 'open' : '' ?>">
+                    <div id="attendanceLeaveSubNav"
+                        class="sub-nav <?= strpos($attendanceLeaveState, 'open') !== false ? 'open' : '' ?>">
+
+                        <!-- Attendance Link -->
                         <a href="attendance.php" class="sub-nav-item <?php echo isActive('attendance'); ?>">
                             <i data-lucide="users" class="icon" style="width:16px;height:16px;"></i>
-                            <span>View Attendance</span>
+                            <span>Attendance</span>
                         </a>
+
+                        <!-- Regularization (Kept as it belongs to attendance) -->
                         <a href="regularization_manage.php"
                             class="sub-nav-item <?php echo isActive('regularization_manage'); ?>">
                             <i data-lucide="settings" class="icon" style="width:16px;height:16px;"></i>
                             <span>Regularization</span>
                         </a>
+
+                        <!-- Nested Leave Management Group -->
+                        <div class="nav-group" style="margin-left: 10px; border-left: 1px solid #e2e8f0;">
+                            <?php
+                            $leaveMgmtPages = ['leave_admin', 'leave'];
+                            // Simple logic: if any leave page is active, this nested group is open
+                            $leaveMgmtState = isGroupOpen($leaveMgmtPages);
+                            // Check if we need to force it open if it was already open via JS, but PHP logic is stateless.
+                            // However, isGroupOpen follows current page.
+                            ?>
+                            <button class="nav-item dropdown-btn <?= $leaveMgmtState ?>"
+                                onclick="toggleSubNav('leaveMgmtSubNav', this)"
+                                style="padding-left: 10px; font-size: 0.9em;">
+                                <span>Leave Management</span>
+                                <i data-lucide="chevron-right" class="icon chevron-icon"
+                                    style="transition: transform 0.2s; transform: <?= strpos($leaveMgmtState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                            </button>
+                            <div id="leaveMgmtSubNav"
+                                class="sub-nav <?= strpos($leaveMgmtState, 'open') !== false ? 'open' : '' ?>">
+                                <a href="leave_admin.php" class="sub-nav-item <?php echo isActive('leave_admin'); ?>">
+                                    <i data-lucide="shield-check" class="icon" style="width:16px;height:16px;"></i>
+                                    <span>Pending Approvals</span>
+                                </a>
+                                <a href="leave.php" class="sub-nav-item <?php echo isActive('leave'); ?>">
+                                    <i data-lucide="history" class="icon" style="width:16px;height:16px;"></i>
+                                    <span>Leave History</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Employee Management Group -->
+                <div class="nav-group">
+                    <?php
+                    $empMgmtPages = ['employees', 'add_employee', 'admin_resignations', 'view_employee', 'edit_employee'];
+                    $empMgmtState = isGroupOpen($empMgmtPages);
+                    ?>
+                    <button class="nav-item dropdown-btn <?= $empMgmtState ?>"
+                        onclick="toggleSubNav('empMgmtSubNav', this)">
+                        <i data-lucide="users" class="icon"></i>
+                        <span>Employee Management</span>
+                        <i data-lucide="chevron-right" class="icon chevron-icon"
+                            style="transition: transform 0.2s; transform: <?= strpos($empMgmtState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                    </button>
+                    <div id="empMgmtSubNav" class="sub-nav <?= strpos($empMgmtState, 'open') !== false ? 'open' : '' ?>">
+                        <a href="employees.php"
+                            class="sub-nav-item <?php echo isActive('employees') || isActive('view_employee') || isActive('edit_employee'); ?>">
+                            <i data-lucide="users" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Employees</span>
+                        </a>
+                        <a href="add_employee.php" class="sub-nav-item <?php echo isActive('add_employee'); ?>">
+                            <i data-lucide="user-plus" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Onboarding</span>
+                        </a>
+                        <a href="admin_resignations.php" class="sub-nav-item <?php echo isActive('admin_resignations'); ?>">
+                            <i data-lucide="user-x" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Resignations</span>
+                        </a>
+                    </div>
+                </div>
 
+                <!-- Organization Setup Group -->
+                <div class="nav-group">
+                    <?php
+                    $orgSetupPages = ['locations', 'department', 'designation', 'policy', 'holidays'];
+                    $orgSetupState = isGroupOpen($orgSetupPages);
+                    ?>
+                    <button class="nav-item dropdown-btn <?= $orgSetupState ?>"
+                        onclick="toggleSubNav('orgSetupSubNav', this)">
+                        <i data-lucide="building" class="icon"></i>
+                        <span>Organization Setup</span>
+                        <i data-lucide="chevron-right" class="icon chevron-icon"
+                            style="transition: transform 0.2s; transform: <?= strpos($orgSetupState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
+                    </button>
+                    <div id="orgSetupSubNav" class="sub-nav <?= strpos($orgSetupState, 'open') !== false ? 'open' : '' ?>">
+                        <a href="locations.php" class="sub-nav-item <?php echo isActive('locations'); ?>">
+                            <i data-lucide="map-pin" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Locations</span>
+                        </a>
+                        <a href="department.php" class="sub-nav-item <?php echo isActive('department'); ?>">
+                            <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Department</span>
+                        </a>
+                        <a href="designation.php" class="sub-nav-item <?php echo isActive('designation'); ?>">
+                            <i data-lucide="briefcase" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Designation</span>
+                        </a>
+                        <a href="policy.php" class="sub-nav-item <?php echo isActive('policy'); ?>">
+                            <i data-lucide="book-open" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Policies</span>
+                        </a>
+                        <a href="holidays.php" class="sub-nav-item <?php echo isActive('holidays'); ?>">
+                            <i data-lucide="calendar-days" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Holidays</span>
+                        </a>
+                    </div>
+                </div>
 
-                <a href="holidays.php" class="nav-item <?php echo isActive('holidays'); ?>">
-                    <i data-lucide="calendar-days" class="icon"></i>
-                    <span>Holidays</span>
-                </a>
-
-                <a href="locations.php" class="nav-item <?php echo isActive('locations'); ?>">
-                    <i data-lucide="map-pin" class="icon"></i>
-                    <span>Locations</span>
+                <a href="#" class="nav-item">
+                    <i data-lucide="banknote" class="icon"></i>
+                    <span>Payroll</span>
                 </a>
 
                 <a href="admin_notices.php" class="nav-item <?php echo isActive('admin_notices'); ?>">
@@ -269,15 +299,6 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                     <span>Manage Notices</span>
                 </a>
 
-                <a href="#" class="nav-item">
-                    <i data-lucide="banknote" class="icon"></i>
-                    <span>Payroll</span>
-                </a>
-
-                <a href="policy.php" class="nav-item <?php echo isActive('policy'); ?>">
-                    <i data-lucide="book-open" class="icon"></i>
-                    <span>Policies</span>
-                </a>
             <?php endif; ?>
         </nav>
 
