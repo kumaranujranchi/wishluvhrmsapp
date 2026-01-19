@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $employeeId = $_POST['employee_id'] ?? null;
 $imageData = $_POST['image_data'] ?? null;
+$mode = $_POST['mode'] ?? 'replace'; // 'replace' or 'append'
 
 if (!$employeeId || !$imageData) {
     echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
@@ -30,7 +31,7 @@ if (!$employeeId || !$imageData) {
 }
 
 try {
-    // Verify employee exists
+    // ... (Verify employee logic same as before) ...
     $stmt = $conn->prepare("SELECT id, first_name, last_name FROM employees WHERE id = :id");
     $stmt->execute(['id' => $employeeId]);
     $employee = $stmt->fetch();
@@ -47,17 +48,19 @@ try {
         exit;
     }
 
-    // Deactivate any existing active faces for this employee
-    $stmt = $conn->prepare("UPDATE employee_faces SET is_active = FALSE WHERE employee_id = :id AND is_active = TRUE");
-    $stmt->execute(['id' => $employeeId]);
+    if ($mode === 'replace') {
+        // Deactivate any existing active faces for this employee
+        $stmt = $conn->prepare("UPDATE employee_faces SET is_active = FALSE WHERE employee_id = :id AND is_active = TRUE");
+        $stmt->execute(['id' => $employeeId]);
 
-    // If there were active faces, delete them from AWS
-    $stmt = $conn->prepare("SELECT aws_face_id FROM employee_faces WHERE employee_id = :id AND is_active = FALSE");
-    $stmt->execute(['id' => $employeeId]);
-    $oldFaces = $stmt->fetchAll();
+        // If there were active faces, delete them from AWS
+        $stmt = $conn->prepare("SELECT aws_face_id FROM employee_faces WHERE employee_id = :id AND is_active = FALSE");
+        $stmt->execute(['id' => $employeeId]);
+        $oldFaces = $stmt->fetchAll();
 
-    foreach ($oldFaces as $face) {
-        deleteFace($face['aws_face_id']);
+        foreach ($oldFaces as $face) {
+            deleteFace($face['aws_face_id']);
+        }
     }
 
     // Index the new face in AWS Rekognition

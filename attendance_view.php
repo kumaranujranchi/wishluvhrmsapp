@@ -823,7 +823,8 @@ function formatDuration($total_minutes)
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(8px);
         z-index: 10001;
         align-items: center;
         justify-content: center;
@@ -836,25 +837,63 @@ function formatDuration($total_minutes)
 
     .face-modal-content {
         background: white;
-        border-radius: 20px;
-        padding: 2rem;
+        border-radius: 24px;
+        padding: 2.5rem;
         max-width: 600px;
         width: 100%;
         text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
 
-    .face-modal-content h3 {
-        margin-bottom: 1rem;
-        color: #1e293b;
+    .face-video-wrapper {
+        position: relative;
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #000;
+        aspect-ratio: 4/3;
+        margin: 1.5rem auto;
+        border: 4px solid #f8fafc;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     #faceVideo {
         width: 100%;
-        max-width: 500px;
-        border-radius: 12px;
-        background: #000;
-        margin: 1rem auto;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1);
+        /* Mirror effect */
         display: block;
+    }
+
+    /* Face Guide Overlay */
+    .face-guide {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 180px;
+        height: 240px;
+        border: 2px dashed rgba(255, 255, 255, 0.6);
+        border-radius: 50% / 45%;
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .face-guide::before {
+        content: "Align Face";
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-top: -20px;
     }
 
     .face-controls {
@@ -867,20 +906,93 @@ function formatDuration($total_minutes)
         flex: 1;
         padding: 1rem;
         border: none;
-        border-radius: 10px;
-        font-weight: 600;
+        border-radius: 12px;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
 
     .face-capture-btn {
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    }
+
+    .face-capture-btn:hover {
+        transform: translateY(-2px);
     }
 
     .face-cancel-btn {
         background: #f1f5f9;
         color: #64748b;
+    }
+
+    .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: #10b981;
+        box-shadow: 0 0 10px #10b981;
+        z-index: 11;
+        animation: scan 2.5s linear infinite;
+        display: none;
+    }
+
+    @keyframes scan {
+        0% {
+            top: 20%;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 80%;
+            opacity: 0;
+        }
+    }
+
+    .enrollment-tips {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .tip-item {
+        text-align: center;
+    }
+
+    .tip-icon {
+        width: 28px;
+        height: 28px;
+        background: #f8fafc;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.4rem;
+        color: #6366f1;
+    }
+
+    .tip-text {
+        font-size: 0.65rem;
+        color: #64748b;
+        font-weight: 600;
     }
 
     .manual-punch-link {
@@ -900,13 +1012,38 @@ function formatDuration($total_minutes)
 <!-- Face Verification Modal -->
 <div class="face-modal" id="faceModal">
     <div class="face-modal-content">
-        <h3 id="faceModalTitle">📸 Face Verification</h3>
-        <p style="color: #64748b; margin-bottom: 1rem;">Position your face in the center and ensure good lighting</p>
-        <video id="faceVideo" autoplay playsinline></video>
+        <h3 id="faceModalTitle" style="color: #1e293b; font-weight: 800;">📸 Face Verification</h3>
+
+        <div class="face-video-wrapper">
+            <video id="faceVideo" autoplay playsinline></video>
+            <div class="face-guide"></div>
+            <div class="scan-line" id="faceScanLine"></div>
+        </div>
+
         <canvas id="faceCanvas" style="display: none;"></canvas>
+
         <div class="face-controls">
-            <button class="face-cancel-btn" onclick="closeFaceModal()">Cancel</button>
-            <button class="face-capture-btn" onclick="captureFaceAndVerify()">📸 Capture & Verify</button>
+            <button class="face-cancel-btn" onclick="closeFaceModal()">
+                <i data-lucide="x" style="width: 18px;"></i> Cancel
+            </button>
+            <button class="face-capture-btn" onclick="captureFaceAndVerify()">
+                <i data-lucide="camera" style="width: 18px;"></i> Verify Face
+            </button>
+        </div>
+
+        <div class="enrollment-tips">
+            <div class="tip-item">
+                <div class="tip-icon"><i data-lucide="sun" style="width: 14px;"></i></div>
+                <div class="tip-text">Good<br>Lighting</div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon"><i data-lucide="smile" style="width: 14px;"></i></div>
+                <div class="tip-text">Center<br>Face</div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon"><i data-lucide="eye" style="width: 14px;"></i></div>
+                <div class="tip-text">Remove<br>Glasses</div>
+            </div>
         </div>
     </div>
 </div>
@@ -1088,7 +1225,8 @@ function formatDuration($total_minutes)
                                 <div class="att-loc-item" style="flex: 1; min-width: 0;">
                                     <div class="att-loc-label">In Location</div>
                                     <div class="att-loc-text">
-                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?></div>
+                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
+                                    </div>
                                     <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
                                         <div
                                             style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
@@ -1100,7 +1238,8 @@ function formatDuration($total_minutes)
                                     <div class="att-loc-item" style="flex: 1; min-width: 0;">
                                         <div class="att-loc-label">Out Location</div>
                                         <div class="att-loc-text">
-                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?></div>
+                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
+                                        </div>
                                         <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
                                             <div
                                                 style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
@@ -1425,6 +1564,10 @@ function formatDuration($total_minutes)
     async function captureFaceAndVerify() {
         const video = document.getElementById('faceVideo');
         const canvas = document.getElementById('faceCanvas');
+        const scanLine = document.getElementById('faceScanLine');
+
+        // Show scan animation
+        scanLine.style.display = 'block';
 
         // Fix: Capture currentPunchAction BEFORE closing modal
         const actionToExecute = currentPunchAction;
@@ -1441,8 +1584,12 @@ function formatDuration($total_minutes)
 
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
 
+        // Wait a bit for the "scan" feel
+        await new Promise(r => setTimeout(r, 800));
+
         // Close camera
         closeFaceModal();
+        scanLine.style.display = 'none';
 
         // Show loading status
         const statusDiv = document.getElementById('locationStatus');
