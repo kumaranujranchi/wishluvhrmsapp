@@ -42,7 +42,41 @@ if (installButton) {
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
+        // --- Cache Clearing Logic ---
+        try {
+            const response = await fetch('ajax/get_version.php');
+            const data = await response.json();
+            const serverVersion = data.version;
+            const localVersion = localStorage.getItem('app_version');
+
+            if (localVersion && localVersion !== serverVersion) {
+                console.log(`[PWA] Version mismatch! (Local: ${localVersion}, Server: ${serverVersion}). Clearing cache...`);
+                
+                // Unregister all service workers
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+
+                // Clear all caches
+                const cacheNames = await caches.keys();
+                for (let cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                }
+
+                // Update stored version and force reload
+                localStorage.setItem('app_version', serverVersion);
+                window.location.reload(true);
+                return;
+            } else if (!localVersion) {
+                localStorage.setItem('app_version', serverVersion);
+            }
+        } catch (e) {
+            console.warn('[PWA] Version check failed:', e);
+        }
+        // --- End Cache Clearing Logic ---
+
         navigator.serviceWorker.register('sw.js')
             .then((registration) => {
                 console.log('[PWA] Service Worker registered:', registration.scope);
@@ -60,7 +94,6 @@ if ('serviceWorker' in navigator) {
     // Listen for service worker updates
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         console.log('[PWA] New service worker activated');
-        // Removed intrusive confirm dialog
         // Updates will apply on next reload naturally
     });
 }

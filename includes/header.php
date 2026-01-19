@@ -55,13 +55,14 @@
         rel="stylesheet">
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="assets/css/style.css?v=2.6">
+    <?php require_once 'config/version.php'; ?>
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= $ASSET_VERSION ?>">
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Chatbot CSS -->
-    <link rel="stylesheet" href="assets/css/chatbot.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/chatbot.css?v=<?= $ASSET_VERSION ?>">
 
     <!-- Desktop Dashboard CSS -->
     <link rel="stylesheet" href="assets/css/desktop-dashboard.css">
