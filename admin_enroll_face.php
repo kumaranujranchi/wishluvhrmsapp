@@ -559,8 +559,8 @@ $employees = $stmt->fetchAll();
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
         } catch (error) {
-            console.error('Camera error:', error);
-            alert('Camera access denied or not available.');
+            console.error('Camera Access Error:', error);
+            CustomDialog.alert('Camera access denied or not available. Please check permissions.', 'error', 'Camera Error');
             closeCamera();
         }
     }

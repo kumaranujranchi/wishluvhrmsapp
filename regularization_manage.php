@@ -520,18 +520,21 @@ $employees = $stmt->fetchAll();
 </div>
 
 <script>
-    function processRequest(requestId, action) {
+    async function processRequest(requestId, action) {
         const card = document.querySelector(`[data-request-id="${requestId}"]`);
         const remarks = card.querySelector('.admin-remarks').value.trim();
 
         if (action === 'rejected' && !remarks) {
-            alert('Please provide remarks for rejection');
+            CustomDialog.alert('Please provide remarks for rejection', 'warning');
             return;
         }
 
-        if (!confirm(`Are you sure you want to ${action === 'approved' ? 'approve' : 'reject'} this request?`)) {
-            return;
-        }
+        const confirmed = await CustomDialog.confirm(
+            `Are you sure you want to ${action === 'approved' ? 'approve' : 'reject'} this request?`,
+            'Confirm Action'
+        );
+
+        if (!confirmed) return;
 
         const formData = new FormData();
         formData.append('request_id', requestId);
@@ -543,16 +546,20 @@ $employees = $stmt->fetchAll();
             body: formData
         })
             .then(res => res.json())
-            .then(data => {
+            .then(async data => {
                 if (data.success) {
-                    alert(data.message);
+                    await CustomDialog.show({
+                        type: 'success',
+                        title: 'Success',
+                        message: data.message
+                    });
                     location.reload();
                 } else {
-                    alert('Error: ' + data.message);
+                    CustomDialog.alert(data.message, 'error', 'Error');
                 }
             })
             .catch(err => {
-                alert('Error processing request');
+                CustomDialog.alert('Error processing request', 'error');
                 console.error(err);
             });
     }
@@ -569,17 +576,17 @@ $employees = $stmt->fetchAll();
             body: formData
         })
             .then(res => res.json())
-            .then(data => {
+            .then(async data => {
                 if (data.success) {
-                    alert(data.message);
+                    await CustomDialog.alert(data.message, 'success', 'Success');
                     this.reset();
                 } else {
-                    alert('Error: ' + data.message);
+                    CustomDialog.alert(data.message, 'error', 'Error');
                 }
                 submitBtn.disabled = false;
             })
             .catch(err => {
-                alert('Error submitting regularization');
+                CustomDialog.alert('Error submitting regularization', 'error');
                 submitBtn.disabled = false;
             });
     });

@@ -32,8 +32,15 @@ include 'includes/header.php';
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* Page Header */
@@ -69,7 +76,9 @@ include 'includes/header.php';
     }
 
     @media (max-width: 1200px) {
-        .dashboard-grid { grid-template-columns: 1fr; }
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     /* Form Card */
@@ -180,8 +189,16 @@ include 'includes/header.php';
         border: 1px dashed #cbd5e1;
     }
 
-    .existing-attendance h4 { color: #6366f1; margin-bottom: 0.5rem; }
-    #existingData { font-weight: 600; color: #334155; line-height: 1.4; }
+    .existing-attendance h4 {
+        color: #6366f1;
+        margin-bottom: 0.5rem;
+    }
+
+    #existingData {
+        font-weight: 600;
+        color: #334155;
+        line-height: 1.4;
+    }
 
     .btn-submit {
         background: var(--primary-gradient);
@@ -287,7 +304,8 @@ include 'includes/header.php';
                     <textarea id="reason" name="reason" required minlength="20" rows="4"
                         placeholder="Please provide a detailed reason for this regularization request..."></textarea>
                     <small style="color: #64748b; display: block; margin-top: 0.5rem;">
-                        <i data-lucide="info" style="width:12px; height:12px;"></i> Characters: <span id="charCount">0</span>/20 minimum
+                        <i data-lucide="info" style="width:12px; height:12px;"></i> Characters: <span
+                            id="charCount">0</span>/20 minimum
                     </small>
                 </div>
 
@@ -316,7 +334,8 @@ include 'includes/header.php';
 
             <div class="sidebar-card" style="background: var(--accent-gradient); color: white;">
                 <h4 style="color: white;"><i data-lucide="help-circle"></i> Need Help?</h4>
-                <p style="margin: 0; opacity: 0.9;">If you're unsure about punch times, check your monthly attendance report first.</p>
+                <p style="margin: 0; opacity: 0.9;">If you're unsure about punch times, check your monthly attendance
+                    report first.</p>
             </div>
         </div>
     </div>
@@ -396,7 +415,7 @@ include 'includes/header.php';
                 lucide.createIcons();
             })
             .catch(err => {
-                alert('Error submitting request. Please try again.');
+                CustomDialog.alert('Error submitting request. Please try again.', 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i data-lucide="send"></i> Submit Request';
             });
