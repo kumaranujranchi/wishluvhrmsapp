@@ -44,10 +44,14 @@ if ($stats['present_days'] > 0) {
 // Helper function to format duration from minutes to hours:minutes
 function formatDuration($total_minutes)
 {
+    // Explicitly cast to int to avoid PHP 8.1 deprecation warnings
+    $total_minutes = (int) $total_minutes;
+
     if (!$total_minutes || $total_minutes == 0)
         return '-';
-    $hours = floor($total_minutes / 60);
-    $minutes = $total_minutes % 60;
+
+    $hours = (int) floor($total_minutes / 60);
+    $minutes = (int) ($total_minutes % 60);
 
     if ($hours > 0 && $minutes > 0) {
         return $hours . ' hr ' . $minutes . ' min';
