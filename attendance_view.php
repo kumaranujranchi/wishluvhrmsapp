@@ -401,8 +401,8 @@ function formatDuration($total_minutes)
 
     /* Desktop Layout */
     .timeline-content { display: flex; align-items: center; gap: 2rem; width: 100%; }
-    .att-header-group { display: flex; flex-direction: column; gap: 4px; min-width: 100px; }
-    .att-time-group { display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
+    .att-header-group { display: flex; flex-direction: column; gap: 4px; width: 120px; flex-shrink: 0; }
+    .att-time-group { display: flex; flex-direction: column; gap: 4px; width: 140px; flex-shrink: 0; }
     
     .details-collapse { 
         display: block !important; 
@@ -417,7 +417,12 @@ function formatDuration($total_minutes)
         border: none !important; 
         padding: 0 !important; 
     }
-    .att-loc-item { flex: 1; }
+    /* Fixed width columns for alignment */
+    .att-loc-item { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    /* Force exact 50% width for desktop location items to ensure alignment */
+    @media (min-width: 1025px) {
+        .att-loc-item { flex: 0 0 45% !important; max-width: 45%; }
+    }
 
     .expand-icon { display: none; }
     .timeline-item { cursor: default; }
