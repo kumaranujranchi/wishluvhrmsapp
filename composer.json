@@ -1,5 +1,7 @@
 {
     "name": "hrms/admin",
     "description": "HRMS Admin Dashboard",
-    "require": {}
+    "require": {
+        "aws/aws-sdk-php": "^3.369"
+    }
 }

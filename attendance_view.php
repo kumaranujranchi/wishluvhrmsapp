@@ -583,7 +583,97 @@ function formatDuration($total_minutes)
         cursor: not-allowed;
         transform: none;
     }
+
+    /* Face Verification Modal */
+    .face-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 10001;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .face-modal.active {
+        display: flex;
+    }
+
+    .face-modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .face-modal-content h3 {
+        margin-bottom: 1rem;
+        color: #1e293b;
+    }
+
+    #faceVideo {
+        width: 100%;
+        max-width: 500px;
+        border-radius: 12px;
+        background: #000;
+        margin: 1rem auto;
+        display: block;
+    }
+
+    .face-controls {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .face-controls button {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .face-capture-btn {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+    }
+
+    .face-cancel-btn {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .manual-punch-link {
+        margin-top: 1rem;
+        color: #6366f1;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
 </style>
+
+<!-- Face Verification Modal -->
+<div class="face-modal" id="faceModal">
+    <div class="face-modal-content">
+        <h3 id="faceModalTitle">📸 Face Verification</h3>
+        <p style="color: #64748b; margin-bottom: 1rem;">Position your face in the center and ensure good lighting</p>
+        <video id="faceVideo" autoplay playsinline></video>
+        <canvas id="faceCanvas" style="display: none;"></canvas>
+        <div class="face-controls">
+            <button class="face-cancel-btn" onclick="closeFaceModal()">Cancel</button>
+            <button class="face-capture-btn" onclick="captureFaceAndVerify()">📸 Capture & Verify</button>
+        </div>
+    </div>
+</div>
 
 <!-- Custom Warning Modal -->
 <div class="warning-modal-overlay" id="warningModal">
@@ -629,24 +719,30 @@ function formatDuration($total_minutes)
                 <input type="hidden" name="reason" id="reasonInput">
 
                 <?php if (!$has_checked_in): ?>
-                    <button type="button" class="custom-punch-btn" onclick="getLocationAndSubmit('clock_in')">
-                        <i data-lucide="power" style="width:40px; height:40px;"></i>
-                        <span>Start Day</span>
+                    <button type="button" class="custom-punch-btn" onclick="startFaceVerification('clock_in')">
+                        <i data-lucide="scan-face" style="width:40px; height:40px;"></i>
+                        <span>Verify Face & Start</span>
                     </button>
                     <div class="status-capsule">
                         <span style="width:8px; height:8px; background:#ef4444; border-radius:50%;"></span>
                         Not Yet Checked In
                     </div>
+                    <div class="manual-punch-link" onclick="getLocationAndSubmit('clock_in')">
+                        Or use Manual Punch (no face verification)
+                    </div>
                 <?php elseif (!$has_checked_out): ?>
-                    <button type="button" class="custom-punch-btn" onclick="getLocationAndSubmit('clock_out')"
+                    <button type="button" class="custom-punch-btn" onclick="startFaceVerification('clock_out')"
                         style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4);">
-                        <i data-lucide="log-out" style="width:40px; height:40px;"></i>
-                        <span>End Day</span>
+                        <i data-lucide="scan-face" style="width:40px; height:40px;"></i>
+                        <span>Verify Face & End</span>
                     </button>
                     <div class="status-capsule">
                         <span
                             style="width:8px; height:8px; background:#10b981; border-radius:50%; box-shadow: 0 0 8px #10b981;"></span>
                         Working Since <?= date('h:i A', strtotime($today_record['clock_in'])) ?>
+                    </div>
+                    <div class="manual-punch-link" onclick="getLocationAndSubmit('clock_out')">
+                        Or use Manual Punch (no face verification)
                     </div>
                 <?php else: ?>
                     <button type="button" class="custom-punch-btn btn-disabled" disabled>
@@ -1046,6 +1142,156 @@ function formatDuration($total_minutes)
             warningModalResolve(reason); // Return the reason
             warningModalResolve = null;
         }
+    }
+
+    // ========================================
+    // FACE VERIFICATION FUNCTIONS
+    // ========================================
+    let faceStream = null;
+    let currentPunchAction = null;
+
+    async function startFaceVerification(action) {
+        currentPunchAction = action;
+        const modal = document.getElementById('faceModal');
+        const video = document.getElementById('faceVideo');
+        
+        const actionText = action === 'clock_in' ? 'Clock In' : 'Clock Out';
+        document.getElementById('faceModalTitle').textContent = `📸 Face Verification - ${actionText}`;
+        
+        modal.classList.add('active');
+        
+        try {
+            faceStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'user', width: 640, height: 480 } 
+            });
+            video.srcObject = faceStream;
+        } catch (error) {
+            alert('❌ Camera access denied. Please allow camera permissions or use Manual Punch.');
+            closeFaceModal();
+        }
+    }
+
+    function closeFaceModal() {
+        const modal = document.getElementById('faceModal');
+        const video = document.getElementById('faceVideo');
+        
+        if (faceStream) {
+            faceStream.getTracks().forEach(track => track.stop());
+            faceStream = null;
+        }
+        
+        video.srcObject = null;
+        modal.classList.remove('active');
+        currentPunchAction = null;
+    }
+
+    async function captureFaceAndVerify() {
+        const video = document.getElementById('faceVideo');
+        const canvas = document.getElementById('faceCanvas');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+        
+        // Close camera
+        closeFaceModal();
+        
+        // Show loading status
+        const statusDiv = document.getElementById('locationStatus');
+        statusDiv.innerHTML = '⏳ Verifying face...';
+        
+        // Get location first
+        if (!navigator.geolocation) {
+            alert('Geolocation not supported');
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                // Get address
+                statusDiv.innerHTML = '⏳ Getting location...';
+                let address = 'Location not available';
+                
+                try {
+                    const apiKey = '<?= getenv("GOOGLE_MAPS_API_KEY") ?>';
+                    const response = await fetch(
+                        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
+                    );
+                    const data = await response.json();
+                    
+                    if (data.status === 'OK' && data.results[0]) {
+                        const addressComponents = data.results[0].address_components;
+                        const getComponent = (type) => {
+                            const comp = addressComponents.find(c => c.types.includes(type));
+                            return comp ? comp.long_name : null;
+                        };
+                        
+                        const road = getComponent('route');
+                        const sublocality = getComponent('sublocality_level_1') || getComponent('sublocality');
+                        const locality = getComponent('locality');
+                        
+                        let locationParts = [];
+                        if (road) locationParts.push(road);
+                        else if (sublocality) locationParts.push(sublocality);
+                        if (locality) locationParts.push(locality);
+                        
+                        address = locationParts.length > 0 ? locationParts.join(', ') : data.results[0].formatted_address;
+                    }
+                } catch (e) {
+                    console.error('Geocoding failed:', e);
+                }
+                
+                // Verify face with backend
+                statusDiv.innerHTML = '⏳ Verifying face with AWS...';
+                
+                const formData = new URLSearchParams();
+                formData.append('image_data', imageData);
+                formData.append('action', currentPunchAction);
+                formData.append('latitude', lat);
+                formData.append('longitude', lng);
+                formData.append('address', address);
+                formData.append('location_id', '');
+                formData.append('out_of_range', '0');
+                formData.append('reason', '');
+                
+                try {
+                    const response = await fetch('ajax/verify_face_punch.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData.toString()
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        statusDiv.innerHTML = `✅ ${result.message}`;
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        statusDiv.innerHTML = `❌ ${result.message}`;
+                        alert(`❌ Face Verification Failed\n\n${result.message}\n\nPlease use Manual Punch option.`);
+                    }
+                } catch (error) {
+                    statusDiv.innerHTML = '❌ Verification error';
+                    alert('Error: ' + error.message + '\n\nPlease use Manual Punch option.');
+                }
+            },
+            (error) => {
+                statusDiv.innerHTML = '❌ Location error';
+                alert('Location access denied. Please enable location services.');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 30000
+            }
+        );
     }
 
     // Close modal on Escape key
