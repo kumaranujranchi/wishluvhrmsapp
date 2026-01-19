@@ -26,10 +26,10 @@ function loadEnv($filePath)
         $name = trim($name);
         $value = trim($value);
 
-        if (!array_key_exists($name, $_ENV)) {
-            putenv("$name=$value");
-            $_ENV[$name] = $value;
-        }
+        // Force overwrite existing variables
+        putenv("$name=$value");
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
     }
 }
 
@@ -47,7 +47,8 @@ function getRekognitionClient()
             'region' => getenv('AWS_REGION') ?: 'ap-south-1',
             'credentials' => [
                 'key' => getenv('AWS_ACCESS_KEY_ID'),
-                'secret' => getenv('AWS_SECRET_ACCESS_KEY')
+                'secret' => getenv('AWS_SECRET_ACCESS_KEY'),
+                'token' => null // Explicitly disable session token
             ]
         ]);
     }
