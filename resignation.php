@@ -152,7 +152,7 @@ $history = $historyStmt->fetchAll();
                     <div style="text-align: right; margin-top: 1rem;">
                         <button type="submit" class="btn-primary"
                             style="background-color: #ef4444; border-color: #ef4444;"
-                            onclick="return confirm('Are you sure you want to submit your resignation? This is a formal request.')">Submit
+                            onclick="handleAsyncFormSubmit(event, 'Are you sure you want to submit your resignation? This is a formal request.')">Submit
                             Resignation</button>
                     </div>
                 </form>

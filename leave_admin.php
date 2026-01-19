@@ -394,8 +394,9 @@ $requests = $stmt->fetchAll();
         document.getElementById('modalSubmitBtn').style.borderColor = btnColor;
     }
 
-    function openDeleteModal(id) {
-        if (confirm("Are you sure you want to delete this leave request? This action cannot be undone and will restore the employee's leave balance.")) {
+    async function openDeleteModal(id) {
+        const confirmed = await CustomDialog.confirm("Are you sure you want to delete this leave request? This action cannot be undone and will restore the employee's leave balance.");
+        if (confirmed) {
             const form = document.createElement('form');
             form.method = 'POST';
             form.innerHTML = `

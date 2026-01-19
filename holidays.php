@@ -260,7 +260,8 @@ if (isset($_GET['edit'])) {
                                 <i data-lucide="edit-2" style="width: 14px;"></i> Edit
                             </a>
                             <a href="?delete=<?= $holiday['id'] ?>&year=<?= $year ?>"
-                                onclick="return confirm('Are you sure you want to delete this holiday?')" class="btn-primary"
+                                onclick="handleAsyncConfirm(event, 'Are you sure you want to delete this holiday?')"
+                                class="btn-primary"
                                 style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #ef4444; text-decoration: none;">
                                 <i data-lucide="trash-2" style="width: 14px;"></i> Delete
                             </a>

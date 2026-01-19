@@ -172,7 +172,7 @@ $notices = $conn->query("SELECT n.*, (SELECT COUNT(*) FROM notice_reads WHERE no
                                     </td>
                                     <td>
                                         <a href="admin_notices.php?delete_id=<?= $row['id'] ?>" class="btn-icon text-danger"
-                                            onclick="return confirm('Are you sure?')">
+                                            onclick="handleAsyncConfirm(event, 'Are you sure?')">
                                             <i data-lucide="trash-2" style="width: 16px;"></i>
                                         </a>
                                     </td>
@@ -201,9 +201,11 @@ $notices = $conn->query("SELECT n.*, (SELECT COUNT(*) FROM notice_reads WHERE no
                                         </div>
                                         <div>
                                             <div style="font-weight: 600; color: #1e293b;">
-                                                <?= htmlspecialchars($row['title']) ?></div>
+                                                <?= htmlspecialchars($row['title']) ?>
+                                            </div>
                                             <div style="font-size: 0.75rem; color: #64748b;">
-                                                <?= date('d M Y', strtotime($row['created_at'])) ?></div>
+                                                <?= date('d M Y', strtotime($row['created_at'])) ?>
+                                            </div>
                                         </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -243,7 +245,7 @@ $notices = $conn->query("SELECT n.*, (SELECT COUNT(*) FROM notice_reads WHERE no
                                         </button>
                                         <a href="admin_notices.php?delete_id=<?= $row['id'] ?>" class="btn-primary"
                                             style="flex: 1; justify-content: center; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; text-decoration: none;"
-                                            onclick="return confirm('Delete this notice?')">
+                                            onclick="handleAsyncConfirm(event, 'Delete this notice?')">
                                             <i data-lucide="trash-2" style="width: 16px;"></i>
                                         </a>
                                     </div>

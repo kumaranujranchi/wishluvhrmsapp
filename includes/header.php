@@ -688,6 +688,17 @@
                     return false;
                 }
 
+                // Helper for async confirmation in form submissions
+                async function handleAsyncFormSubmit(e, msg) {
+                    e.preventDefault();
+                    const form = e.target.closest('form');
+                    const confirmed = await CustomDialog.confirm(msg);
+                    if (confirmed) {
+                        form.submit();
+                    }
+                    return false;
+                }
+
                 // Note: window.confirm cannot be fully overridden as it is synchronous.
                 // We have replaced most critical confirms with CustomDialog.confirm(msg)
 

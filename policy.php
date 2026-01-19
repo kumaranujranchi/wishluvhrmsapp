@@ -261,8 +261,8 @@ if (isset($_GET['edit'])) {
                                     style="flex: 1; padding: 0.4rem; font-size: 0.8rem; background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe;">
                                     Edit
                                 </a>
-                                <a href="policy.php?delete=<?= $policy['id'] ?>" onclick="return confirm('Delete this policy?')"
-                                    class="btn-primary"
+                                <a href="policy.php?delete=<?= $policy['id'] ?>"
+                                    onclick="handleAsyncConfirm(event, 'Delete this policy?')" class="btn-primary"
                                     style="flex: 1; padding: 0.4rem; font-size: 0.8rem; background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6;">
                                     Delete
                                 </a>
