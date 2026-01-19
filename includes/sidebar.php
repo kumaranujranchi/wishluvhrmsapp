@@ -225,7 +225,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <!-- Employee Management Group -->
                 <div class="nav-group">
                     <?php
-                    $empMgmtPages = ['employees', 'add_employee', 'admin_resignations', 'view_employee', 'edit_employee'];
+                    $empMgmtPages = ['employees', 'add_employee', 'admin_resignations', 'admin_enroll_face', 'view_employee', 'edit_employee'];
                     $empMgmtState = isGroupOpen($empMgmtPages);
                     ?>
                     <button class="nav-item dropdown-btn <?= $empMgmtState ?>"
@@ -248,6 +248,10 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                         <a href="admin_resignations.php" class="sub-nav-item <?php echo isActive('admin_resignations'); ?>">
                             <i data-lucide="user-x" class="icon" style="width:16px;height:16px;"></i>
                             <span>Resignations</span>
+                        </a>
+                        <a href="admin_enroll_face.php" class="sub-nav-item <?php echo isActive('admin_enroll_face'); ?>">
+                            <i data-lucide="scan-face" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Face Enrollment</span>
                         </a>
                     </div>
                 </div>
