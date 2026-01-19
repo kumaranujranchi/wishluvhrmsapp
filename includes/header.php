@@ -577,7 +577,7 @@
             </header>
 
             <!-- Custom Global Modal Structure -->
-            <div id="customModalOverlay" class="custom-modal-overlay">
+            <div id="customModalOverlay" class="custom-modal-overlay" style="display: none;">
                 <div class="custom-modal">
                     <div class="modal-content-wrapper">
                         <div id="modalIcon" class="modal-icon info">
@@ -638,11 +638,15 @@
                             if (showInput) this.inputField.value = '';
 
                             // Show overlay
-                            this.overlay.classList.add('active');
+                            this.overlay.style.display = 'flex';
+                            setTimeout(() => this.overlay.classList.add('active'), 10);
 
                             // Handlers
                             const cleanup = () => {
                                 this.overlay.classList.remove('active');
+                                setTimeout(() => {
+                                    this.overlay.style.display = 'none';
+                                }, 300);
                                 this.confirmBtn.onclick = null;
                                 this.cancelBtn.onclick = null;
                             };
@@ -716,8 +720,3 @@
                     setTimeout(initLucide, 500);
                 })();
             </script>
-        </div> <!-- end main-content -->
-    </div> <!-- end app-container -->
-</body>
-
-</html>
