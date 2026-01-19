@@ -154,13 +154,14 @@ $current_notes = getSetting($conn, 'latest_apk_notes');
 
             <form method="POST" id="appUpdateForm" style="padding: 2rem;" enctype="multipart/form-data">
                 <div class="form-group mb-4"
-                    style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 2px dashed #e2e8f0;">
-                    <label
-                        style="font-weight: 700; color: #1e293b; display:block; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 2px dashed #e2e8f0; position: relative;">
+                    <label for="apk_file"
+                        style="font-weight: 700; color: #1e293b; display:block; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
                         <i data-lucide="upload-cloud" style="color: #6366f1;"></i>
                         Upload APK File
                     </label>
-                    <input type="file" name="apk_file" accept=".apk"
+                    <input type="file" name="apk_file" id="apk_file"
+                        accept=".apk,application/vnd.android.package-archive"
                         style="width: 100%; padding: 10px; background: white; border-radius: 10px; border: 1px solid #cbd5e1; cursor: pointer;">
                     <small style="color: #64748b; display:block; margin-top: 8px;">Upload the .apk file directly to the
                         server.</small>
