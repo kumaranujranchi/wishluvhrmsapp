@@ -898,22 +898,41 @@ function formatDuration($total_minutes)
 
     .face-controls {
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
         margin-top: 1.5rem;
     }
 
     .face-controls button {
         flex: 1;
-        padding: 1rem;
+        padding: 0.85rem 0.5rem;
         border: none;
         border-radius: 12px;
         font-weight: 700;
+        font-size: 0.85rem;
         cursor: pointer;
         transition: all 0.3s;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    @media (max-width: 480px) {
+        .face-controls {
+            flex-wrap: wrap;
+        }
+
+        .face-controls button {
+            flex: 1 1 100%;
+        }
+
+        .face-capture-btn {
+            order: -1;
+            padding: 1rem !important;
+            font-size: 1rem !important;
+        }
     }
 
     .face-capture-btn {
