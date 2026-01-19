@@ -30,8 +30,8 @@ $locationId = $_POST['location_id'] ?? null;
 $outOfRange = $_POST['out_of_range'] ?? 0;
 $reason = $_POST['reason'] ?? null;
 
-if (!$imageData || !$action) {
-    echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
+if (!$imageData || !$action || !in_array($action, ['clock_in', 'clock_out'])) {
+    echo json_encode(['success' => false, 'message' => 'Missing or invalid required parameters (Action: ' . json_encode($action) . ')']);
     exit;
 }
 

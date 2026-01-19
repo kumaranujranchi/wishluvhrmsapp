@@ -391,79 +391,208 @@ function formatDuration($total_minutes)
 
     /* --- RESPONSIVE ATTENDANCE HISTORY --- */
     /* Desktop Defaults (Big Fonts, Horizontal Layout) */
-    .att-day { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
-    .att-badge { font-size: 0.8rem; padding: 4px 10px; font-weight: 700; border-radius: 50px; }
-    .att-time { font-size: 0.95rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
-    .att-loc-label { font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
-    .att-loc-text { font-size: 0.85rem; color: #475569; line-height: 1.4; }
-    .att-hours { font-size: 1.3rem; font-weight: 800; color: #3b82f6; line-height: 1; display: block; }
-    .att-hours-label { font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+    .att-day {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .att-badge {
+        font-size: 0.8rem;
+        padding: 4px 10px;
+        font-weight: 700;
+        border-radius: 50px;
+    }
+
+    .att-time {
+        font-size: 0.95rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .att-loc-label {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .att-loc-text {
+        font-size: 0.85rem;
+        color: #475569;
+        line-height: 1.4;
+    }
+
+    .att-hours {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #3b82f6;
+        line-height: 1;
+        display: block;
+    }
+
+    .att-hours-label {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
 
     /* Desktop Layout */
-    .timeline-content { display: flex; align-items: center; gap: 2rem; width: 100%; }
-    .att-header-group { display: flex; flex-direction: column; gap: 4px; width: 120px; flex-shrink: 0; }
-    .att-time-group { display: flex; flex-direction: column; gap: 4px; width: 140px; flex-shrink: 0; }
-    
-    .details-collapse { 
-        display: block !important; 
-        max-height: none !important; 
-        margin: 0 !important; 
-        flex: 1; 
-    }
-    .att-loc-container { 
-        display: flex; 
-        gap: 2rem; 
-        background: none !important; 
-        border: none !important; 
-        padding: 0 !important; 
-    }
-    /* Fixed width columns for alignment */
-    .att-loc-item { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-    /* Force exact 50% width for desktop location items to ensure alignment */
-    @media (min-width: 1025px) {
-        .att-loc-item { flex: 0 0 45% !important; max-width: 45%; }
+    .timeline-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        width: 100%;
     }
 
-    .expand-icon { display: none; }
-    .timeline-item { cursor: default; }
+    .att-header-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 120px;
+        flex-shrink: 0;
+    }
+
+    .att-time-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 140px;
+        flex-shrink: 0;
+    }
+
+    .details-collapse {
+        display: block !important;
+        max-height: none !important;
+        margin: 0 !important;
+        flex: 1;
+    }
+
+    .att-loc-container {
+        display: flex;
+        gap: 2rem;
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    /* Fixed width columns for alignment */
+    .att-loc-item {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Force exact 50% width for desktop location items to ensure alignment */
+    @media (min-width: 1025px) {
+        .att-loc-item {
+            flex: 0 0 45% !important;
+            max-width: 45%;
+        }
+    }
+
+    .expand-icon {
+        display: none;
+    }
+
+    .timeline-item {
+        cursor: default;
+    }
 
 
     /* Mobile Polishing */
     @media (max-width: 1024px) {
+
         /* Mobile Overrides for Attendance History */
-        .timeline-content { display: block; }
-        .att-header-group { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; width: 100%; }
-        .att-time-group { flex-direction: row; gap: 1rem; margin-bottom: 0.25rem; width: 100%; }
-        
-        .details-collapse { 
-            max-height: 0 !important; 
-            margin-top: 10px !important; 
-            overflow: hidden; 
-            transition: max-height 0.3s ease; 
+        .timeline-content {
+            display: block;
         }
-        .timeline-item.expanded .details-collapse { max-height: 500px !important; }
-        
-        .att-loc-container { 
-            gap: 8px; 
-            background: #f8fafc !important; 
-            padding: 10px !important; 
-            border: 1px solid #f1f5f9 !important; 
-            border-radius: 8px !important; 
-            flex-wrap: nowrap; 
+
+        .att-header-group {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+            width: 100%;
         }
-        
-        .expand-icon { display: block; }
-        .timeline-item { cursor: pointer; }
+
+        .att-time-group {
+            flex-direction: row;
+            gap: 1rem;
+            margin-bottom: 0.25rem;
+            width: 100%;
+        }
+
+        .details-collapse {
+            max-height: 0 !important;
+            margin-top: 10px !important;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .timeline-item.expanded .details-collapse {
+            max-height: 500px !important;
+        }
+
+        .att-loc-container {
+            gap: 8px;
+            background: #f8fafc !important;
+            padding: 10px !important;
+            border: 1px solid #f1f5f9 !important;
+            border-radius: 8px !important;
+            flex-wrap: nowrap;
+        }
+
+        .expand-icon {
+            display: block;
+        }
+
+        .timeline-item {
+            cursor: pointer;
+        }
 
         /* Small Fonts for Mobile (Preserving Sorted View) */
-        .att-day { font-size: 0.8rem; }
-        .att-badge { font-size: 0.6rem; padding: 2px 6px; }
-        .att-time { font-size: 0.7rem; gap: 3px; }
-        .att-time i { width: 12px; height: 12px; }
-        .att-loc-label { font-size: 0.6rem; }
-        .att-loc-text { font-size: 0.7rem; line-height: 1.2; }
-        .att-hours { font-size: 0.75rem; white-space: nowrap; }
-        .att-hours-label { font-size: 0.6rem; }
+        .att-day {
+            font-size: 0.8rem;
+        }
+
+        .att-badge {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+        }
+
+        .att-time {
+            font-size: 0.7rem;
+            gap: 3px;
+        }
+
+        .att-time i {
+            width: 12px;
+            height: 12px;
+        }
+
+        .att-loc-label {
+            font-size: 0.6rem;
+        }
+
+        .att-loc-text {
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+
+        .att-hours {
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .att-hours-label {
+            font-size: 0.6rem;
+        }
 
         .page-content {
             background: #f5f7fa !important;
@@ -512,7 +641,7 @@ function formatDuration($total_minutes)
         .mobile-stats-grid .stat-value {
             font-size: 1.5rem !important;
         }
-        
+
         .mobile-stats-grid .stat-label {
             font-size: 8px !important;
         }
@@ -525,7 +654,7 @@ function formatDuration($total_minutes)
         .timeline-item {
             padding: 1rem 1rem 1rem 0.75rem;
         }
-        
+
         .card {
             padding: 0 !important;
         }
@@ -925,7 +1054,7 @@ function formatDuration($total_minutes)
                         <?= date('d', strtotime($row['date'])) ?>
                         <span><?= date('M', strtotime($row['date'])) ?></span>
                     </div>
-                    
+
                     <div class="timeline-content">
                         <!-- Group 1: Day & Status -->
                         <div class="att-header-group">
@@ -958,9 +1087,11 @@ function formatDuration($total_minutes)
                             <div class="att-loc-container">
                                 <div class="att-loc-item" style="flex: 1; min-width: 0;">
                                     <div class="att-loc-label">In Location</div>
-                                    <div class="att-loc-text"><?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?></div>
+                                    <div class="att-loc-text">
+                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?></div>
                                     <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
-                                        <div style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
+                                        <div
+                                            style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
                                             ⚠️ Out of Range: <?= htmlspecialchars($row['out_of_range_reason']) ?>
                                         </div>
                                     <?php endif; ?>
@@ -968,10 +1099,13 @@ function formatDuration($total_minutes)
                                 <?php if ($row['clock_out']): ?>
                                     <div class="att-loc-item" style="flex: 1; min-width: 0;">
                                         <div class="att-loc-label">Out Location</div>
-                                        <div class="att-loc-text"><?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?></div>
+                                        <div class="att-loc-text">
+                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?></div>
                                         <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
-                                            <div style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
-                                                ⚠️ Exit Range: <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
+                                            <div
+                                                style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
+                                                ⚠️ Exit Range:
+                                                <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -1292,6 +1426,13 @@ function formatDuration($total_minutes)
         const video = document.getElementById('faceVideo');
         const canvas = document.getElementById('faceCanvas');
 
+        // Fix: Capture currentPunchAction BEFORE closing modal
+        const actionToExecute = currentPunchAction;
+        if (!actionToExecute) {
+            alert('Error: No punch action specified.');
+            return;
+        }
+
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
@@ -1305,9 +1446,9 @@ function formatDuration($total_minutes)
 
         // Show loading status
         const statusDiv = document.getElementById('locationStatus');
-        statusDiv.innerHTML = '⏳ Verifying face...';
+        statusDiv.innerHTML = '⏳ Verifying face and location...';
 
-        // Get location first
+        // Get location
         if (!navigator.geolocation) {
             alert('Geolocation not supported');
             return;
@@ -1318,8 +1459,42 @@ function formatDuration($total_minutes)
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
-                // Get address
-                statusDiv.innerHTML = '⏳ Getting location...';
+                // Geofencing Check
+                let matchedLocation = null;
+                let isOutOfRange = false;
+                let reason = "";
+
+                if (assignedLocations.length > 0) {
+                    for (const loc of assignedLocations) {
+                        const dist = getDistance(lat, lng, parseFloat(loc.latitude), parseFloat(loc.longitude));
+                        if (dist <= parseFloat(loc.radius)) {
+                            matchedLocation = loc;
+                            break;
+                        }
+                    }
+
+                    if (!matchedLocation) {
+                        isOutOfRange = true;
+                        const actionText = (actionToExecute === 'clock_in') ? 'Punch In' : 'Punch Out';
+
+                        // Show custom warning modal instead of browser prompt
+                        document.getElementById('warningModalMessage').textContent =
+                            `Warning: You are attempting to ${actionText} from outside the permitted office location. Please provide a reason for this action.`;
+
+                        // Show modal and wait for user response
+                        const modalResult = await showWarningModal();
+
+                        if (!modalResult || modalResult.trim() === "") {
+                            statusDiv.innerHTML = '<span style="color:#ef4444;">Reason is required to punch from outside!</span>';
+                            return;
+                        }
+
+                        reason = modalResult;
+                    }
+                }
+
+                // Get address (Background)
+                statusDiv.innerHTML = '⏳ Getting address...';
                 let address = 'Location not available';
 
                 try {
@@ -1356,13 +1531,13 @@ function formatDuration($total_minutes)
 
                 const formData = new URLSearchParams();
                 formData.append('image_data', imageData);
-                formData.append('action', currentPunchAction);
+                formData.append('action', actionToExecute);
                 formData.append('latitude', lat);
                 formData.append('longitude', lng);
                 formData.append('address', address);
-                formData.append('location_id', '');
-                formData.append('out_of_range', '0');
-                formData.append('reason', '');
+                formData.append('location_id', matchedLocation ? matchedLocation.id : '');
+                formData.append('out_of_range', isOutOfRange ? '1' : '0');
+                formData.append('reason', reason);
 
                 try {
                     const response = await fetch('ajax/verify_face_punch.php', {
