@@ -20,12 +20,46 @@ function getSetting($conn, $key, $default = '')
 
 // Handle Update
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $apk_url = trim($_POST['apk_url']);
     $apk_version = trim($_POST['apk_version']);
     $apk_notes = trim($_POST['apk_notes']);
     $notify = isset($_POST['notify_employees']);
+    $apk_url = trim($_POST['apk_url']); // Fallback manual URL
 
     try {
+        // Handle File Upload
+        if (isset($_FILES['apk_file']) && $_FILES['apk_file']['error'] == 0) {
+            $file = $_FILES['apk_file'];
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+            if (strtolower($ext) !== 'apk') {
+                throw new Exception("Only .apk files are allowed.");
+            }
+
+            $upload_dir = 'uploads/apps/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+
+            // Clean version name for filename
+            $safe_version = preg_replace('/[^A-Za-z0-9.]/', '_', $apk_version);
+            $new_filename = "myworld_hrms_" . $safe_version . "_" . time() . ".apk";
+            $target_path = $upload_dir . $new_filename;
+
+            if (move_uploaded_file($file['tmp_name'], $target_path)) {
+                // Construct full URL
+                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+                $host = $_SERVER['HTTP_HOST'];
+                $base_dir = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+                $apk_url = "$protocol://$host$base_dir/$target_path";
+            } else {
+                throw new Exception("Failed to move uploaded file.");
+            }
+        }
+
+        if (empty($apk_url)) {
+            throw new Exception("Please provide an APK URL or upload a file.");
+        }
+
         $conn->beginTransaction();
 
         $settings = [
@@ -118,15 +152,35 @@ $current_notes = getSetting($conn, 'latest_apk_notes');
                 </div>
             </div>
 
-            <form method="POST" id="appUpdateForm" style="padding: 2rem;">
+            <form method="POST" id="appUpdateForm" style="padding: 2rem;" enctype="multipart/form-data">
+                <div class="form-group mb-4"
+                    style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 2px dashed #e2e8f0;">
+                    <label
+                        style="font-weight: 700; color: #1e293b; display:block; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="upload-cloud" style="color: #6366f1;"></i>
+                        Upload APK File
+                    </label>
+                    <input type="file" name="apk_file" accept=".apk"
+                        style="width: 100%; padding: 10px; background: white; border-radius: 10px; border: 1px solid #cbd5e1; cursor: pointer;">
+                    <small style="color: #64748b; display:block; margin-top: 8px;">Upload the .apk file directly to the
+                        server.</small>
+                </div>
+
+                <div
+                    style="text-align: center; margin: 1.5rem 0; color: #94a3b8; font-weight: 700; font-size: 0.8rem; position: relative;">
+                    <span style="background: white; padding: 0 15px; position: relative; z-index: 1;">OR USE EXTERNAL
+                        LINK</span>
+                    <div
+                        style="position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid #f1f5f9; z-index: 0;">
+                    </div>
+                </div>
+
                 <div class="form-group mb-4">
-                    <label style="font-weight: 600; color: #475569; display:block; margin-bottom: 8px;">Direct APK
-                        Download URL</label>
+                    <label style="font-weight: 600; color: #475569; display:block; margin-bottom: 8px;">Manual Download
+                        URL</label>
                     <input type="url" name="apk_url" class="form-control" value="<?= htmlspecialchars($current_url) ?>"
-                        placeholder="https://example.com/app.apk" required
+                        placeholder="https://example.com/app.apk"
                         style="width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; font-size: 0.95rem;">
-                    <small style="color: #64748b; display:block; margin-top: 6px;">Ensure this is a direct link that
-                        starts the download immediately.</small>
                 </div>
 
                 <div class="row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
