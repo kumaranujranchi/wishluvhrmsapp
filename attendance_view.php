@@ -654,10 +654,15 @@ function formatDuration($total_minutes)
 
     .manual-punch-link {
         margin-top: 1rem;
-        color: #6366f1;
+        color: rgba(255, 255, 255, 0.9);
         text-decoration: underline;
         cursor: pointer;
         font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .manual-punch-link:hover {
+        color: #ffffff;
     }
 </style>
 
@@ -721,7 +726,7 @@ function formatDuration($total_minutes)
                 <?php if (!$has_checked_in): ?>
                     <button type="button" class="custom-punch-btn" onclick="startFaceVerification('clock_in')">
                         <i data-lucide="scan-face" style="width:40px; height:40px;"></i>
-                        <span>Verify Face & Start</span>
+                        <span>Verify & Start</span>
                     </button>
                     <div class="status-capsule">
                         <span style="width:8px; height:8px; background:#ef4444; border-radius:50%;"></span>
@@ -734,7 +739,7 @@ function formatDuration($total_minutes)
                     <button type="button" class="custom-punch-btn" onclick="startFaceVerification('clock_out')"
                         style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4);">
                         <i data-lucide="scan-face" style="width:40px; height:40px;"></i>
-                        <span>Verify Face & End</span>
+                        <span>Verify & End</span>
                     </button>
                     <div class="status-capsule">
                         <span
@@ -1154,15 +1159,15 @@ function formatDuration($total_minutes)
         currentPunchAction = action;
         const modal = document.getElementById('faceModal');
         const video = document.getElementById('faceVideo');
-        
+
         const actionText = action === 'clock_in' ? 'Clock In' : 'Clock Out';
         document.getElementById('faceModalTitle').textContent = `📸 Face Verification - ${actionText}`;
-        
+
         modal.classList.add('active');
-        
+
         try {
-            faceStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'user', width: 640, height: 480 } 
+            faceStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: 640, height: 480 }
             });
             video.srcObject = faceStream;
         } catch (error) {
@@ -1174,12 +1179,12 @@ function formatDuration($total_minutes)
     function closeFaceModal() {
         const modal = document.getElementById('faceModal');
         const video = document.getElementById('faceVideo');
-        
+
         if (faceStream) {
             faceStream.getTracks().forEach(track => track.stop());
             faceStream = null;
         }
-        
+
         video.srcObject = null;
         modal.classList.remove('active');
         currentPunchAction = null;
@@ -1188,69 +1193,69 @@ function formatDuration($total_minutes)
     async function captureFaceAndVerify() {
         const video = document.getElementById('faceVideo');
         const canvas = document.getElementById('faceCanvas');
-        
+
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        
+
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0);
-        
+
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
-        
+
         // Close camera
         closeFaceModal();
-        
+
         // Show loading status
         const statusDiv = document.getElementById('locationStatus');
         statusDiv.innerHTML = '⏳ Verifying face...';
-        
+
         // Get location first
         if (!navigator.geolocation) {
             alert('Geolocation not supported');
             return;
         }
-        
+
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
-                
+
                 // Get address
                 statusDiv.innerHTML = '⏳ Getting location...';
                 let address = 'Location not available';
-                
+
                 try {
                     const apiKey = '<?= getenv("GOOGLE_MAPS_API_KEY") ?>';
                     const response = await fetch(
                         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
                     );
                     const data = await response.json();
-                    
+
                     if (data.status === 'OK' && data.results[0]) {
                         const addressComponents = data.results[0].address_components;
                         const getComponent = (type) => {
                             const comp = addressComponents.find(c => c.types.includes(type));
                             return comp ? comp.long_name : null;
                         };
-                        
+
                         const road = getComponent('route');
                         const sublocality = getComponent('sublocality_level_1') || getComponent('sublocality');
                         const locality = getComponent('locality');
-                        
+
                         let locationParts = [];
                         if (road) locationParts.push(road);
                         else if (sublocality) locationParts.push(sublocality);
                         if (locality) locationParts.push(locality);
-                        
+
                         address = locationParts.length > 0 ? locationParts.join(', ') : data.results[0].formatted_address;
                     }
                 } catch (e) {
                     console.error('Geocoding failed:', e);
                 }
-                
+
                 // Verify face with backend
                 statusDiv.innerHTML = '⏳ Verifying face with AWS...';
-                
+
                 const formData = new URLSearchParams();
                 formData.append('image_data', imageData);
                 formData.append('action', currentPunchAction);
@@ -1260,16 +1265,16 @@ function formatDuration($total_minutes)
                 formData.append('location_id', '');
                 formData.append('out_of_range', '0');
                 formData.append('reason', '');
-                
+
                 try {
                     const response = await fetch('ajax/verify_face_punch.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: formData.toString()
                     });
-                    
+
                     const result = await response.json();
-                    
+
                     if (result.success) {
                         statusDiv.innerHTML = `✅ ${result.message}`;
                         setTimeout(() => location.reload(), 2000);
