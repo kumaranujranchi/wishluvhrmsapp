@@ -13,12 +13,14 @@ if ($_SESSION['user_role'] !== 'Admin') {
     exit;
 }
 
-// Fetch all employees with their face enrollment status
+// Fetch all employees with their latest face enrollment status
 $sql = "SELECT e.id, e.first_name, e.last_name, e.employee_code, e.avatar, d.name as dept_name,
-        ef.id as face_id, ef.confidence_score, ef.enrolled_at, ef.is_active
+        MAX(ef.id) as face_id, MAX(ef.confidence_score) as confidence_score, 
+        MAX(ef.enrolled_at) as enrolled_at, MAX(ef.is_active) as is_active
         FROM employees e
         LEFT JOIN departments d ON e.department_id = d.id
         LEFT JOIN employee_faces ef ON e.id = ef.employee_id AND ef.is_active = TRUE
+        GROUP BY e.id
         ORDER BY e.first_name ASC";
 $stmt = $conn->query($sql);
 $employees = $stmt->fetchAll();
