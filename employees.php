@@ -118,7 +118,7 @@ $employees = $conn->query($sql)->fetchAll();
                                         </a>
                                         <a href="?delete=<?= $emp['id'] ?>" class="btn-icon" style="color:#ef4444;"
                                             title="Delete"
-                                            onclick="return confirm('Are you sure you want to delete <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>? This action cannot be undone.')">
+                                            onclick="handleAsyncConfirm(event, 'Are you sure you want to delete <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>? This action cannot be undone.')">
                                             <i data-lucide="trash-2" style="width:16px;"></i>
                                         </a>
                                     </div>
@@ -180,7 +180,7 @@ $employees = $conn->query($sql)->fetchAll();
                                     style="flex: 1; justify-content: center; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; text-decoration: none;">Edit</a>
                                 <a href="?delete=<?= $emp['id'] ?>" class="btn-primary"
                                     style="flex: 1; justify-content: center; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; text-decoration: none;"
-                                    onclick="return confirm('Delete this employee?')">Delete</a>
+                                    onclick="handleAsyncConfirm(event, 'Delete this employee?')">Delete</a>
                             </div>
                         </div>
                     </div>

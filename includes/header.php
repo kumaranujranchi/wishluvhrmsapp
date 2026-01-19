@@ -607,17 +607,17 @@
                     inputField: document.getElementById('modalInputField'),
                     cancelBtn: document.getElementById('modalCancelBtn'),
                     confirmBtn: document.getElementById('modalConfirmBtn'),
-                    
-                    show: function(options) {
+
+                    show: function (options) {
                         return new Promise((resolve) => {
-                            const { 
-                                type = 'info', 
-                                title = 'Notice', 
-                                message = '', 
-                                confirmText = 'OK', 
-                                cancelText = 'Cancel', 
+                            const {
+                                type = 'info',
+                                title = 'Notice',
+                                message = '',
+                                confirmText = 'OK',
+                                cancelText = 'Cancel',
                                 showInput = false,
-                                showCancel = false 
+                                showCancel = false
                             } = options;
 
                             // Set content
@@ -625,7 +625,7 @@
                             this.message.textContent = message;
                             this.confirmBtn.textContent = confirmText;
                             this.cancelBtn.textContent = cancelText;
-                            
+
                             // Set type/icon
                             this.iconDiv.className = `modal-icon ${type}`;
                             const iconMap = { info: 'info', success: 'check-circle', warning: 'alert-triangle', error: 'x-circle' };
@@ -659,18 +659,37 @@
                         });
                     },
 
-                    alert: function(message, type = 'info', title = 'Notice') {
+                    alert: function (message, type = 'info', title = 'Notice') {
                         return this.show({ message, type, title, showCancel: false });
                     },
 
-                    confirm: function(message, title = 'Confirm Action') {
+                    confirm: function (message, title = 'Confirm Action') {
                         return this.show({ message, type: 'warning', title, showCancel: true, confirmText: 'Yes', cancelText: 'No' });
                     },
 
-                    prompt: function(message, title = 'Input Required') {
+                    prompt: function (message, title = 'Input Required') {
                         return this.show({ message, type: 'info', title, showInput: true, showCancel: true });
                     }
                 };
+
+                // Override global alert (Non-blocking replacement)
+                window.alert = function (msg) {
+                    CustomDialog.alert(msg);
+                };
+
+                // Helper for async confirmation in links
+                async function handleAsyncConfirm(e, msg) {
+                    e.preventDefault();
+                    const target = e.currentTarget;
+                    const confirmed = await CustomDialog.confirm(msg);
+                    if (confirmed) {
+                        window.location.href = target.href;
+                    }
+                    return false;
+                }
+
+                // Note: window.confirm cannot be fully overridden as it is synchronous.
+                // We have replaced most critical confirms with CustomDialog.confirm(msg)
 
                 (function () {
                     function initLucide() {
@@ -689,4 +708,5 @@
         </div> <!-- end main-content -->
     </div> <!-- end app-container -->
 </body>
+
 </html>

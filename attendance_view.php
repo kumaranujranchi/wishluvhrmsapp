@@ -1474,12 +1474,12 @@ function formatDuration($total_minutes)
                 else if (error.code === 3) errorMsg = "Location request timed out. Please try refreshing.";
 
                 statusDiv.innerHTML = `<span style="color:#ef4444;">${errorMsg}</span>`;
-                alert(errorMsg);
+                CustomDialog.alert(errorMsg, 'error', 'Location Error');
             };
 
             navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
         } else {
-            alert("Geolocation not supported by this browser.");
+            CustomDialog.alert("Geolocation not supported by this browser.", 'warning');
         }
     }
 
@@ -1526,7 +1526,7 @@ function formatDuration($total_minutes)
         const reason = document.getElementById('warningReasonInput').value.trim();
 
         if (reason === '') {
-            alert('Please enter a reason before submitting.');
+            CustomDialog.alert('Please enter a reason before submitting.', 'warning');
             return;
         }
 

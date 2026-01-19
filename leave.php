@@ -561,8 +561,9 @@ $all_employees = $conn->query($employees_sql)->fetchAll();
         document.getElementById('actionModal').style.display = 'none';
     }
 
-    function openDeleteModal(id) {
-        if (confirm("Are you sure you want to delete this leave request? This will remove it from all dashboards and restore the employee balance.")) {
+    async function openDeleteModal(id) {
+        const confirmed = await CustomDialog.confirm("Are you sure you want to delete this leave request? This will remove it from all dashboards and restore the employee balance.");
+        if (confirmed) {
             const form = document.createElement('form');
             form.method = 'POST';
             form.innerHTML = `

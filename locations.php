@@ -264,7 +264,7 @@ if (isset($_GET['edit'])) {
                                 <span>Edit</span>
                             </a>
                             <a href="locations.php?delete=<?= $location['id'] ?>" 
-                               onclick="return confirm('Are you sure? This will remove all employee assignments.')"
+                               onclick="handleAsyncConfirm(event, 'Are you sure? This will remove all employee assignments.')"
                                style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.65rem 1rem; background: #fef2f2; color: #dc2626; border-radius: 0.5rem; text-decoration: none; font-weight: 500; font-size: 0.9rem; border: 1px solid #fecaca;">
                                 <i data-lucide="trash-2" style="width: 16px;"></i>
                                 <span>Delete</span>
