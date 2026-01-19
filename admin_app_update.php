@@ -161,8 +161,7 @@ $current_notes = getSetting($conn, 'latest_apk_notes');
                         Upload APK File
                     </label>
                     <input type="file" name="apk_file" id="apk_file"
-                        accept=".apk,application/vnd.android.package-archive"
-                        style="width: 100%; padding: 10px; background: white; border-radius: 10px; border: 1px solid #cbd5e1; cursor: pointer;">
+                        style="width: 100%; padding: 12px; background: white; border-radius: 10px; border: 1px solid #cbd5e1; cursor: pointer; font-size: 0.9rem;">
                     <small style="color: #64748b; display:block; margin-top: 8px;">Upload the .apk file directly to the
                         server.</small>
                 </div>
