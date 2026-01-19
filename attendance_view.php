@@ -855,7 +855,7 @@ function formatDuration($total_minutes)
                         <div
                             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
                             <span
-                                style="font-weight:700; color:#1e293b; font-size: 0.95rem;"><?= date('l', strtotime($row['date'])) ?></span>
+                                style="font-weight:700; color:#1e293b; font-size: 0.8rem;"><?= date('l', strtotime($row['date'])) ?></span>
                             <?php
                             $badgeStyle = match ($row['status']) {
                                 'On Time' => 'background:#dcfce7; color:#166534;',
@@ -865,17 +865,17 @@ function formatDuration($total_minutes)
                             };
                             ?>
                             <span class="badge"
-                                style="<?= $badgeStyle ?> font-size: 0.65rem; padding: 2px 8px; font-weight: 700;"><?= $row['status'] ?></span>
+                                style="<?= $badgeStyle ?> font-size: 0.6rem; padding: 2px 6px; font-weight: 700;"><?= $row['status'] ?></span>
                         </div>
 
                         <!-- Always visible summary -->
-                        <div style="display:flex; gap:1.5rem; font-size:0.85rem; color:#64748b;">
-                            <div style="display:flex; align-items:center; gap:4px;">
-                                <i data-lucide="log-in" style="width:14px; color:#10b981;"></i>
+                        <div style="display:flex; gap:1rem; font-size:0.7rem; color:#64748b;">
+                            <div style="display:flex; align-items:center; gap:3px;">
+                                <i data-lucide="log-in" style="width:12px; color:#10b981;"></i>
                                 <?= date('h:i A', strtotime($row['clock_in'])) ?>
                             </div>
-                            <div style="display:flex; align-items:center; gap:4px;">
-                                <i data-lucide="log-out" style="width:14px; color:#f43f5e;"></i>
+                            <div style="display:flex; align-items:center; gap:3px;">
+                                <i data-lucide="log-out" style="width:12px; color:#f43f5e;"></i>
                                 <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working...' ?>
                             </div>
                         </div>
@@ -884,11 +884,11 @@ function formatDuration($total_minutes)
                         <div class="details-collapse" style="margin-top: 10px;">
                             <div
                                 style="display: flex; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; flex-wrap: wrap;">
-                                <div style="flex: 1; min-width: 140px;">
+                                <div style="flex: 1; min-width: 120px;">
                                     <div
-                                        style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
+                                        style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                         In Location</div>
-                                    <div style="font-size: 0.75rem; color: #475569; line-height: 1.3;">
+                                    <div style="font-size: 0.7rem; color: #475569; line-height: 1.2;">
                                         <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
                                     </div>
                                     <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
@@ -899,11 +899,11 @@ function formatDuration($total_minutes)
                                     <?php endif; ?>
                                 </div>
                                 <?php if ($row['clock_out']): ?>
-                                    <div style="flex: 1; min-width: 140px;">
+                                    <div style="flex: 1; min-width: 120px;">
                                         <div
-                                            style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
+                                            style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                             Out Location</div>
-                                        <div style="font-size: 0.75rem; color: #475569; line-height: 1.3;">
+                                        <div style="font-size: 0.7rem; color: #475569; line-height: 1.2;">
                                             <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
                                         </div>
                                         <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
@@ -918,11 +918,11 @@ function formatDuration($total_minutes)
                             </div>
                         </div>
                     </div>
-                    <div style="text-align:right; min-width:55px;">
+                    <div style="text-align:right; min-width:50px;">
                         <span
-                            style="display:block; font-size:0.85rem; font-weight:700; color:#3b82f6; line-height: 1.2;"><?= formatDuration($row['total_hours']) ?></span>
+                            style="display:block; font-size:0.75rem; font-weight:700; color:#3b82f6; line-height: 1.1; white-space: nowrap;"><?= formatDuration($row['total_hours']) ?></span>
                         <span
-                            style="font-size:0.65rem; color:#94a3b8; font-weight: 600; text-transform: uppercase;">Hours</span>
+                            style="font-size:0.6rem; color:#94a3b8; font-weight: 600; text-transform: uppercase;">Hours</span>
                     </div>
                 </div>
             <?php endforeach; ?>
