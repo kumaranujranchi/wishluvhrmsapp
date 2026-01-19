@@ -460,11 +460,11 @@ function formatDuration($total_minutes)
     @media (max-width: 600px) {
         .timeline-date {
             min-width: 45px;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
         }
 
         .timeline-date span {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
         }
     }
 
@@ -883,32 +883,32 @@ function formatDuration($total_minutes)
                         <!-- Collapsible Details (Mobile addresses) -->
                         <div class="details-collapse" style="margin-top: 10px;">
                             <div
-                                style="display: grid; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9;">
-                                <div>
+                                style="display: flex; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 140px;">
                                     <div
-                                        style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
+                                        style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                         In Location</div>
-                                    <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
+                                    <div style="font-size: 0.75rem; color: #475569; line-height: 1.3;">
                                         <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
                                     </div>
                                     <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
                                         <div
-                                            style="font-size: 0.7rem; color: #dc2626; font-weight: 700; margin-top: 5px; background: #fff1f2; padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                                            style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
                                             ⚠️ Out of Range: <?= htmlspecialchars($row['out_of_range_reason']) ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                                 <?php if ($row['clock_out']): ?>
-                                    <div>
+                                    <div style="flex: 1; min-width: 140px;">
                                         <div
-                                            style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
+                                            style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                             Out Location</div>
-                                        <div style="font-size: 0.8rem; color: #475569; line-height: 1.4;">
+                                        <div style="font-size: 0.75rem; color: #475569; line-height: 1.3;">
                                             <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
                                         </div>
                                         <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
                                             <div
-                                                style="font-size: 0.7rem; color: #dc2626; font-weight: 700; margin-top: 5px; background: #fff1f2; padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                                                style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
                                                 ⚠️ Out of Range (Exit):
                                                 <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
                                             </div>
