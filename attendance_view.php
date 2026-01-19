@@ -449,7 +449,11 @@ function formatDuration($total_minutes)
         }
 
         .timeline-item {
-            padding-right: 30px;
+            padding: 1rem 1rem 1rem 0.75rem;
+        }
+        
+        .card {
+            padding: 0 !important;
         }
     }
 
@@ -914,11 +918,11 @@ function formatDuration($total_minutes)
                             </div>
                         </div>
                     </div>
-                    <div style="text-align:right; min-width:60px;">
+                    <div style="text-align:right; min-width:55px;">
                         <span
-                            style="display:block; font-size:1.1rem; font-weight:800; color:#3b82f6;"><?= formatDuration($row['total_hours']) ?></span>
+                            style="display:block; font-size:0.85rem; font-weight:700; color:#3b82f6; line-height: 1.2;"><?= formatDuration($row['total_hours']) ?></span>
                         <span
-                            style="font-size:0.7rem; color:#94a3b8; font-weight: 600; text-transform: uppercase;">Hours</span>
+                            style="font-size:0.65rem; color:#94a3b8; font-weight: 600; text-transform: uppercase;">Hours</span>
                     </div>
                 </div>
             <?php endforeach; ?>
