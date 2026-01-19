@@ -303,8 +303,30 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                     <span>Manage Notices</span>
                 </a>
 
+                <a href="admin_app_update.php" class="nav-item <?php echo isActive('admin_app_update'); ?>">
+                    <i data-lucide="smartphone" class="icon"></i>
+                    <span>App Update Center</span>
+                </a>
+
             <?php endif; ?>
         </nav>
+
+        <?php
+        // Fetch latest APK URL for the download link
+        $apk_link_stmt = $conn->prepare("SELECT setting_value FROM system_settings WHERE setting_key = 'latest_apk_url' LIMIT 1");
+        $apk_link_stmt->execute();
+        $latest_apk_url = $apk_link_stmt->fetchColumn() ?: '#';
+        ?>
+
+        <!-- Permanent Download App Link -->
+        <div style="padding: 0 1rem; margin-bottom: 1rem;">
+            <a href="<?= htmlspecialchars($latest_apk_url) ?>" class="nav-item"
+                style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; border-radius: 12px; height: 44px; justify-content: center; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);"
+                download>
+                <i data-lucide="download-cloud" class="icon" style="color: white;"></i>
+                <span style="font-weight: 700;">Download App</span>
+            </a>
+        </div>
 
         <div class="sidebar-footer">
             <div class="user-info">
