@@ -573,12 +573,105 @@
                             <span class="notification-badge"><?= $unread_count ?></span>
                         <?php endif; ?>
                     </a>
-
                 </div>
             </header>
 
+            <!-- Custom Global Modal Structure -->
+            <div id="customModalOverlay" class="custom-modal-overlay">
+                <div class="custom-modal">
+                    <div class="modal-content-wrapper">
+                        <div id="modalIcon" class="modal-icon info">
+                            <i data-lucide="info"></i>
+                        </div>
+                        <h3 id="modalTitle">Notification</h3>
+                        <p id="modalMessage">Message goes here...</p>
+                        <div id="modalInputContainer" style="display: none;">
+                            <input type="text" id="modalInputField" class="modal-input" placeholder="Type here...">
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="modalCancelBtn" class="btn-cancel" style="display: none;">Cancel</button>
+                        <button id="modalConfirmBtn" class="btn-confirm">OK</button>
+                    </div>
+                </div>
+            </div>
+
             <script>
-                // Ensure icons are created even if script loads late or page crashes partially
+                // Premium Dialog Replacement System
+                const CustomDialog = {
+                    overlay: document.getElementById('customModalOverlay'),
+                    iconDiv: document.getElementById('modalIcon'),
+                    title: document.getElementById('modalTitle'),
+                    message: document.getElementById('modalMessage'),
+                    inputContainer: document.getElementById('modalInputContainer'),
+                    inputField: document.getElementById('modalInputField'),
+                    cancelBtn: document.getElementById('modalCancelBtn'),
+                    confirmBtn: document.getElementById('modalConfirmBtn'),
+                    
+                    show: function(options) {
+                        return new Promise((resolve) => {
+                            const { 
+                                type = 'info', 
+                                title = 'Notice', 
+                                message = '', 
+                                confirmText = 'OK', 
+                                cancelText = 'Cancel', 
+                                showInput = false,
+                                showCancel = false 
+                            } = options;
+
+                            // Set content
+                            this.title.textContent = title;
+                            this.message.textContent = message;
+                            this.confirmBtn.textContent = confirmText;
+                            this.cancelBtn.textContent = cancelText;
+                            
+                            // Set type/icon
+                            this.iconDiv.className = `modal-icon ${type}`;
+                            const iconMap = { info: 'info', success: 'check-circle', warning: 'alert-triangle', error: 'x-circle' };
+                            this.iconDiv.innerHTML = `<i data-lucide="${iconMap[type] || 'info'}"></i>`;
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                            // Visibility toggles
+                            this.inputContainer.style.display = showInput ? 'block' : 'none';
+                            this.cancelBtn.style.display = showCancel ? 'block' : 'none';
+                            if (showInput) this.inputField.value = '';
+
+                            // Show overlay
+                            this.overlay.classList.add('active');
+
+                            // Handlers
+                            const cleanup = () => {
+                                this.overlay.classList.remove('active');
+                                this.confirmBtn.onclick = null;
+                                this.cancelBtn.onclick = null;
+                            };
+
+                            this.confirmBtn.onclick = () => {
+                                cleanup();
+                                resolve(showInput ? this.inputField.value : true);
+                            };
+
+                            this.cancelBtn.onclick = () => {
+                                cleanup();
+                                resolve(false);
+                            };
+                        });
+                    },
+
+                    alert: function(message, type = 'info', title = 'Notice') {
+                        return this.show({ message, type, title, showCancel: false });
+                    },
+
+                    confirm: function(message, title = 'Confirm Action') {
+                        return this.show({ message, type: 'warning', title, showCancel: true, confirmText: 'Yes', cancelText: 'No' });
+                    },
+
+                    prompt: function(message, title = 'Input Required') {
+                        return this.show({ message, type: 'info', title, showInput: true, showCancel: true });
+                    }
+                };
+
                 (function () {
                     function initLucide() {
                         if (typeof lucide !== 'undefined') {
@@ -590,8 +683,10 @@
                     } else {
                         initLucide();
                     }
-                    // Backup call
                     setTimeout(initLucide, 500);
-                    setTimeout(initLucide, 2000); // Second backup
                 })();
             </script>
+        </div> <!-- end main-content -->
+    </div> <!-- end app-container -->
+</body>
+</html>

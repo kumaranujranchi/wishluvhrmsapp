@@ -634,19 +634,28 @@ $employees = $stmt->fetchAll();
                         'Turn Slightly RIGHT'
                     ];
 
-                    // Show a nicer internal notification if possible, but alert works for reliability
-                    alert(`✅ Step ${currentStep - 1} Success!\n\nNext: ${hints[currentStep - 1]}`);
+                    await CustomDialog.show({
+                        type: 'success',
+                        title: `Step ${currentStep - 1} Done!`,
+                        message: `Great! Now ${hints[currentStep - 1]}`,
+                        confirmText: 'Continue'
+                    });
                 } else {
-                    alert('✅ All angles enrolled successfully!');
+                    await CustomDialog.show({
+                        type: 'success',
+                        title: 'Complete!',
+                        message: 'All angles enrolled successfully.',
+                        confirmText: 'Finish'
+                    });
                     location.reload();
                 }
             } else {
                 nameHeader.textContent = originalText;
-                alert('❌ ' + result.message);
+                CustomDialog.alert(result.message, 'error', 'Enrollment Failed');
             }
         } catch (error) {
             nameHeader.textContent = originalText;
-            alert('Error: ' + error.message);
+            CustomDialog.alert(error.message, 'error', 'System Error');
         }
     }
 </script>

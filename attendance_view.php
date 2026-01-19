@@ -1561,7 +1561,7 @@ function formatDuration($total_minutes)
             });
             video.srcObject = faceStream;
         } catch (error) {
-            alert('❌ Camera access denied. Please allow camera permissions or use Manual Punch.');
+            CustomDialog.alert('Camera access denied. Please allow camera permissions or use Manual Punch.', 'error', 'Hardware Error');
             closeFaceModal();
         }
     }
@@ -1591,7 +1591,7 @@ function formatDuration($total_minutes)
         // Fix: Capture currentPunchAction BEFORE closing modal
         const actionToExecute = currentPunchAction;
         if (!actionToExecute) {
-            alert('Error: No punch action specified.');
+            CustomDialog.alert('No punch action specified.', 'error', 'Action Error');
             return;
         }
 
@@ -1616,7 +1616,7 @@ function formatDuration($total_minutes)
 
         // Get location
         if (!navigator.geolocation) {
-            alert('Geolocation not supported');
+            CustomDialog.alert('Geolocation is not supported by your browser.', 'warning');
             return;
         }
 
@@ -1719,16 +1719,21 @@ function formatDuration($total_minutes)
                         setTimeout(() => location.reload(), 2000);
                     } else {
                         statusDiv.innerHTML = `❌ ${result.message}`;
-                        alert(`❌ Face Verification Failed\n\n${result.message}\n\nPlease use Manual Punch option.`);
+                        CustomDialog.show({
+                            type: 'error',
+                            title: 'Verification Failed',
+                            message: `${result.message}\n\nPlease use Manual Punch option if this persists.`,
+                            confirmText: 'Dismiss'
+                        });
                     }
                 } catch (error) {
                     statusDiv.innerHTML = '❌ Verification error';
-                    alert('Error: ' + error.message + '\n\nPlease use Manual Punch option.');
+                    CustomDialog.alert(error.message, 'error', 'System Error');
                 }
             },
             (error) => {
                 statusDiv.innerHTML = '❌ Location error';
-                alert('Location access denied. Please enable location services.');
+                CustomDialog.alert('Location access denied. Please enable location services.', 'warning', 'Location Required');
             },
             {
                 enableHighAccuracy: true,
