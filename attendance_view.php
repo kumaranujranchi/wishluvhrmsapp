@@ -883,8 +883,8 @@ function formatDuration($total_minutes)
                         <!-- Collapsible Details (Mobile addresses) -->
                         <div class="details-collapse" style="margin-top: 10px;">
                             <div
-                                style="display: flex; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; flex-wrap: wrap;">
-                                <div style="flex: 1; min-width: 120px;">
+                                style="display: flex; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; flex-wrap: nowrap;">
+                                <div style="flex: 1; min-width: 0;">
                                     <div
                                         style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                         In Location</div>
@@ -899,7 +899,7 @@ function formatDuration($total_minutes)
                                     <?php endif; ?>
                                 </div>
                                 <?php if ($row['clock_out']): ?>
-                                    <div style="flex: 1; min-width: 120px;">
+                                    <div style="flex: 1; min-width: 0;">
                                         <div
                                             style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
                                             Out Location</div>
