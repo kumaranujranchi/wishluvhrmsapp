@@ -389,8 +389,77 @@ function formatDuration($total_minutes)
         transform: rotate(180deg);
     }
 
+    /* --- RESPONSIVE ATTENDANCE HISTORY --- */
+    /* Desktop Defaults (Big Fonts, Horizontal Layout) */
+    .att-day { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+    .att-badge { font-size: 0.8rem; padding: 4px 10px; font-weight: 700; border-radius: 50px; }
+    .att-time { font-size: 0.95rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
+    .att-loc-label { font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+    .att-loc-text { font-size: 0.85rem; color: #475569; line-height: 1.4; }
+    .att-hours { font-size: 1.3rem; font-weight: 800; color: #3b82f6; line-height: 1; display: block; }
+    .att-hours-label { font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+
+    /* Desktop Layout */
+    .timeline-content { display: flex; align-items: center; gap: 2rem; width: 100%; }
+    .att-header-group { display: flex; flex-direction: column; gap: 4px; min-width: 100px; }
+    .att-time-group { display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
+    
+    .details-collapse { 
+        display: block !important; 
+        max-height: none !important; 
+        margin: 0 !important; 
+        flex: 1; 
+    }
+    .att-loc-container { 
+        display: flex; 
+        gap: 2rem; 
+        background: none !important; 
+        border: none !important; 
+        padding: 0 !important; 
+    }
+    .att-loc-item { flex: 1; }
+
+    .expand-icon { display: none; }
+    .timeline-item { cursor: default; }
+
+
     /* Mobile Polishing */
     @media (max-width: 1024px) {
+        /* Mobile Overrides for Attendance History */
+        .timeline-content { display: block; }
+        .att-header-group { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; width: 100%; }
+        .att-time-group { flex-direction: row; gap: 1rem; margin-bottom: 0.25rem; width: 100%; }
+        
+        .details-collapse { 
+            max-height: 0 !important; 
+            margin-top: 10px !important; 
+            overflow: hidden; 
+            transition: max-height 0.3s ease; 
+        }
+        .timeline-item.expanded .details-collapse { max-height: 500px !important; }
+        
+        .att-loc-container { 
+            gap: 8px; 
+            background: #f8fafc !important; 
+            padding: 10px !important; 
+            border: 1px solid #f1f5f9 !important; 
+            border-radius: 8px !important; 
+            flex-wrap: nowrap; 
+        }
+        
+        .expand-icon { display: block; }
+        .timeline-item { cursor: pointer; }
+
+        /* Small Fonts for Mobile (Preserving Sorted View) */
+        .att-day { font-size: 0.8rem; }
+        .att-badge { font-size: 0.6rem; padding: 2px 6px; }
+        .att-time { font-size: 0.7rem; gap: 3px; }
+        .att-time i { width: 12px; height: 12px; }
+        .att-loc-label { font-size: 0.6rem; }
+        .att-loc-text { font-size: 0.7rem; line-height: 1.2; }
+        .att-hours { font-size: 0.75rem; white-space: nowrap; }
+        .att-hours-label { font-size: 0.6rem; }
+
         .page-content {
             background: #f5f7fa !important;
             min-height: 100vh !important;
@@ -851,11 +920,11 @@ function formatDuration($total_minutes)
                         <?= date('d', strtotime($row['date'])) ?>
                         <span><?= date('M', strtotime($row['date'])) ?></span>
                     </div>
+                    
                     <div class="timeline-content">
-                        <div
-                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-                            <span
-                                style="font-weight:700; color:#1e293b; font-size: 0.8rem;"><?= date('l', strtotime($row['date'])) ?></span>
+                        <!-- Group 1: Day & Status -->
+                        <div class="att-header-group">
+                            <span class="att-day"><?= date('l', strtotime($row['date'])) ?></span>
                             <?php
                             $badgeStyle = match ($row['status']) {
                                 'On Time' => 'background:#dcfce7; color:#166534;',
@@ -864,53 +933,40 @@ function formatDuration($total_minutes)
                                 default => 'background:#f1f5f9; color:#64748b;'
                             };
                             ?>
-                            <span class="badge"
-                                style="<?= $badgeStyle ?> font-size: 0.6rem; padding: 2px 6px; font-weight: 700;"><?= $row['status'] ?></span>
+                            <span class="badge att-badge" style="<?= $badgeStyle ?>"><?= $row['status'] ?></span>
                         </div>
 
-                        <!-- Always visible summary -->
-                        <div style="display:flex; gap:1rem; font-size:0.7rem; color:#64748b;">
-                            <div style="display:flex; align-items:center; gap:3px;">
-                                <i data-lucide="log-in" style="width:12px; color:#10b981;"></i>
+                        <!-- Group 2: Times -->
+                        <div class="att-time-group">
+                            <div class="att-time">
+                                <i data-lucide="log-in" style="width:14px; color:#10b981;"></i>
                                 <?= date('h:i A', strtotime($row['clock_in'])) ?>
                             </div>
-                            <div style="display:flex; align-items:center; gap:3px;">
-                                <i data-lucide="log-out" style="width:12px; color:#f43f5e;"></i>
+                            <div class="att-time">
+                                <i data-lucide="log-out" style="width:14px; color:#f43f5e;"></i>
                                 <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working...' ?>
                             </div>
                         </div>
 
-                        <!-- Collapsible Details (Mobile addresses) -->
-                        <div class="details-collapse" style="margin-top: 10px;">
-                            <div
-                                style="display: flex; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; flex-wrap: nowrap;">
-                                <div style="flex: 1; min-width: 0;">
-                                    <div
-                                        style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
-                                        In Location</div>
-                                    <div style="font-size: 0.7rem; color: #475569; line-height: 1.2;">
-                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
-                                    </div>
+                        <!-- Group 3: Locations (Collapsible on Mobile, Inline on Desktop) -->
+                        <div class="details-collapse">
+                            <div class="att-loc-container">
+                                <div class="att-loc-item" style="flex: 1; min-width: 0;">
+                                    <div class="att-loc-label">In Location</div>
+                                    <div class="att-loc-text"><?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?></div>
                                     <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
-                                        <div
-                                            style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
+                                        <div style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
                                             ⚠️ Out of Range: <?= htmlspecialchars($row['out_of_range_reason']) ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                                 <?php if ($row['clock_out']): ?>
-                                    <div style="flex: 1; min-width: 0;">
-                                        <div
-                                            style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">
-                                            Out Location</div>
-                                        <div style="font-size: 0.7rem; color: #475569; line-height: 1.2;">
-                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
-                                        </div>
+                                    <div class="att-loc-item" style="flex: 1; min-width: 0;">
+                                        <div class="att-loc-label">Out Location</div>
+                                        <div class="att-loc-text"><?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?></div>
                                         <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
-                                            <div
-                                                style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
-                                                ⚠️ Out of Range (Exit):
-                                                <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
+                                            <div style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
+                                                ⚠️ Exit Range: <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -918,11 +974,11 @@ function formatDuration($total_minutes)
                             </div>
                         </div>
                     </div>
+
+                    <!-- Right: Hours -->
                     <div style="text-align:right; min-width:50px;">
-                        <span
-                            style="display:block; font-size:0.75rem; font-weight:700; color:#3b82f6; line-height: 1.1; white-space: nowrap;"><?= formatDuration($row['total_hours']) ?></span>
-                        <span
-                            style="font-size:0.6rem; color:#94a3b8; font-weight: 600; text-transform: uppercase;">Hours</span>
+                        <span class="att-hours"><?= formatDuration($row['total_hours']) ?></span>
+                        <span class="att-hours-label">Hours</span>
                     </div>
                 </div>
             <?php endforeach; ?>
