@@ -297,24 +297,44 @@ function formatDuration($total_minutes)
         backdrop-filter: blur(5px);
     }
 
-    /* Stats Cards */
+    /* Stats Cards - Colorful Design */
     .mini-stat-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        border: 1px solid #f1f5f9;
-        transition: transform 0.2s;
+        border-radius: 20px;
+        padding: 16px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.15);
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
-    .mini-stat-card:hover {
-        transform: translateY(-3px);
+    .mini-stat-card .stat-icon {
+        position: absolute;
+        bottom: -12px;
+        right: -8px;
+        opacity: 0.15;
+        width: 70px;
+        height: 70px;
+        transform: rotate(-10deg);
     }
 
-    .mini-stat-card i {
-        width: 32px;
-        height: 32px;
+    .mini-stat-card .stat-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        opacity: 0.9;
+        margin-bottom: 4px;
+    }
+
+    .mini-stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        margin: 8px 0;
     }
 
     /* History Timeline */
@@ -405,18 +425,22 @@ function formatDuration($total_minutes)
         }
 
         .mobile-stats-grid .mini-stat-card {
-            padding: 1rem 0.5rem;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 16px;
+            min-height: 120px;
         }
 
-        .mobile-stats-grid .mini-stat-card i {
-            width: 20px;
-            height: 20px;
+        .mobile-stats-grid .mini-stat-card .stat-icon {
+            width: 50px;
+            height: 50px;
         }
 
-        .mobile-stats-grid h2 {
-            font-size: 1.2rem;
-            margin: 4px 0;
+        .mobile-stats-grid .stat-value {
+            font-size: 1.5rem !important;
+        }
+        
+        .mobile-stats-grid .stat-label {
+            font-size: 8px !important;
         }
 
         .mobile-stats-grid span {
@@ -768,20 +792,29 @@ function formatDuration($total_minutes)
 
         <!-- RIGHT/BOTTOM: Mini Stats (Compact Grid on Mobile) -->
         <div class="mobile-stats-grid" style="display: flex; flex-direction: column; gap: 1rem;">
-            <div class="mini-stat-card">
-                <div style="color:#10b981;"><i data-lucide="calendar-check"></i></div>
-                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= $present_days ?></h2>
-                <span style="color:#64748b; font-size:0.85rem;">Days Present</span>
+            <div class="mini-stat-card" style="background: #5246E2;">
+                <div style="position: relative; z-index: 10;">
+                    <p class="stat-label">Attendance</p>
+                    <p class="stat-value"><?= $present_days ?></p>
+                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">Days Present</p>
+                </div>
+                <i data-lucide="calendar" class="stat-icon"></i>
             </div>
-            <div class="mini-stat-card">
-                <div style="color:#f59e0b;"><i data-lucide="clock"></i></div>
-                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= $late_days ?></h2>
-                <span style="color:#64748b; font-size:0.85rem;">Late Arrivals</span>
+            <div class="mini-stat-card" style="background: #FFA000;">
+                <div style="position: relative; z-index: 10;">
+                    <p class="stat-label">Late Marks</p>
+                    <p class="stat-value"><?= $late_days ?></p>
+                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">Arrivals</p>
+                </div>
+                <i data-lucide="clock" class="stat-icon"></i>
             </div>
-            <div class="mini-stat-card">
-                <div style="color:#3b82f6;"><i data-lucide="timer"></i></div>
-                <h2 style="font-size:2.2rem; margin:0; color:#1e293b;"><?= formatDuration($total_work_hours) ?></h2>
-                <span style="color:#64748b; font-size:0.85rem;">Total Hours</span>
+            <div class="mini-stat-card" style="background: #00BFA5;">
+                <div style="position: relative; z-index: 10;">
+                    <p class="stat-label">Total Hours</p>
+                    <p class="stat-value"><?= formatDuration($total_work_hours) ?></p>
+                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">This Month</p>
+                </div>
+                <i data-lucide="timer" class="stat-icon"></i>
             </div>
         </div>
     </div>
