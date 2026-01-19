@@ -2,6 +2,7 @@
 *.log
 config/db_local.php
 vendor/
+composer.lock
 uploads/
 config/email_credentials.php
 .env
