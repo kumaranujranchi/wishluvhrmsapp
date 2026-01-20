@@ -1,5 +1,5 @@
 // Service Worker for HRMS PWA
-const CACHE_NAME = 'hrms-v1.0.3';
+const CACHE_NAME = 'hrms-v1.0.4';
 const OFFLINE_URL = 'offline.html';
 
 // Files to cache
