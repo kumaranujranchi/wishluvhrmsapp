@@ -500,30 +500,7 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
     <!-- ============================================== -->
     <div class="mobile-view-container">
 
-        <?php if (!empty($latest_apk_url)): ?>
-            <!-- APK Update Banner -->
-            <div
-                style="background: linear-gradient(135deg, #FF6B6B 0%, #EE0979 100%); margin: 0 0 20px 0; border-radius: 20px; padding: 20px; color: white; box-shadow: 0 10px 20px rgba(238, 9, 121, 0.2); position: relative; overflow: hidden;">
-                <div style="position: relative; z-index: 1;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <i data-lucide="smartphone-charging" style="width: 18px; height: 18px;"></i>
-                        <span
-                            style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">System
-                            Update</span>
-                    </div>
-                    <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800;">App Update Available</h3>
-                    <p style="margin: 0 0 16px 0; font-size: 12px; opacity: 0.9;">New version
-                        <?= htmlspecialchars($latest_apk_version) ?> is now available with new features.</p>
-                    <a href="<?= htmlspecialchars($latest_apk_url) ?>"
-                        style="display: inline-flex; align-items: center; gap: 8px; background: white; color: #EE0979; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        <i data-lucide="download" style="width: 16px;"></i>
-                        Update Mobile App
-                    </a>
-                </div>
-                <i data-lucide="smartphone"
-                    style="position: absolute; right: -10px; bottom: -10px; width: 80px; height: 80px; opacity: 0.15; transform: rotate(-15deg);"></i>
-            </div>
-        <?php endif; ?>
+
 
         <!-- Stats Grid -->
         <div class="mobile-grid">
