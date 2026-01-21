@@ -399,7 +399,8 @@ $employees = $stmt->fetchAll();
                 <div class="employee-header">
                     <div class="employee-avatar">
                         <?php if ($emp['avatar']): ?>
-                            <img src="<?= htmlspecialchars($emp['avatar']) ?>" alt="Avatar">
+                            <img src="<?= htmlspecialchars($emp['avatar']) ?>" alt="Avatar"
+                                onerror="this.style.display='none'; this.parentElement.innerHTML='<?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>';">
                         <?php else: ?>
                             <?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>
                         <?php endif; ?>
