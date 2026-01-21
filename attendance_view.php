@@ -1026,6 +1026,130 @@ function formatDuration($total_minutes)
     .manual-punch-link:hover {
         color: #ffffff;
     }
+
+    /* Processing Modal */
+    .processing-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10001;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .processing-modal.active {
+        display: flex;
+    }
+
+    .processing-modal-content {
+        background: white;
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .processing-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #f1f5f9;
+        border-top: 4px solid #6366f1;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .processing-modal-content h3 {
+        color: #1e293b;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .processing-modal-content p {
+        color: #64748b;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .processing-modal-content.success .processing-spinner {
+        display: none;
+    }
+
+    .processing-modal-content.success::before {
+        content: '✓';
+        display: block;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        font-size: 3rem;
+        font-weight: 700;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        line-height: 80px;
+        animation: successPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes successPop {
+        0% {
+            transform: scale(0);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .processing-modal-content.error .processing-spinner {
+        display: none;
+    }
+
+    .processing-modal-content.error::before {
+        content: '✕';
+        display: block;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        font-size: 3rem;
+        font-weight: 700;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        line-height: 80px;
+        animation: successPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
 </style>
 
 <!-- Face Verification Modal -->
@@ -1064,6 +1188,15 @@ function formatDuration($total_minutes)
                 <div class="tip-text">Remove<br>Glasses</div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Processing Status Modal -->
+<div class="processing-modal" id="processingModal">
+    <div class="processing-modal-content">
+        <div class="processing-spinner"></div>
+        <h3 id="processingTitle">Processing...</h3>
+        <p id="processingMessage">Please wait while we verify your attendance.</p>
     </div>
 </div>
 
@@ -1119,9 +1252,7 @@ function formatDuration($total_minutes)
                         <span style="width:8px; height:8px; background:#ef4444; border-radius:50%;"></span>
                         Not Yet Checked In
                     </div>
-                    <div class="manual-punch-link" onclick="getLocationAndSubmit('clock_in')">
-                        Or use Manual Punch (no face verification)
-                    </div>
+
                 <?php elseif (!$has_checked_out): ?>
                     <button type="button" class="custom-punch-btn" onclick="startFaceVerification('clock_out')"
                         style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4);">
@@ -1133,9 +1264,7 @@ function formatDuration($total_minutes)
                             style="width:8px; height:8px; background:#10b981; border-radius:50%; box-shadow: 0 0 8px #10b981;"></span>
                         Working Since <?= date('h:i A', strtotime($today_record['clock_in'])) ?>
                     </div>
-                    <div class="manual-punch-link" onclick="getLocationAndSubmit('clock_out')">
-                        Or use Manual Punch (no face verification)
-                    </div>
+
                 <?php else: ?>
                     <button type="button" class="custom-punch-btn btn-disabled" disabled>
                         <i data-lucide="check-circle" style="width:40px; height:40px;"></i>
@@ -1561,7 +1690,7 @@ function formatDuration($total_minutes)
             });
             video.srcObject = faceStream;
         } catch (error) {
-            CustomDialog.alert('Camera access denied. Please allow camera permissions or use Manual Punch.', 'error', 'Hardware Error');
+            CustomDialog.alert('Camera access denied. Please allow camera permissions to mark attendance.', 'error', 'Camera Access Required');
             closeFaceModal();
         }
     }
@@ -1610,9 +1739,8 @@ function formatDuration($total_minutes)
         closeFaceModal();
         scanLine.style.display = 'none';
 
-        // Show loading status
-        const statusDiv = document.getElementById('locationStatus');
-        statusDiv.innerHTML = '⏳ Verifying face and location...';
+        // Show processing modal
+        showProcessingModal('Processing Face Data', 'We are processing your face data, please wait...');
 
         // Get location
         if (!navigator.geolocation) {
@@ -1651,7 +1779,8 @@ function formatDuration($total_minutes)
                         const modalResult = await showWarningModal();
 
                         if (!modalResult || modalResult.trim() === "") {
-                            statusDiv.innerHTML = '<span style="color:#ef4444;">Reason is required to punch from outside!</span>';
+                            hideProcessingModal();
+                            CustomDialog.alert('Reason is required to punch from outside office location.', 'warning', 'Reason Required');
                             return;
                         }
 
@@ -1660,7 +1789,7 @@ function formatDuration($total_minutes)
                 }
 
                 // Get address (Background)
-                statusDiv.innerHTML = '⏳ Getting address...';
+                updateProcessingModal('Getting Location', 'Fetching your location details...');
                 let address = 'Location not available';
 
                 try {
@@ -1693,7 +1822,7 @@ function formatDuration($total_minutes)
                 }
 
                 // Verify face with backend
-                statusDiv.innerHTML = '⏳ Verifying face with AWS...';
+                updateProcessingModal('Verifying Face', 'Verifying your face with Azure Face Recognition...');
 
                 const formData = new URLSearchParams();
                 formData.append('image_data', imageData);
@@ -1715,25 +1844,20 @@ function formatDuration($total_minutes)
                     const result = await response.json();
 
                     if (result.success) {
-                        statusDiv.innerHTML = `✅ ${result.message}`;
-                        setTimeout(() => location.reload(), 2000);
+                        showSuccessModal('Success!', result.message);
+                        setTimeout(() => location.reload(), 2500);
                     } else {
-                        statusDiv.innerHTML = `❌ ${result.message}`;
-                        CustomDialog.show({
-                            type: 'error',
-                            title: 'Verification Failed',
-                            message: `${result.message}\n\nPlease use Manual Punch option if this persists.`,
-                            confirmText: 'Dismiss'
-                        });
+                        showErrorModal('Verification Failed', result.message);
+                        setTimeout(() => hideProcessingModal(), 3000);
                     }
                 } catch (error) {
-                    statusDiv.innerHTML = '❌ Verification error';
-                    CustomDialog.alert(error.message, 'error', 'System Error');
+                    showErrorModal('System Error', 'An error occurred during verification. Please try again.');
+                    setTimeout(() => hideProcessingModal(), 3000);
                 }
             },
             (error) => {
-                statusDiv.innerHTML = '❌ Location error';
-                CustomDialog.alert('Location access denied. Please enable location services.', 'warning', 'Location Required');
+                hideProcessingModal();
+                CustomDialog.alert('Location access denied. Please enable location services to mark attendance.', 'warning', 'Location Required');
             },
             {
                 enableHighAccuracy: true,
@@ -1752,6 +1876,42 @@ function formatDuration($total_minutes)
             }
         }
     });
+
+    // Processing Modal Functions
+    function showProcessingModal(title, message) {
+        const modal = document.getElementById('processingModal');
+        const content = modal.querySelector('.processing-modal-content');
+        content.className = 'processing-modal-content';
+        document.getElementById('processingTitle').textContent = title;
+        document.getElementById('processingMessage').textContent = message;
+        modal.classList.add('active');
+    }
+
+    function updateProcessingModal(title, message) {
+        document.getElementById('processingTitle').textContent = title;
+        document.getElementById('processingMessage').textContent = message;
+    }
+
+    function showSuccessModal(title, message) {
+        const modal = document.getElementById('processingModal');
+        const content = modal.querySelector('.processing-modal-content');
+        content.className = 'processing-modal-content success';
+        document.getElementById('processingTitle').textContent = title;
+        document.getElementById('processingMessage').textContent = message;
+    }
+
+    function showErrorModal(title, message) {
+        const modal = document.getElementById('processingModal');
+        const content = modal.querySelector('.processing-modal-content');
+        content.className = 'processing-modal-content error';
+        document.getElementById('processingTitle').textContent = title;
+        document.getElementById('processingMessage').textContent = message;
+    }
+
+    function hideProcessingModal() {
+        const modal = document.getElementById('processingModal');
+        modal.classList.remove('active');
+    }
 </script>
 
 <?php include 'includes/footer.php'; ?>
