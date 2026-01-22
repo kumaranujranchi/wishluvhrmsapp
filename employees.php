@@ -73,7 +73,10 @@ $employees = $conn->query($sql)->fetchAll();
                                             style="width:40px; height:40px; border-radius:50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#64748b; font-weight:bold;">
                                             <?php if (!empty($emp['avatar'])): ?>
                                                 <img src="<?= $emp['avatar'] ?>"
-                                                    style="width:100%; height:100%; object-fit:cover;">
+                                                    alt="<?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>"
+                                                    style="width:100%; height:100%; object-fit:cover;"
+                                                    data-initials="<?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>"
+                                                    onerror="this.style.display='none'; this.parentElement.textContent=this.getAttribute('data-initials');">
                                             <?php else: ?>
                                                 <?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>
                                             <?php endif; ?>
@@ -140,7 +143,11 @@ $employees = $conn->query($sql)->fetchAll();
                                 <div
                                     style="width:40px; height:40px; border-radius:12px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#64748b; font-weight:bold; font-size: 0.85rem;">
                                     <?php if (!empty($emp['avatar'])): ?>
-                                        <img src="<?= $emp['avatar'] ?>" style="width:100%; height:100%; object-fit:cover;">
+                                        <img src="<?= $emp['avatar'] ?>"
+                                            alt="<?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>"
+                                            style="width:100%; height:100%; object-fit:cover;"
+                                            data-initials="<?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>"
+                                            onerror="this.style.display='none'; this.parentElement.textContent=this.getAttribute('data-initials');">
                                     <?php else: ?>
                                         <?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>
                                     <?php endif; ?>

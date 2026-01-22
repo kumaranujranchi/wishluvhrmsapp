@@ -399,8 +399,10 @@ $employees = $stmt->fetchAll();
                 <div class="employee-header">
                     <div class="employee-avatar">
                         <?php if ($emp['avatar']): ?>
-                            <img src="<?= htmlspecialchars($emp['avatar']) ?>" alt="Avatar"
-                                onerror="this.style.display='none'; this.parentElement.innerHTML='<?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>';">
+                            <img src="<?= htmlspecialchars($emp['avatar']) ?>"
+                                alt="<?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>"
+                                data-initials="<?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>"
+                                onerror="this.style.display='none'; this.parentElement.textContent=this.getAttribute('data-initials');">
                         <?php else: ?>
                             <?= strtoupper(substr($emp['first_name'], 0, 1) . substr($emp['last_name'], 0, 1)) ?>
                         <?php endif; ?>

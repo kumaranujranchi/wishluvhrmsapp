@@ -11,7 +11,7 @@ echo "Starting Deployment to $SERVER_HOST..."
 echo "============================================"
 
 # Connect to server and pull latest code
-ssh $SERVER_USER@$SERVER_HOST "cd $PROJECT_PATH && git pull origin main && echo '✅ Deployment Successful: Github se latest code server par aa gaya hai.'"
+ssh -p 65002 $SERVER_USER@$SERVER_HOST "cd $PROJECT_PATH && git checkout employee_dashboard.php sw.js && git pull origin main && echo '✅ Deployment Successful: Github se latest code server par aa gaya hai.'"
 
 echo "============================================"
 echo "Done."

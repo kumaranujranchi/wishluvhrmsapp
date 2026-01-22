@@ -250,7 +250,10 @@ $percentage = min(100, round(($filled / $total_fields) * 100));
                 <div class="user-big-avatar">
                     <?php if (!empty($user['avatar'])): ?>
                         <img src="<?= $user['avatar'] ?>"
-                            style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                            alt="<?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?>"
+                            style="width:100%; height:100%; object-fit:cover; border-radius:50%;"
+                            data-initials="<?= strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)) ?>"
+                            onerror="this.style.display='none'; this.parentElement.textContent=this.getAttribute('data-initials');">
                     <?php else: ?>
                         <?= strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)) ?>
                     <?php endif; ?>
