@@ -113,6 +113,10 @@ for ($i = 6; $i >= 0; $i--) {
 ?>
 
 <style>
+    .page-content {
+        padding-bottom: 100px !important;
+    }
+
     @media (max-width: 768px) {
         .page-content {
             background: #f5f7fa !important;
