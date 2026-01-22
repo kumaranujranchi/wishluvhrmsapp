@@ -64,7 +64,7 @@ try {
         // Determine status based on clock-in time
         $status = 'On Time';
         $in_time_val = strtotime($clock_in);
-        if (date('H:i', $in_time_val) >= '10:00') {
+        if (date('H:i', $in_time_val) > '10:00') {
             $status = 'Late';
         }
 

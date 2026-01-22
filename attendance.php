@@ -80,6 +80,16 @@ $avg_hours->execute(['date' => $filter_date]);
 $avg_minutes = round($avg_hours->fetchColumn());
 $avg = formatDuration($avg_minutes);
 
+// On Leave Count
+$leave_count = $conn->prepare("
+    SELECT COUNT(DISTINCT employee_id) 
+    FROM leave_requests 
+    WHERE :date BETWEEN start_date AND end_date 
+    AND admin_status = 'Approved'
+");
+$leave_count->execute(['date' => $filter_date]);
+$leave_count = $leave_count->fetchColumn();
+
 
 // --- CHART DATA (Last 7 Days) ---
 $chart_labels = [];
@@ -169,6 +179,13 @@ for ($i = 6; $i >= 0; $i--) {
                 <h3 class="stats-value"><?= $avg ?></h3>
             </div>
             <div class="stats-icon-wrapper"><i data-lucide="timer" class="icon" style="color:#8b5cf6;"></i></div>
+        </div>
+        <div class="card stats-card" style="border-left: 4px solid #10b981;">
+            <div class="stats-info">
+                <span class="stats-title">On Leave Today</span>
+                <h3 class="stats-value"><?= $leave_count ?></h3>
+            </div>
+            <div class="stats-icon-wrapper"><i data-lucide="calendar-off" class="icon" style="color:#10b981;"></i></div>
         </div>
     </div>
 
