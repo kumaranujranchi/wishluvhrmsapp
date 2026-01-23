@@ -133,27 +133,45 @@ for ($i = 6; $i >= 0; $i--) {
             margin-bottom: 1rem;
         }
 
-        .filter-form {
+        .page-header-flex {
             flex-direction: column !important;
+            gap: 1rem !important;
+            align-items: stretch !important;
+            padding: 1.25rem 1rem !important;
+        }
+
+        .header-controls {
+            flex-direction: column !important;
+            gap: 12px !important;
             width: 100%;
+        }
+
+        .filter-form {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 8px !important;
+            width: 100% !important;
+        }
+
+        .filter-form>div {
+            flex: 1;
         }
 
         .filter-form input[type="date"] {
             width: 100% !important;
         }
 
+        .export-actions {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            width: 100% !important;
+        }
+
         .header-action-btn {
-            width: 100%;
-        }
-
-        .page-header-flex {
-            flex-direction: column !important;
-            gap: 1rem !important;
-            align-items: stretch !important;
-        }
-
-        .page-header-flex>div {
-            width: 100%;
+            width: 100% !important;
+            justify-content: center !important;
+            margin: 0 !important;
         }
     }
 </style>
@@ -211,7 +229,7 @@ for ($i = 6; $i >= 0; $i--) {
             <div class="page-header-info">
                 <h3 style="margin:0; font-size: 1.1rem; color: #1e293b;">Daily Attendance</h3>
             </div>
-            <div style="display:flex; gap:12px; align-items:center;">
+            <div class="header-controls" style="display:flex; gap:12px; align-items:center;">
                 <form method="GET" class="filter-form" style="display:flex; gap:8px; align-items:center;">
                     <div style="position:relative; display:flex; align-items:center;">
                         <input type="date" name="date" class="form-control" value="<?= $filter_date ?>"
@@ -223,12 +241,13 @@ for ($i = 6; $i >= 0; $i--) {
                         Filter
                     </button>
                 </form>
-                <div style="display:flex; gap:8px;">
+                <div class="export-actions" style="display:flex; gap:8px;">
                     <form method="POST">
                         <button type="submit" name="export_csv" class="btn-primary header-action-btn"
-                            style="height: 42px; padding: 0 1.25rem; background: #0f172a; border-radius: 10px;">
+                            style="height: 42px; padding: 0 1.25rem; background: #0f172a; border-radius: 10px; display: flex; align-items: center;">
                             <i data-lucide="download" style="width:18px;"></i>
                             <span class="desktop-only" style="margin-left: 6px;">CSV</span>
+                            <span class="mobile-only" style="margin-left: 6px;">CSV</span>
                         </button>
                     </form>
                     <a href="attendance_report_print.php?date=<?= $filter_date ?>" target="_blank"
@@ -236,6 +255,7 @@ for ($i = 6; $i >= 0; $i--) {
                         style="height: 42px; padding: 0 1.25rem; background: #ef4444; border-radius: 10px; display: flex; align-items: center; text-decoration: none; color: white;">
                         <i data-lucide="file-text" style="width:18px;"></i>
                         <span class="desktop-only" style="margin-left: 6px;">Export PDF</span>
+                        <span class="mobile-only" style="margin-left: 6px;">PDF</span>
                     </a>
                 </div>
             </div>
