@@ -27,11 +27,34 @@ try {
     }
 
     // 1.1 Fetch Holidays
-    $holiday_sql = "SELECT date FROM holidays WHERE date BETWEEN :start AND :end AND is_active = 1";
+    $holiday_sql = "SELECT start_date, end_date FROM holidays 
+                    WHERE is_active = 1 
+                    AND (
+                        (start_date BETWEEN :start AND :end) 
+                        OR (end_date BETWEEN :start AND :end)
+                        OR (start_date <= :start AND end_date >= :end)
+                    )";
     $holiday_stmt = $conn->prepare($holiday_sql);
     $holiday_stmt->execute(['start' => $start_date, 'end' => $end_date]);
-    $holidays_list = $holiday_stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
-    $total_holidays_in_month = count($holidays_list);
+    $holiday_ranges = $holiday_stmt->fetchAll();
+    
+    $holidays_list = [];
+    foreach ($holiday_ranges as $range) {
+        $curr = strtotime($range['start_date']);
+        $last = strtotime($range['end_date']);
+        while ($curr <= $last) {
+            $holidays_list[] = date('Y-m-d', $curr);
+            $curr = strtotime('+1 day', $curr);
+        }
+    }
+    $holidays_list = array_unique($holidays_list);
+    $total_holidays_in_month = 0;
+    // Count how many of these holidays fall within the CURRENT payroll month
+    foreach($holidays_list as $h_date) {
+        if ($h_date >= $start_date && $h_date <= $end_date) {
+            $total_holidays_in_month++;
+        }
+    }
 
     // 2. Handle Save Action (POST)
     $message = "";
