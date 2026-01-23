@@ -223,13 +223,21 @@ for ($i = 6; $i >= 0; $i--) {
                         Filter
                     </button>
                 </form>
-                <form method="POST">
-                    <button type="submit" name="export_csv" class="btn-primary header-action-btn"
-                        style="height: 42px; padding: 0 1.25rem; background: #0f172a; border-radius: 10px;">
-                        <i data-lucide="download" style="width:18px;"></i>
-                        <span class="desktop-only" style="margin-left: 6px;">Export CSV</span>
-                    </button>
-                </form>
+                <div style="display:flex; gap:8px;">
+                    <form method="POST">
+                        <button type="submit" name="export_csv" class="btn-primary header-action-btn"
+                            style="height: 42px; padding: 0 1.25rem; background: #0f172a; border-radius: 10px;">
+                            <i data-lucide="download" style="width:18px;"></i>
+                            <span class="desktop-only" style="margin-left: 6px;">CSV</span>
+                        </button>
+                    </form>
+                    <a href="attendance_report_print.php?date=<?= $filter_date ?>" target="_blank"
+                        class="btn-primary header-action-btn"
+                        style="height: 42px; padding: 0 1.25rem; background: #ef4444; border-radius: 10px; display: flex; align-items: center; text-decoration: none; color: white;">
+                        <i data-lucide="file-text" style="width:18px;"></i>
+                        <span class="desktop-only" style="margin-left: 6px;">Export PDF</span>
+                    </a>
+                </div>
             </div>
         </div>
 
