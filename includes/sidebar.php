@@ -300,7 +300,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                     </div>
                 </div>
 
-                <a href="#" class="nav-item">
+                <a href="admin_payroll.php" class="nav-item <?php echo isActive('admin_payroll'); ?>">
                     <i data-lucide="banknote" class="icon"></i>
                     <span>Payroll</span>
                 </a>
