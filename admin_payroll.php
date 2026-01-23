@@ -12,6 +12,16 @@ if ($_SESSION['user_role'] === 'Employee') {
 $month = $_GET['month'] ?? date('m');
 $year = $_GET['year'] ?? date('Y');
 
+// Validation: Prevent future months
+$current_month = (int) date('m');
+$current_year = (int) date('Y');
+
+if ((int) $year > $current_year || ((int) $year == $current_year && (int) $month > $current_month)) {
+    // Redirect to current month if future month is requested
+    header("Location: admin_payroll.php?month=" . date('m') . "&year=" . date('Y') . "&error=future_period");
+    exit;
+}
+
 // 2. Fetch Processed Payroll Records
 try {
     $sql = "SELECT p.*, e.first_name, e.last_name, e.employee_code, d.name as dept_name 
@@ -40,6 +50,13 @@ try {
 <div class="page-content">
     <?= isset($db_error) ? "<div class='alert error' style='background:#fee2e2; color:#991b1b; padding:1rem; border-radius:10px; margin-bottom:1rem;'><strong>Database Error:</strong> $db_error <br> Please run the payroll migration SQL.</div>" : "" ?>
 
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'future_period'): ?>
+        <div class="alert error"
+            style="background:#fee2e2; color:#991b1b; padding:1rem; border-radius:10px; margin-bottom:1rem;">
+            <strong>Restriction:</strong> Payroll cannot be generated or viewed for future periods.
+        </div>
+    <?php endif; ?>
+
     <div class="page-header-flex"
         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
@@ -65,9 +82,14 @@ try {
             <form method="GET" style="display: flex; gap: 10px;">
                 <select name="month" class="form-control"
                     style="flex: 2; padding: 0.6rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <?php for ($m = 1; $m <= 12; $m++): ?>
-                        <option value="<?= sprintf('%02d', $m) ?>" <?= $month == sprintf('%02d', $m) ? 'selected' : '' ?>>
-                            <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
+                    <?php for ($m = 1; $m <= 12; $m++):
+                        $m_str = sprintf('%02d', $m);
+                        $is_future = ($year == date('Y') && $m > (int) date('m'));
+                        if ($year > date('Y'))
+                            $is_future = true;
+                        ?>
+                        <option value="<?= $m_str ?>" <?= $month == $m_str ? 'selected' : '' ?>     <?= $is_future ? 'disabled style="color: #cbd5e1;"' : '' ?>>
+                            <?= date('F', mktime(0, 0, 0, $m, 1)) ?>     <?= $is_future ? '(Future)' : '' ?>
                         </option>
                     <?php endfor; ?>
                 </select>

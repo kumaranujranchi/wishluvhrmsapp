@@ -11,6 +11,16 @@ if ($_SESSION['user_role'] === 'Employee') {
 // 1. Get Filters
 $month = $_GET['month'] ?? date('m');
 $year = $_GET['year'] ?? date('Y');
+
+// Validation: Prevent future months
+$current_month = (int) date('m');
+$current_year = (int) date('Y');
+
+if ((int) $year > $current_year || ((int) $year == $current_year && (int) $month > $current_month)) {
+    header("Location: admin_payroll.php?month=" . date('m') . "&year=" . date('Y') . "&error=future_period");
+    exit;
+}
+
 $start_date = "$year-$month-01";
 $end_date = date('Y-m-t', strtotime($start_date));
 $num_days = date('t', strtotime($start_date));
@@ -123,6 +133,24 @@ foreach ($employees as $emp) {
     </div>
 
     <?= $message ?>
+
+    <?php if (empty($logs) && $month == date('m') && $year == date('Y')): ?>
+        <div class="alert warning"
+            style="background:#fff7ed; color:#9a3412; padding:1rem; border-radius:10px; border:1px solid #fed7aa; margin-bottom:1.5rem;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i data-lucide="alert-triangle"></i>
+                <div>
+                    <strong>Note:</strong> No attendance logs found for this period yet. If this is the current month,
+                    calculations show zero present days.
+                </div>
+            </div>
+        </div>
+    <?php elseif (empty($logs)): ?>
+        <div class="alert error"
+            style="background:#fee2e2; color:#991b1b; padding:1rem; border-radius:10px; margin-bottom:1.5rem;">
+            <strong>Warning:</strong> No attendance data found for this period. Payroll calculation might be incorrect.
+        </div>
+    <?php endif; ?>
 
     <form method="POST">
         <input type="hidden" name="action" value="confirm_payroll">
