@@ -26,7 +26,7 @@ $end_date = date('Y-m-t', strtotime($start_date));
 $num_days = date('t', strtotime($start_date));
 
 // 1.1 Fetch Holidays for this period
-$holiday_sql = "SELECT date FROM holidays WHERE (start_date BETWEEN :start AND :end OR end_date BETWEEN :start AND :end) AND is_active = 1";
+$holiday_sql = "SELECT date FROM holidays WHERE date BETWEEN :start AND :end AND is_active = 1";
 $holiday_stmt = $conn->prepare($holiday_sql);
 $holiday_stmt->execute(['start' => $start_date, 'end' => $end_date]);
 $holidays_list = $holiday_stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -40,22 +40,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     try {
         $conn->beginTransaction();
 
-        $upsert_sql = "INSERT INTO monthly_payroll 
-            (employee_id, month, year, total_working_days, present_days, absent_days, holiday_days, lop_days, base_salary, gross_salary, pf_deduction, esi_deduction, other_deductions, net_salary, status) 
-            VALUES (:emp_id, :month, :year, :total, :present, :absent, :holidays, :lop, :base, :gross, :pf, :esi, :other, :net, 'Processed')
-            ON DUPLICATE KEY UPDATE 
-            total_working_days = VALUES(total_working_days),
-            present_days = VALUES(present_days),
-            absent_days = VALUES(absent_days),
-            holiday_days = VALUES(holiday_days),
-            lop_days = VALUES(lop_days),
-            base_salary = VALUES(base_salary),
-            gross_salary = VALUES(gross_salary),
-            pf_deduction = VALUES(pf_deduction),
-            esi_deduction = VALUES(esi_deduction),
-            other_deductions = VALUES(other_deductions),
-            net_salary = VALUES(net_salary),
-            status = 'Processed'";
+        $upsert_sql = "INSERT INTO monthly_payroll
+(employee_id, month, year, total_working_days, present_days, absent_days, holiday_days, lop_days, base_salary,
+gross_salary, pf_deduction, esi_deduction, other_deductions, net_salary, status)
+VALUES (:emp_id, :month, :year, :total, :present, :absent, :holidays, :lop, :base, :gross, :pf, :esi, :other, :net,
+'Processed')
+ON DUPLICATE KEY UPDATE
+total_working_days = VALUES(total_working_days),
+present_days = VALUES(present_days),
+absent_days = VALUES(absent_days),
+holiday_days = VALUES(holiday_days),
+lop_days = VALUES(lop_days),
+base_salary = VALUES(base_salary),
+gross_salary = VALUES(gross_salary),
+pf_deduction = VALUES(pf_deduction),
+esi_deduction = VALUES(esi_deduction),
+other_deductions = VALUES(other_deductions),
+net_salary = VALUES(net_salary),
+status = 'Processed'";
 
         $stmt = $conn->prepare($upsert_sql);
 
@@ -89,7 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // 3. Fetch Employees & Attendance for Preview
-$emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code, salary FROM employees ORDER BY first_name ASC");
+$emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code, salary FROM employees ORDER BY first_name
+ASC");
 $employees = $emp_stmt->fetchAll();
 
 $att_sql = "SELECT employee_id, date, status FROM attendance WHERE date BETWEEN :start AND :end";
@@ -160,7 +163,7 @@ foreach ($employees as $emp) {
         'code' => $emp['employee_code'],
         'base_salary' => $base_salary,
         'present_days' => $total_punches, // Show total punches in the "Present" column
-        'wo_days' => $total_wo_in_month,   // Uniform for everyone
+        'wo_days' => $total_wo_in_month, // Uniform for everyone
         'holiday_days' => $total_holidays_in_month,
         'paid_days' => $paid_days,
         'absent_days' => max(0, $num_days - $paid_days),
