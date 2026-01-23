@@ -33,34 +33,7 @@ function formatDuration($total_minutes)
 }
 
 
-// CSV Export Logic (Must be BEFORE any HTML output)
-if (isset($_POST['export_csv'])) {
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="attendance_' . $filter_date . '.csv"');
-    $output = fopen('php://output', 'w');
 
-    // Add UTF-8 BOM for Excel compatibility with special characters (Hindi)
-    fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-    fputcsv($output, ['Employee', 'Code', 'Department', 'Date', 'Status', 'Clock In', 'Location In', 'Clock Out', 'Location Out', 'Total Hours']);
-
-    foreach ($attendance_records as $row) {
-        fputcsv($output, [
-            $row['first_name'] . ' ' . $row['last_name'],
-            $row['employee_code'],
-            $row['dept_name'],
-            $row['date'],
-            $row['status'],
-            $row['clock_in'],
-            $row['clock_in_address'],
-            $row['clock_out'],
-            $row['clock_out_address'],
-            formatDuration($row['total_hours'])
-        ]);
-    }
-    fclose($output);
-    exit;
-}
 
 include 'includes/header.php';
 
@@ -162,8 +135,7 @@ for ($i = 6; $i >= 0; $i--) {
         }
 
         .export-actions {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
+            display: flex !important;
             gap: 8px !important;
             width: 100% !important;
         }
@@ -242,14 +214,6 @@ for ($i = 6; $i >= 0; $i--) {
                     </button>
                 </form>
                 <div class="export-actions" style="display:flex; gap:8px;">
-                    <form method="POST">
-                        <button type="submit" name="export_csv" class="btn-primary header-action-btn"
-                            style="height: 42px; padding: 0 1.25rem; background: #0f172a; border-radius: 10px; display: flex; align-items: center;">
-                            <i data-lucide="download" style="width:18px;"></i>
-                            <span class="desktop-only" style="margin-left: 6px;">CSV</span>
-                            <span class="mobile-only" style="margin-left: 6px;">CSV</span>
-                        </button>
-                    </form>
                     <a href="attendance_report_print.php?date=<?= $filter_date ?>" target="_blank"
                         class="btn-primary header-action-btn"
                         style="height: 42px; padding: 0 1.25rem; background: #ef4444; border-radius: 10px; display: flex; align-items: center; text-decoration: none; color: white;">
