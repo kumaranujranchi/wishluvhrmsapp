@@ -104,7 +104,8 @@ try {
         $empStmt = $conn->prepare("SELECT shift_start_time FROM employees WHERE id = :uid");
         $empStmt->execute(['uid' => $userId]);
         $shiftStart = $empStmt->fetchColumn() ?: '10:00:00';
-        $status = (strtotime($currentTime) > strtotime($shiftStart)) ? 'Late' : 'On Time';
+        // Compare only hours and minutes to allow the 10:00 AM minute to be "On Time"
+        $status = (date('H:i', strtotime($currentTime)) > date('H:i', strtotime($shiftStart))) ? 'Late' : 'On Time';
 
         // Insert attendance record
         $stmt = $conn->prepare("
