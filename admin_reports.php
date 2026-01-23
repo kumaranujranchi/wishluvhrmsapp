@@ -26,12 +26,30 @@ if ($_SESSION['user_role'] === 'Employee') {
                     style="width: 60px; height: 60px; border-radius: 16px; background: #eff6ff; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
                     <i data-lucide="file-text" style="width: 30px; height: 30px; color: #3b82f6;"></i>
                 </div>
-                <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 700;">Attendance Report</h3>
-                <p style="color: #64748b; font-size: 0.9rem; margin-top: 8px;">Detailed attendance logs with date range
-                    and employee filtering.</p>
+                <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 700;">Detailed Attendance Log</h3>
+                <p style="color: #64748b; font-size: 0.9rem; margin-top: 8px;">View individual punch details with exact
+                    times and locations.</p>
                 <div
                     style="margin-top: 1.5rem; color: #3b82f6; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 4px;">
-                    Generate Report <i data-lucide="arrow-right" style="width: 14px;"></i>
+                    View Logs <i data-lucide="arrow-right" style="width: 14px;"></i>
+                </div>
+            </div>
+        </a>
+
+        <!-- Monthly Matrix Report Card -->
+        <a href="monthly_attendance_report.php" class="card"
+            style="text-decoration: none; transition: transform 0.3s; border: 1px solid #f1f5f9; cursor: pointer;">
+            <div style="padding: 2rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <div
+                    style="width: 60px; height: 60px; border-radius: 16px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+                    <i data-lucide="grid-3x3" style="width: 30px; height: 30px; color: #10b981;"></i>
+                </div>
+                <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 700;">Monthly Matrix Report</h3>
+                <p style="color: #64748b; font-size: 0.9rem; margin-top: 8px;">Grid-style overview of full month
+                    attendance for salary processing.</p>
+                <div
+                    style="margin-top: 1.5rem; color: #10b981; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 4px;">
+                    Generate Matrix <i data-lucide="arrow-right" style="width: 14px;"></i>
                 </div>
             </div>
         </a>
