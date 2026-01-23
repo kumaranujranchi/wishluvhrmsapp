@@ -218,8 +218,7 @@ for ($i = 6; $i >= 0; $i--) {
                         class="btn-primary header-action-btn"
                         style="height: 42px; padding: 0 1.25rem; background: #ef4444; border-radius: 10px; display: flex; align-items: center; text-decoration: none; color: white;">
                         <i data-lucide="file-text" style="width:18px;"></i>
-                        <span class="desktop-only" style="margin-left: 6px;">Export PDF</span>
-                        <span class="mobile-only" style="margin-left: 6px;">PDF</span>
+                        <span style="margin-left: 6px;">Daily Report</span>
                     </a>
                 </div>
             </div>
