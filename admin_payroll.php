@@ -13,24 +13,33 @@ $month = $_GET['month'] ?? date('m');
 $year = $_GET['year'] ?? date('Y');
 
 // 2. Fetch Processed Payroll Records
-$sql = "SELECT p.*, e.first_name, e.last_name, e.employee_code, d.name as dept_name 
-        FROM monthly_payroll p
-        JOIN employees e ON p.employee_id = e.id
-        LEFT JOIN departments d ON e.department_id = d.id
-        WHERE p.month = :month AND p.year = :year
-        ORDER BY e.first_name ASC";
-$stmt = $conn->prepare($sql);
-$stmt->execute(['month' => (int) $month, 'year' => (int) $year]);
-$records = $stmt->fetchAll();
+try {
+    $sql = "SELECT p.*, e.first_name, e.last_name, e.employee_code, d.name as dept_name 
+            FROM monthly_payroll p
+            JOIN employees e ON p.employee_id = e.id
+            LEFT JOIN departments d ON e.department_id = d.id
+            WHERE p.month = :month AND p.year = :year
+            ORDER BY e.first_name ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute(['month' => (int) $month, 'year' => (int) $year]);
+    $records = $stmt->fetchAll();
 
-// 3. Stats
-$total_net = 0;
-foreach ($records as $rec) {
-    $total_net += $rec['net_salary'];
+    // 3. Stats
+    $total_net = 0;
+    foreach ($records as $rec) {
+        $total_net += $rec['net_salary'];
+    }
+} catch (PDOException $e) {
+    // If table doesn't exist, records will be empty
+    $records = [];
+    $total_net = 0;
+    $db_error = $e->getMessage();
 }
 ?>
 
 <div class="page-content">
+    <?= isset($db_error) ? "<div class='alert error' style='background:#fee2e2; color:#991b1b; padding:1rem; border-radius:10px; margin-bottom:1rem;'><strong>Database Error:</strong> $db_error <br> Please run the payroll migration SQL.</div>" : "" ?>
+
     <div class="page-header-flex"
         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
