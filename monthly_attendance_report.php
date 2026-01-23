@@ -67,7 +67,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                 $log = $matrix[$emp['id']][$d];
                 $in = $log['clock_in'] ? date('H:i', strtotime($log['clock_in'])) : '-';
                 $out = $log['clock_out'] ? date('H:i', strtotime($log['clock_out'])) : '-';
-                $row[] = "$in / $out";
+                $row[] = "$in\n$out";
                 $present++;
                 if ($log['status'] === 'Late')
                     $late++;
@@ -264,7 +264,8 @@ include 'includes/header.php';
     <div class="report-heading-section">
         <h1 class="report-title">Monthly Attendance Report with (In\Out) Time</h1>
         <div class="report-subtitle">For Period: 01/<?= $month ?>/<?= $year ?> To
-            <?= $num_days ?>/<?= $month ?>/<?= $year ?></div>
+            <?= $num_days ?>/<?= $month ?>/<?= $year ?>
+        </div>
         <div style="font-weight: 700; color: #1e293b; margin-top: 8px;">Company Name : WISHLUV BUILDCON PVT LTD</div>
         <div style="font-size: 0.85rem; color: #475569;">Location : PATNA</div>
     </div>
