@@ -140,6 +140,8 @@ foreach ($employees as $emp) {
             color: var(--text-main);
             font-size: 11px;
             background: #fff;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .report-wrapper {
@@ -151,10 +153,12 @@ foreach ($employees as $emp) {
 
         .header {
             text-align: center;
-            background: #0891b2;
-            color: white;
+            background: #0891b2 !important;
+            color: white !important;
             padding: 12px;
             margin: -15px -15px 15px -15px;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .header h1 {
@@ -240,13 +244,15 @@ foreach ($employees as $emp) {
         }
 
         th {
-            background: #0891b2;
-            color: white;
+            background: #0891b2 !important;
+            color: white !important;
             text-align: left;
             padding: 8px 6px;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 9px;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         td {
@@ -264,24 +270,26 @@ foreach ($employees as $emp) {
             border-radius: 50px;
             font-weight: 700;
             font-size: 8px;
-            color: white;
+            color: white !important;
             text-transform: uppercase;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .status-ontime {
-            background: #10b981;
+            background-color: #10b981 !important;
         }
 
         .status-late {
-            background: #f59e0b;
+            background-color: #f59e0b !important;
         }
 
         .status-absent {
-            background: #ef4444;
+            background-color: #ef4444 !important;
         }
 
         .status-leave {
-            background: #a855f7;
+            background-color: #a855f7 !important;
         }
 
         .footer-note {
