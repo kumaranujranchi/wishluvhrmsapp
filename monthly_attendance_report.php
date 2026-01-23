@@ -60,6 +60,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         $late = 0;
 
         for ($d = 1; $d <= $num_days; $d++) {
+            $current_date = "$year-$month-" . sprintf('%02d', $d);
+            $is_tuesday = (date('l', strtotime($current_date)) === 'Tuesday');
+
             if (isset($matrix[$emp['id']][$d])) {
                 $log = $matrix[$emp['id']][$d];
                 $in = $log['clock_in'] ? date('H:i', strtotime($log['clock_in'])) : '-';
@@ -69,7 +72,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                 if ($log['status'] === 'Late')
                     $late++;
             } else {
-                $row[] = 'A';
+                $row[] = $is_tuesday ? 'W/O' : 'A';
             }
         }
         $row[] = $present;
@@ -84,36 +87,62 @@ include 'includes/header.php';
 ?>
 
 <style>
+    .matrix-container {
+        padding: 2rem;
+        background: #f8fafc;
+        min-height: 100vh;
+    }
+
+    .report-heading-section {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .report-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #0f172a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .report-subtitle {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
     .matrix-table-wrapper {
         overflow-x: auto;
         background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        border: 1px solid #f1f5f9;
-        margin-top: 1.5rem;
+        box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
     }
 
     .matrix-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
 
     .matrix-table th,
     .matrix-table td {
-        border: 1px solid #f1f5f9;
-        padding: 8px 4px;
+        border: 1px solid #e2e8f0;
+        padding: 6px 2px;
         text-align: center;
-        min-width: 60px;
+        min-width: 55px;
     }
 
     .matrix-table th {
-        background: #f8fafc;
+        background: #f1f5f9;
         font-weight: 700;
-        color: #475569;
+        color: #334155;
         position: sticky;
         top: 0;
         z-index: 10;
+        padding: 10px 4px;
     }
 
     .matrix-table .emp-col {
@@ -122,101 +151,135 @@ include 'includes/header.php';
         background: #f8fafc;
         z-index: 20;
         text-align: left;
-        min-width: 180px;
+        min-width: 160px;
         padding-left: 12px;
+        border-right: 2px solid #e2e8f0;
     }
 
     .matrix-table td.emp-col {
         background: white;
         font-weight: 600;
+        color: #1e293b;
+    }
+
+    .punch-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        line-height: 1;
+        justify-content: center;
+        height: 100%;
     }
 
     .time-val {
         display: block;
-        line-height: 1.2;
+        font-weight: 500;
+    }
+
+    .time-in {
+        color: #059669;
+    }
+
+    .time-out {
+        color: #2563eb;
     }
 
     .status-a {
         color: #ef4444;
+        font-weight: 800;
+        font-size: 0.8rem;
+    }
+
+    .status-wo {
+        color: #64748b;
+        font-weight: 800;
+        font-size: 0.75rem;
+        background: #f1f5f9;
+        display: block;
+        padding: 4px 0;
+    }
+
+    .summary-col {
         font-weight: 700;
+        background: #f8fafc;
     }
 
-    .status-present {
-        color: #10b981;
-    }
-
-    .status-late {
-        color: #f59e0b;
+    .no-print {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e2e8f0;
     }
 </style>
 
-<div class="page-content">
-    <div class="page-header-flex"
-        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <div>
-            <h2 style="margin: 0; font-size: 1.5rem; color: #1e293b; font-weight: 700;">Monthly Matrix Report</h2>
-            <p style="color: #64748b; margin-top: 4px;">Matrix view of attendance for
-                <?= date('F Y', strtotime($start_date)) ?>
-            </p>
+<div class="matrix-container">
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 1rem; align-items: end;">
+            <form method="GET" style="display: flex; gap: 0.75rem; align-items: end;">
+                <div class="form-group">
+                    <label
+                        style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px;">MONTH</label>
+                    <select name="month"
+                        style="padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem;">
+                        <?php for ($m = 1; $m <= 12; $m++): ?>
+                            <option value="<?= sprintf('%02d', $m) ?>" <?= $month == sprintf('%02d', $m) ? 'selected' : '' ?>>
+                                <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
+                            </option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label
+                        style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px;">YEAR</label>
+                    <select name="year"
+                        style="padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem;">
+                        <?php for ($y = date('Y'); $y >= date('Y') - 2; $y--): ?>
+                            <option value="<?= $y ?>" <?= $year == $y ? 'selected' : '' ?>><?= $y ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <button type="submit"
+                    style="background: #6366f1; color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer; height: 36px;">
+                    Apply
+                </button>
+            </form>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <a href="admin_reports.php" class="btn-secondary"
-                style="text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 10px; display: flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; font-weight: 600; font-size: 0.85rem;">
-                <i data-lucide="arrow-left" style="width: 16px;"></i> Back
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="admin_reports.php"
+                style="text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; background: #f1f5f9; color: #475569; font-weight: 600; font-size: 0.85rem; border: 1px solid #e2e8f0;">
+                Back
             </a>
-            <a href="?<?= http_build_query(array_merge($_GET, ['export' => 'csv'])) ?>" class="btn-primary"
-                style="text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 10px; display: flex; align-items: center; gap: 8px; background: #0f172a; color: white; font-weight: 600; font-size: 0.85rem;">
-                <i data-lucide="download" style="width: 16px;"></i> Export CSV
+            <a href="?<?= http_build_query(array_merge($_GET, ['export' => 'csv'])) ?>"
+                style="text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; background: #0f172a; color: white; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="download" style="width: 14px;"></i> CSV Export
             </a>
+            <button onclick="window.print()"
+                style="padding: 0.5rem 1rem; border-radius: 6px; background: #059669; color: white; font-weight: 600; font-size: 0.85rem; border: none; cursor: pointer;">
+                Print PDF
+            </button>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem; border: 1px solid #f1f5f9;">
-        <form method="GET" style="display: flex; gap: 1.25rem; align-items: end; flex-wrap: wrap;">
-            <div class="form-group">
-                <label
-                    style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Month</label>
-                <select name="month" class="form-control"
-                    style="padding: 0.5rem; border-radius: 8px; border: 1px solid #e2e8f0; min-width: 140px;">
-                    <?php for ($m = 1; $m <= 12; $m++): ?>
-                        <option value="<?= sprintf('%02d', $m) ?>" <?= $month == sprintf('%02d', $m) ? 'selected' : '' ?>>
-                            <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
-                        </option>
-                    <?php endfor; ?>
-                </select>
-            </div>
-            <div class="form-group">
-                <label
-                    style="display: block; font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px;">Year</label>
-                <select name="year" class="form-control"
-                    style="padding: 0.5rem; border-radius: 8px; border: 1px solid #e2e8f0; min-width: 100px;">
-                    <?php for ($y = date('Y'); $y >= date('Y') - 2; $y--): ?>
-                        <option value="<?= $y ?>" <?= $year == $y ? 'selected' : '' ?>>
-                            <?= $y ?>
-                        </option>
-                    <?php endfor; ?>
-                </select>
-            </div>
-            <button type="submit" class="btn-primary"
-                style="height: 38px; padding: 0 1.5rem; border: none; border-radius: 8px; background: #6366f1; color: white; font-weight: 600; cursor: pointer;">
-                View Report
-            </button>
-        </form>
+    <div class="report-heading-section">
+        <h1 class="report-title">Monthly Attendance Report with (In\Out) Time</h1>
+        <div class="report-subtitle">For Period: 01/<?= $month ?>/<?= $year ?> To
+            <?= $num_days ?>/<?= $month ?>/<?= $year ?></div>
+        <div style="font-weight: 700; color: #1e293b; margin-top: 8px;">Company Name : WISHLUV BUILDCON PVT LTD</div>
+        <div style="font-size: 0.85rem; color: #475569;">Location : PATNA</div>
     </div>
 
     <div class="matrix-table-wrapper">
         <table class="matrix-table">
             <thead>
                 <tr>
-                    <th class="emp-col">Employee Name</th>
+                    <th class="emp-col" style="min-width: 50px;">Code</th>
+                    <th class="emp-col" style="left: 62px; min-width: 150px;">Emp Name</th>
                     <?php for ($d = 1; $d <= $num_days; $d++): ?>
-                        <th>
-                            <?= $d ?>
-                        </th>
+                        <th><?= $d ?></th>
                     <?php endfor; ?>
-                    <th style="background: #f0fdf4; color: #166534;">Pres.</th>
-                    <th style="background: #fffbeb; color: #92400e;">Late</th>
+                    <th class="summary-col">Pres.</th>
+                    <th class="summary-col">Late</th>
                 </tr>
             </thead>
             <tbody>
@@ -226,13 +289,17 @@ include 'includes/header.php';
                     $late_count = 0;
                     ?>
                     <tr>
-                        <td class="emp-col">
+                        <td class="emp-col" style="min-width: 50px;">
+                            <?= $emp['employee_code'] ?>
+                        </td>
+                        <td class="emp-col" style="left: 62px; min-width: 150px;">
                             <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>
-                            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 400;">
-                                <?= $emp['employee_code'] ?>
-                            </div>
                         </td>
                         <?php for ($d = 1; $d <= $num_days; $d++): ?>
+                            <?php
+                            $current_date = "$year-$month-" . sprintf('%02d', $d);
+                            $is_tuesday = (date('l', strtotime($current_date)) === 'Tuesday');
+                            ?>
                             <td>
                                 <?php if (isset($matrix[$emp['id']][$d])): ?>
                                     <?php
@@ -240,32 +307,33 @@ include 'includes/header.php';
                                     $present_count++;
                                     if ($log['status'] === 'Late')
                                         $late_count++;
-                                    $statusClass = ($log['status'] === 'Late') ? 'status-late' : 'status-present';
                                     ?>
-                                    <div class="<?= $statusClass ?>">
-                                        <span class="time-val">
-                                            <?= $log['clock_in'] ? date('H:i', strtotime($log['clock_in'])) : '--' ?>
-                                        </span>
-                                        <span class="time-val">
-                                            <?= $log['clock_out'] ? date('H:i', strtotime($log['clock_out'])) : '--' ?>
-                                        </span>
+                                    <div class="punch-cell">
+                                        <span
+                                            class="time-val time-in"><?= $log['clock_in'] ? date('H:i', strtotime($log['clock_in'])) : '---' ?></span>
+                                        <span
+                                            class="time-val time-out"><?= $log['clock_out'] ? date('H:i', strtotime($log['clock_out'])) : '---' ?></span>
                                     </div>
+                                <?php elseif ($is_tuesday): ?>
+                                    <span class="status-wo">W/O</span>
                                 <?php else: ?>
                                     <span class="status-a">A</span>
                                 <?php endif; ?>
                             </td>
                         <?php endfor; ?>
-                        <td style="font-weight: 700; background: #f0fdf4;">
-                            <?= $present_count ?>
-                        </td>
-                        <td style="font-weight: 700; background: #fffbeb;">
-                            <?= $late_count ?>
-                        </td>
+                        <td class="summary-col" style="color: #059669;"><?= $present_count ?></td>
+                        <td class="summary-col" style="color: #d97706;"><?= $late_count ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>
 
 <?php include 'includes/footer.php'; ?>
