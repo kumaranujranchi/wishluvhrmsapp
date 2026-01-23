@@ -149,6 +149,12 @@ try {
                             style="padding: 1rem; text-align: right; font-size: 0.85rem; font-weight: 700; color: #475569; border-bottom: 1px solid #f1f5f9;">
                             Base Salary</th>
                         <th
+                            style="padding: 1rem; text-align: center; font-size: 0.85rem; font-weight: 700; color: #475569; border-bottom: 1px solid #f1f5f9;">
+                            Holiday/LOP</th>
+                        <th
+                            style="padding: 1rem; text-align: right; font-size: 0.85rem; font-weight: 700; color: #475569; border-bottom: 1px solid #f1f5f9;">
+                            Deductions</th>
+                        <th
                             style="padding: 1rem; text-align: right; font-size: 0.85rem; font-weight: 700; color: #475569; border-bottom: 1px solid #f1f5f9;">
                             Net Payout</th>
                         <th
@@ -195,6 +201,16 @@ try {
                                 </td>
                                 <td style="padding: 1rem; text-align: right; font-weight: 500; color: #64748b;">₹
                                     <?= number_format($row['base_salary'], 2) ?>
+                                </td>
+                                <td style="padding: 1rem; text-align: center; font-size: 0.85rem;">
+                                    <span style="color: #6366f1; font-weight: 600;"
+                                        title="Holidays"><?= $row['holiday_days'] ?>H</span> /
+                                    <span style="color: #ef4444; font-weight: 600;"
+                                        title="LOP Days"><?= $row['lop_days'] ?>L</span>
+                                </td>
+                                <td style="padding: 1rem; text-align: right; font-size: 0.85rem; color: #ef4444;">
+                                    <?php $total_ded = $row['pf_deduction'] + $row['esi_deduction'] + $row['other_deductions']; ?>
+                                    ₹ <?= number_format($total_ded, 2) ?>
                                 </td>
                                 <td
                                     style="padding: 1rem; text-align: right; font-weight: 800; color: #6366f1; font-size: 1rem;">

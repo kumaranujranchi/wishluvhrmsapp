@@ -25,6 +25,13 @@ $start_date = "$year-$month-01";
 $end_date = date('Y-m-t', strtotime($start_date));
 $num_days = date('t', strtotime($start_date));
 
+// 1.1 Fetch Holidays for this period
+$holiday_sql = "SELECT date FROM holidays WHERE (start_date BETWEEN :start AND :end OR end_date BETWEEN :start AND :end) AND is_active = 1";
+$holiday_stmt = $conn->prepare($holiday_sql);
+$holiday_stmt->execute(['start' => $start_date, 'end' => $end_date]);
+$holidays_list = $holiday_stmt->fetchAll(PDO::FETCH_COLUMN);
+$holiday_count_total = count($holidays_list);
+
 // 2. Handle Save Action (POST)
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'confirm_payroll') {
@@ -34,13 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $conn->beginTransaction();
 
         $upsert_sql = "INSERT INTO monthly_payroll 
-            (employee_id, month, year, total_working_days, present_days, absent_days, base_salary, net_salary, status) 
-            VALUES (:emp_id, :month, :year, :total, :present, :absent, :base, :net, 'Processed')
+            (employee_id, month, year, total_working_days, present_days, absent_days, holiday_days, lop_days, base_salary, gross_salary, pf_deduction, esi_deduction, other_deductions, net_salary, status) 
+            VALUES (:emp_id, :month, :year, :total, :present, :absent, :holidays, :lop, :base, :gross, :pf, :esi, :other, :net, 'Processed')
             ON DUPLICATE KEY UPDATE 
             total_working_days = VALUES(total_working_days),
             present_days = VALUES(present_days),
             absent_days = VALUES(absent_days),
+            holiday_days = VALUES(holiday_days),
+            lop_days = VALUES(lop_days),
             base_salary = VALUES(base_salary),
+            gross_salary = VALUES(gross_salary),
+            pf_deduction = VALUES(pf_deduction),
+            esi_deduction = VALUES(esi_deduction),
+            other_deductions = VALUES(other_deductions),
             net_salary = VALUES(net_salary),
             status = 'Processed'";
 
@@ -49,12 +62,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         foreach ($payout_data as $emp_id => $data) {
             $stmt->execute([
                 'emp_id' => $emp_id,
-                'month' => $month,
-                'year' => $year,
+                'month' => (int) $month,
+                'year' => (int) $year,
                 'total' => $num_days,
                 'present' => $data['present_days'],
                 'absent' => $data['absent_days'],
+                'holidays' => $data['holiday_days'],
+                'lop' => $data['lop_days'],
                 'base' => $data['base_salary'],
+                'gross' => $data['base_salary'], // Assuming gross same as base for now or per row
+                'pf' => $data['pf_deduction'],
+                'esi' => $data['esi_deduction'],
+                'other' => $data['other_deductions'],
                 'net' => $data['net_salary']
             ]);
         }
@@ -85,27 +104,52 @@ foreach ($logs as $log) {
     $attendance_map[$log['employee_id']][$day] = $log['status'];
 }
 
-// 4. Calculate Paid Days
+// 4. Calculate Paid Days (Uniform Weekly Offs & Holidays)
+
+// 4.1 Count total Tuesdays and Holidays in the month
+$tuesdays_list = [];
+for ($d = 1; $d <= $num_days; $d++) {
+    $curr_date = "$year-$month-" . sprintf('%02d', $d);
+    if (date('l', strtotime($curr_date)) === 'Tuesday') {
+        $tuesdays_list[] = $d;
+    }
+}
+$total_wo_in_month = count($tuesdays_list);
+$total_holidays_in_month = count($holidays_list);
+
 $payroll_preview = [];
 foreach ($employees as $emp) {
-    $present_count = 0;
-    $wo_count = 0;
+    $present_regular_count = 0; // Punches on days that are NOT Tuesday or Holiday
 
     for ($d = 1; $d <= $num_days; $d++) {
         $current_date = "$year-$month-" . sprintf('%02d', $d);
-        $is_tuesday = (date('l', strtotime($current_date)) === 'Tuesday');
+        $is_wo_or_holiday = (date('l', strtotime($current_date)) === 'Tuesday' || in_array($current_date, $holidays_list));
 
         if (isset($attendance_map[$emp['id']][$d])) {
             $status = $attendance_map[$emp['id']][$d];
-            if ($status !== 'Absent') {
-                $present_count++;
+            if ($status !== 'Absent' && !$is_wo_or_holiday) {
+                $present_regular_count++;
             }
-        } elseif ($is_tuesday) {
-            $wo_count++;
         }
     }
 
-    $paid_days = $present_count + $wo_count;
+    // Total Paid Days = Actual Punches (on regular days) + Fixed Weekly Offs + Fixed Holidays
+    $paid_days = $present_regular_count + $total_wo_in_month + $total_holidays_in_month;
+
+    // Special Rule: Anuj Kumar (Admin) gets full pay
+    if ($emp['first_name'] === 'Anuj' && $emp['last_name'] === 'Kumar') {
+        $paid_days = $num_days;
+    }
+
+    // For "Present" column, we can still show total punches for transparency
+    $total_punches = 0;
+    if (isset($attendance_map[$emp['id']])) {
+        foreach ($attendance_map[$emp['id']] as $st) {
+            if ($st !== 'Absent')
+                $total_punches++;
+        }
+    }
+
     $base_salary = $emp['salary'] ?: 0;
     $daily_rate = $base_salary / $num_days;
     $net_salary = round($daily_rate * $paid_days, 2);
@@ -115,10 +159,11 @@ foreach ($employees as $emp) {
         'name' => $emp['first_name'] . ' ' . $emp['last_name'],
         'code' => $emp['employee_code'],
         'base_salary' => $base_salary,
-        'present_days' => $present_count,
-        'wo_days' => $wo_count,
+        'present_days' => $total_punches, // Show total punches in the "Present" column
+        'wo_days' => $total_wo_in_month,   // Uniform for everyone
+        'holiday_days' => $total_holidays_in_month,
         'paid_days' => $paid_days,
-        'absent_days' => $num_days - $paid_days,
+        'absent_days' => max(0, $num_days - $paid_days),
         'net_salary' => $net_salary
     ];
 }
@@ -126,7 +171,7 @@ foreach ($employees as $emp) {
 
 <div class="page-content">
     <div class="page-header" style="margin-bottom: 2rem;">
-        <h2 style="margin: 0; font-size: 1.5rem; color: #1e293b; font-weight: 700;">Payroll Preview:
+        <h2 style="margin: 0; font-size: 1.5rem; color: #1e293b; font-weight: 700;">Payroll Preview v2:
             <?= date('F Y', strtotime($start_date)) ?>
         </h2>
         <p style="color: #64748b; margin-top: 4px;">Review calculated salaries before confirming generation.</p>
@@ -163,8 +208,10 @@ foreach ($employees as $emp) {
                             <th style="padding: 1rem; text-align: center;">Monthly Salary</th>
                             <th style="padding: 1rem; text-align: center;">Present</th>
                             <th style="padding: 1rem; text-align: center;">Weekly Off</th>
-                            <th style="padding: 1rem; text-align: center;">Total Paid Days</th>
-                            <th style="padding: 1rem; text-align: right;">Calculated Net Payout</th>
+                            <th style="padding: 1rem; text-align: center;">Paid Days / Total</th>
+                            <th style="padding: 1rem; text-align: center; color: #ef4444;">LOP Days</th>
+                            <th style="padding: 1rem; text-align: center;">Deductions (PF/ESI/Other)</th>
+                            <th style="padding: 1rem; text-align: right;">Net Payout</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -177,15 +224,17 @@ foreach ($employees as $emp) {
                                     <div style="font-size: 0.75rem; color: #64748b;">
                                         <?= $p['code'] ?>
                                     </div>
-                                    <!-- Hidden inputs for form submission -->
+                                    <!-- Hidden inputs -->
                                     <input type="hidden" name="payout[<?= $p['id'] ?>][base_salary]"
                                         value="<?= $p['base_salary'] ?>">
                                     <input type="hidden" name="payout[<?= $p['id'] ?>][present_days]"
                                         value="<?= $p['present_days'] ?>">
                                     <input type="hidden" name="payout[<?= $p['id'] ?>][absent_days]"
                                         value="<?= $p['absent_days'] ?>">
-                                    <input type="hidden" name="payout[<?= $p['id'] ?>][net_salary]"
-                                        value="<?= $p['net_salary'] ?>">
+                                    <input type="hidden" name="payout[<?= $p['id'] ?>][holiday_days]"
+                                        value="<?= $p['holiday_days'] ?>">
+                                    <input type="hidden" id="net_plain_<?= $p['id'] ?>"
+                                        name="payout[<?= $p['id'] ?>][net_salary]" value="<?= $p['net_salary'] ?>">
                                 </td>
                                 <td style="padding: 1rem; text-align: center; color: #64748b;">₹
                                     <?= number_format($p['base_salary'], 2) ?>
@@ -197,13 +246,33 @@ foreach ($employees as $emp) {
                                     <?= $p['wo_days'] ?>
                                 </td>
                                 <td style="padding: 1rem; text-align: center; font-weight: 700; background: #f8fafc;">
-                                    <?= $p['paid_days'] ?> /
+                                    <span id="paid_days_display_<?= $p['id'] ?>"><?= $p['paid_days'] ?></span> /
                                     <?= $num_days ?>
+                                </td>
+                                <td style="padding: 1rem; text-align: center;">
+                                    <input type="number" step="0.5" name="payout[<?= $p['id'] ?>][lop_days]"
+                                        class="form-control lop-input" data-emp-id="<?= $p['id'] ?>"
+                                        data-base="<?= $p['base_salary'] ?>" data-total-days="<?= $num_days ?>"
+                                        data-initial-paid="<?= $p['paid_days'] ?>" value="0"
+                                        style="width: 70px; text-align: center; border-radius: 6px;">
+                                </td>
+                                <td style="padding: 1rem; text-align: center;">
+                                    <div style="display: flex; gap: 5px; justify-content: center;">
+                                        <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][pf_deduction]"
+                                            class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>"
+                                            placeholder="PF" style="width: 80px; font-size: 0.8rem;" value="0">
+                                        <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][esi_deduction]"
+                                            class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>"
+                                            placeholder="ESI" style="width: 80px; font-size: 0.8rem;" value="0">
+                                        <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][other_deductions]"
+                                            class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>"
+                                            placeholder="Other" style="width: 80px; font-size: 0.8rem;" value="0">
+                                    </div>
                                 </td>
                                 <td
                                     style="padding: 1rem; text-align: right; font-weight: 800; color: #6366f1; font-size: 1rem;">
-                                    ₹
-                                    <?= number_format($p['net_salary'], 2) ?>
+                                    ₹ <span
+                                        id="net_display_<?= $p['id'] ?>"><?= number_format($p['net_salary'], 2) ?></span>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -226,3 +295,42 @@ foreach ($employees as $emp) {
 </div>
 
 <?php include 'includes/footer.php'; ?>
+<script>
+    document.querySelectorAll('.lop-input, .deduction-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const empId = this.dataset.empId;
+            calculateNet(empId);
+        });
+    });
+
+    function calculateNet(empId) {
+        const row = document.querySelector(`input[name="payout[${empId}][lop_days]"]`);
+        const base = parseFloat(row.dataset.base);
+        const totalDays = parseInt(row.dataset.totalDays);
+        const initialPaid = parseFloat(row.dataset.initialPaid);
+        const lop = parseFloat(row.value) || 0;
+
+        // Select deductions
+        const pfInput = document.querySelector(`input[name="payout[${empId}][pf_deduction]"]`);
+        const esiInput = document.querySelector(`input[name="payout[${empId}][esi_deduction]"]`);
+        const otherInput = document.querySelector(`input[name="payout[${empId}][other_deductions]"]`);
+
+        const pf = parseFloat(pfInput.value) || 0;
+        const esi = parseFloat(esiInput.value) || 0;
+        const other = parseFloat(otherInput.value) || 0;
+
+        // Calculate final paid days
+        const finalPaidDays = initialPaid - lop;
+        document.getElementById(`paid_days_display_${empId}`).innerText = finalPaidDays;
+
+        // Calculate Net
+        const dailyRate = base / totalDays;
+        let net = (dailyRate * finalPaidDays) - (pf + esi + other);
+        net = Math.round(net * 100) / 100;
+        if (net < 0) net = 0;
+
+        // Update displays
+        document.getElementById(`net_display_${empId}`).innerText = net.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        document.getElementById(`net_plain_${empId}`).value = net;
+    }
+</script>
