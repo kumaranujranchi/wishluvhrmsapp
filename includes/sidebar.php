@@ -165,7 +165,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                 <div class="nav-group">
                     <?php
                     // pages for the parent group to be open
-                    $attendanceLeavePages = ['attendance', 'regularization_manage', 'leave_admin', 'leave'];
+                    $attendanceLeavePages = ['attendance', 'regularization_manage', 'leave_admin', 'leave', 'attendance_report', 'admin_reports'];
                     $attendanceLeaveState = isGroupOpen($attendanceLeavePages);
                     ?>
                     <button class="nav-item dropdown-btn <?= $attendanceLeaveState ?>"
@@ -219,6 +219,13 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                                 </a>
                             </div>
                         </div>
+
+                        <!-- Reports Link -->
+                        <a href="admin_reports.php"
+                            class="sub-nav-item <?php echo isActive('admin_reports') || isActive('attendance_report'); ?>">
+                            <i data-lucide="file-bar-chart" class="icon" style="width:16px;height:16px;"></i>
+                            <span>Reports</span>
+                        </a>
                     </div>
                 </div>
 
