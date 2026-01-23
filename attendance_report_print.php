@@ -18,6 +18,7 @@ $location = "PATNA";
 $sql_employees = "SELECT e.id, e.employee_code, e.first_name, e.last_name, d.name as dept_name 
                   FROM employees e 
                   LEFT JOIN departments d ON e.department_id = d.id 
+                  WHERE e.role != 'Admin'
                   ORDER BY e.first_name ASC";
 $employees = $conn->query($sql_employees)->fetchAll();
 
