@@ -134,10 +134,9 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                             style="transition: transform 0.2s; transform: <?= strpos($payrollState, 'open') !== false ? 'rotate(90deg)' : 'rotate(0deg)' ?>"></i>
                     </button>
                     <div id="payrollSubNav" class="sub-nav <?= strpos($payrollState, 'open') !== false ? 'open' : '' ?>">
-                        <a href="javascript:void(0)" class="sub-nav-item">
+                        <a href="salary_slips.php" class="sub-nav-item <?php echo isActive('salary_slips'); ?>">
                             <i data-lucide="file-down" class="icon" style="width:16px;height:16px;"></i>
-                            <span>Download Salary Slip <span style="font-size: 0.7rem; opacity: 0.7;">(Coming
-                                    Soon)</span></span>
+                            <span>Download Salary Slip</span>
                         </a>
                     </div>
                 </div>
