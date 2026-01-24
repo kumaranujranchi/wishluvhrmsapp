@@ -37,7 +37,8 @@ try {
         </div>
     <?php endif; ?>
 
-    <div class="card"
+    <!-- DESKTOP TABLE VIEW -->
+    <div class="card desktop-only"
         style="padding: 0; overflow: hidden; border: 1px solid #f1f5f9; background: white; border-radius: 16px;">
         <div class="table-responsive">
             <table class="table" style="width: 100%; border-collapse: collapse;">
@@ -106,6 +107,88 @@ try {
             </table>
         </div>
     </div>
+
+    <!-- MOBILE CARD VIEW -->
+    <div class="mobile-only">
+        <?php if (empty($slips)): ?>
+            <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+                <i data-lucide="file-x" style="width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.5;"></i>
+                <div>No salary slips available yet.</div>
+            </div>
+        <?php else: ?>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <?php foreach ($slips as $slip):
+                    $dateObj = DateTime::createFromFormat('!m', $slip['month']);
+                    $monthName = $dateObj->format('F');
+                    ?>
+                    <div class="card"
+                        style="padding: 1.25rem; border-radius: 16px; border: 1px solid #f1f5f9; background: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b;"><?= $monthName ?>
+                                    <?= $slip['year'] ?></h3>
+                                <p style="margin: 4px 0 0; font-size: 0.75rem; color: #64748b;">
+                                    #PAY-<?= $slip['year'] ?><?= sprintf('%02d', $slip['month']) ?>-<?= $slip['id'] ?></p>
+                            </div>
+                            <span
+                                style="background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
+                                <?= $slip['status'] ?>
+                            </span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                            <div style="background: #f8fafc; padding: 10px; border-radius: 10px;">
+                                <div style="font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Net
+                                    Payout</div>
+                                <div style="font-size: 1.1rem; font-weight: 800; color: #059669; margin-top: 2px;">
+                                    ₹<?= number_format($slip['net_salary'], 2) ?></div>
+                            </div>
+                            <div style="background: #f8fafc; padding: 10px; border-radius: 10px;">
+                                <div style="font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase;">
+                                    Paid Days</div>
+                                <div style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-top: 2px;">
+                                    <?= $slip['present_days'] + $slip['holiday_days'] ?> <span
+                                        style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">/
+                                        <?= $slip['total_working_days'] ?></span></div>
+                            </div>
+                        </div>
+
+                        <a href="salary_slip_view.php?id=<?= $slip['id'] ?>" target="_blank" class="btn-primary"
+                            style="text-decoration: none; padding: 0.8rem; border-radius: 12px; font-size: 0.95rem; background: #6366f1; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 600; width: 100%; box-sizing: border-box;">
+                            <i data-lucide="printer" style="width: 18px;"></i> View / Print Slip
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
 </div>
+
+<style>
+    /* Default: Show Desktop, Hide Mobile */
+    .desktop-only {
+        display: block;
+    }
+
+    .mobile-only {
+        display: none;
+    }
+
+    /* Mobile Logic */
+    @media (max-width: 768px) {
+        .page-content {
+            padding: 1rem;
+        }
+
+        .desktop-only {
+            display: none !important;
+        }
+
+        .mobile-only {
+            display: block !important;
+        }
+    }
+</style>
 
 <?php include 'includes/footer.php'; ?>
