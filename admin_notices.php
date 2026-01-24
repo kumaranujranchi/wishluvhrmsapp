@@ -27,16 +27,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = trim($_POST['title']);
     $content = trim($_POST['content']);
     $urgency = $_POST['urgency'];
+    $is_popup = isset($_POST['is_popup']) ? 1 : 0;
     $admin_id = $_SESSION['user_id'];
 
     if (!empty($title) && !empty($content)) {
         try {
-            $stmt = $conn->prepare("INSERT INTO notices (title, content, urgency, created_by) VALUES (:title, :content, :urgency, :created_by)");
+            $stmt = $conn->prepare("INSERT INTO notices (title, content, urgency, created_by, is_popup) VALUES (:title, :content, :urgency, :created_by, :is_popup)");
             $stmt->execute([
                 'title' => $title,
                 'content' => $content,
                 'urgency' => $urgency,
-                'created_by' => $admin_id
+                'created_by' => $admin_id,
+                'is_popup' => $is_popup
             ]);
             $message = "<div class='alert success'>Notice published successfully!</div>";
 
@@ -108,6 +110,11 @@ $notices = $conn->query("SELECT n.*, (SELECT COUNT(*) FROM notice_reads WHERE no
                         <option value="Urgent">Urgent</option>
                     </select>
                 </div>
+                <div class="form-check" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" name="is_popup" id="is_popup" value="1" style="width: 18px; height: 18px;">
+                    <label for="is_popup" style="margin: 0; font-weight: 500; cursor: pointer;">Send as Pop-up
+                        Notification (Mandatory Read)</label>
+                </div>
                 <div class="form-group">
                     <label>Content <span class="text-danger">*</span></label>
                     <textarea name="content" class="form-control" rows="5" placeholder="Write your notice here..."
@@ -145,6 +152,10 @@ $notices = $conn->query("SELECT n.*, (SELECT COUNT(*) FROM notice_reads WHERE no
                                         </div>
                                         <div style="font-size: 0.75rem; color: #64748b;">
                                             <?= date('d M Y, h:i A', strtotime($row['created_at'])) ?>
+                                            <?php if (!empty($row['is_popup'])): ?>
+                                                <span class="badge"
+                                                    style="background:#6366f1; color:white; font-size:0.7rem; margin-left:5px; padding: 2px 6px;">Pop-up</span>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                     <td>
