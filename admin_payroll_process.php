@@ -202,7 +202,9 @@ try {
                             <th style="padding: 1rem; text-align: center;">Weekly Off</th>
                             <th style="padding: 1rem; text-align: center;">Paid Days / Total</th>
                             <th style="padding: 1rem; text-align: center; color: #ef4444;">LOP Days</th>
-                            <th style="padding: 1rem; text-align: center;">Deductions</th>
+                            <th style="padding: 1rem; text-align: center;">PF</th>
+                            <th style="padding: 1rem; text-align: center;">ESI</th>
+                            <th style="padding: 1rem; text-align: center;">Other Ded.</th>
                             <th style="padding: 1rem; text-align: right;">Net Payout</th>
                         </tr>
                     </thead>
@@ -231,11 +233,13 @@ try {
                                            style="width: 70px; text-align: center; border-radius: 6px;">
                                 </td>
                                 <td style="padding: 1rem; text-align: center;">
-                                    <div style="display: flex; gap: 4px; justify-content: center;">
-                                        <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][pf_deduction]" class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>" placeholder="PF" style="width: 70px; font-size: 0.75rem;" value="0">
-                                        <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][esi_deduction]" class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>" placeholder="ESI" style="width: 70px; font-size: 0.75rem;" value="0">
-                                        <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][other_deductions]" class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>" placeholder="Oth" style="width: 70px; font-size: 0.75rem;" value="0">
-                                    </div>
+                                    <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][pf_deduction]" class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>" placeholder="PF" style="width: 70px; font-size: 0.85rem; text-align:center;" value="0">
+                                </td>
+                                <td style="padding: 1rem; text-align: center;">
+                                    <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][esi_deduction]" class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>" placeholder="ESI" style="width: 70px; font-size: 0.85rem; text-align:center;" value="0">
+                                </td>
+                                <td style="padding: 1rem; text-align: center;">
+                                    <input type="number" step="0.01" name="payout[<?= $p['id'] ?>][other_deductions]" class="form-control deduction-input" data-emp-id="<?= $p['id'] ?>" placeholder="Other" style="width: 70px; font-size: 0.85rem; text-align:center;" value="0">
                                 </td>
                                 <td style="padding: 1rem; text-align: right; font-weight: 800; color: #6366f1;">
                                     ₹ <span id="net_display_<?= $p['id'] ?>"><?= number_format($p['net_salary'], 2) ?></span>
