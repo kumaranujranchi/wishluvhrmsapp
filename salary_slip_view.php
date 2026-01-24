@@ -14,7 +14,7 @@ $slip_id = $_GET['id'] ?? 0;
 try {
     // Fetch Slip Data + Employee Data + Department + Designation
     $sql = "SELECT p.*, e.first_name, e.last_name, e.employee_code, e.joining_date,
-            d.name as dept_name, des.title as designation_title,
+            d.name as dept_name, des.name as designation_title,
             e.pan_number, e.uan_number, e.bank_account_no
             FROM monthly_payroll p
             JOIN employees e ON p.employee_id = e.id
