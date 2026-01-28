@@ -262,18 +262,27 @@ $requests = $stmt->fetchAll();
                                             <?= htmlspecialchars($req['reason']) ?>
                                         </p>
                                     </td>
-                                    <td style="text-align:right; display: flex; gap: 5px; justify-content: flex-end;">
-                                        <button class="btn-icon" style="color:#64748b; background:#f1f5f9;"
+                                    <td
+                                        style="text-align:right; display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                                        <!-- Delete Button (Icon) -->
+                                        <button class="btn-icon"
+                                            style="color:#64748b; background:#f1f5f9; padding: 6px; border-radius: 6px; border:none; cursor:pointer;"
                                             onclick="openDeleteModal(<?= $req['id'] ?>)" title="Delete Request">
-                                            <i data-lucide="trash-2"></i>
+                                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
                                         </button>
-                                        <button class="btn-icon" style="color:#10b981; background:#dcfce7;"
-                                            onclick="openActionModal(<?= $req['id'] ?>, 'Approved')">
-                                            <i data-lucide="check-circle"></i>
-                                        </button>
-                                        <button class="btn-icon" style="color:#ef4444; background:#fee2e2;"
+
+                                        <!-- Reject Button (Text) -->
+                                        <button class="btn-primary"
+                                            style="background: #ef4444; border:none; padding: 0.4rem 1rem; font-size: 0.85rem;"
                                             onclick="openActionModal(<?= $req['id'] ?>, 'Rejected')">
-                                            <i data-lucide="x-circle"></i>
+                                            Reject
+                                        </button>
+
+                                        <!-- Approve Button (Text) -->
+                                        <button class="btn-primary"
+                                            style="background: #10b981; border:none; padding: 0.4rem 1rem; font-size: 0.85rem;"
+                                            onclick="openActionModal(<?= $req['id'] ?>, 'Approved')">
+                                            Approve
                                         </button>
                                     </td>
                                 </tr>

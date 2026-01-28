@@ -500,8 +500,8 @@ $employees = $stmt->fetchAll();
                     </div>
 
                     <div class="form-group">
-                        <label>Clock Out *</label>
-                        <input type="time" name="clock_out" required>
+                        <label>Clock Out</label>
+                        <input type="time" name="clock_out">
                     </div>
                 </div>
 

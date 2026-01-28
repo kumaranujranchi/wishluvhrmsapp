@@ -19,8 +19,8 @@ $clock_out = $_POST['clock_out'] ?? '';
 $reason = trim($_POST['reason'] ?? '');
 
 // Validation
-if (empty($employee_id) || empty($attendance_date) || empty($clock_in) || empty($clock_out) || empty($reason)) {
-    echo json_encode(['success' => false, 'message' => 'All fields are required']);
+if (empty($employee_id) || empty($attendance_date) || empty($clock_in) || empty($reason)) {
+    echo json_encode(['success' => false, 'message' => 'All fields are required except Clock Out']);
     exit;
 }
 
@@ -33,16 +33,22 @@ if (strtotime($attendance_date) > time()) {
 try {
     $conn->beginTransaction();
 
-    // Calculate total minutes
-    $in_time = new DateTime($clock_in);
-    $out_time = new DateTime($clock_out);
-    $interval = $in_time->diff($out_time);
-    $total_minutes = ($interval->h * 60) + $interval->i;
+    // Calculate total minutes if clock_out is provided
+    $total_minutes = 0;
+    $clock_out_val = null;
 
+    if (!empty($clock_out)) {
+        $clock_out_val = $clock_out;
+        $in_time = new DateTime($clock_in);
+        $out_time = new DateTime($clock_out);
+        $interval = $in_time->diff($out_time);
+        $total_minutes = ($interval->h * 60) + $interval->i;
+    }
 
     // Determine status
     $status = 'On Time';
     $in_time_val = strtotime($clock_in);
+    // Late threshold 10:00 AM
     if (date('H:i', $in_time_val) > '10:00') {
         $status = 'Late';
     }
@@ -63,7 +69,7 @@ try {
         ");
         $stmt->execute([
             'clock_in' => $clock_in,
-            'clock_out' => $clock_out,
+            'clock_out' => $clock_out_val,
             'hours' => $total_minutes,
             'status' => $status,
             'admin_id' => $admin_id,
@@ -81,7 +87,7 @@ try {
             'emp_id' => $employee_id,
             'date' => $attendance_date,
             'clock_in' => $clock_in,
-            'clock_out' => $clock_out,
+            'clock_out' => $clock_out_val,
             'hours' => $total_minutes,
             'status' => $status,
             'admin_id' => $admin_id,
@@ -89,7 +95,7 @@ try {
         ]);
     }
 
-    // Log the direct regularization (optional - create a record in regularization table for tracking)
+    // Log the direct regularization
     $stmt = $conn->prepare("
         INSERT INTO attendance_regularization 
         (employee_id, attendance_date, requested_clock_in, requested_clock_out, reason, request_type, requested_by, status, reviewed_by, reviewed_at, admin_remarks)
@@ -99,7 +105,7 @@ try {
         'emp_id' => $employee_id,
         'date' => $attendance_date,
         'clock_in' => $clock_in,
-        'clock_out' => $clock_out,
+        'clock_out' => $clock_out_val,
         'reason' => $reason,
         'admin_id' => $admin_id
     ]);

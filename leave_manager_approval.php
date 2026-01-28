@@ -35,6 +35,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt = $conn->prepare($update_sql);
             $stmt->execute(['status' => $status, 'remarks' => $remarks, 'id' => $request_id]);
             $action_message = "<div class='alert success'>Review submitted successfully!</div>";
+
+            // --- NOTIFY ADMIN IF APPROVED ---
+            if ($status === 'Approved') {
+                require_once 'config/email.php';
+
+                // Fetch Request Details for Email
+                $detSql = "SELECT e.first_name, e.last_name, e.employee_code, l.leave_type, l.start_date, l.end_date, l.reason 
+                           FROM leave_requests l 
+                           JOIN employees e ON l.employee_id = e.id 
+                           WHERE l.id = :id";
+                $detStmt = $conn->prepare($detSql);
+                $detStmt->execute(['id' => $request_id]);
+                $reqData = $detStmt->fetch();
+
+                if ($reqData) {
+                    $empName = $reqData['first_name'] . ' ' . $reqData['last_name'];
+                    // Notify Admin
+                    $admins = $conn->query("SELECT email FROM employees WHERE role = 'Admin'")->fetchAll();
+                    foreach ($admins as $admin) {
+                        if (!empty($admin['email'])) {
+                            $body = getHtmlEmailTemplate(
+                                "Manager Approved: Leave Request",
+                                "<p><strong>$empName</strong>'s leave request has been approved by their manager and is pending your final approval.</p>
+                                  <ul>
+                                    <li><strong>Type:</strong> {$reqData['leave_type']}</li>
+                                    <li><strong>Dates:</strong> " . date('d M', strtotime($reqData['start_date'])) . " - " . date('d M', strtotime($reqData['end_date'])) . "</li>
+                                  </ul>",
+                                "https://wishluvbuildcon.com/hrms/leave_admin.php",
+                                "Approve Leave"
+                            );
+                            sendEmail($admin['email'], "Action Required: Leave Approval", $body);
+                        }
+                    }
+                }
+            }
+
         } else {
             $action_message = "<div class='alert error'>Unauthorized action.</div>";
         }
@@ -170,7 +206,8 @@ $requests = $stmt->fetchAll();
                                     </div>
                                     <div>
                                         <div style="font-weight: 600; color: #1e293b;">
-                                            <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?></div>
+                                            <?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?>
+                                        </div>
                                         <div style="font-size: 0.75rem; color: #64748b;">
                                             <?= date('d M', strtotime($req['start_date'])) ?> -
                                             <?= date('d M', strtotime($req['end_date'])) ?>

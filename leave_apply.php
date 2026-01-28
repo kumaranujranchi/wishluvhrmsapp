@@ -33,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $manager_status = ($mgrRole === 'Admin') ? 'Approved' : 'Pending';
 
-            $sql = "INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason, manager_status) 
-                     VALUES (:uid, :type, :start, :end, :reason, :mstatus)";
+            $sql = "INSERT INTO leave_requests (employee_id, leave_type, start_date, end_date, reason, manager_status, admin_status, status) 
+                     VALUES (:uid, :type, :start, :end, :reason, :mstatus, 'Pending', 'Pending')";
             try {
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([
