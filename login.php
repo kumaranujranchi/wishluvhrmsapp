@@ -35,6 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 header("Pragma: no-cache");
 
                 $role = trim($user['role']); // Ensure no whitespace issues
+
+                // Kiosk Mode Redirection
+                if ($user['email'] === 'kiosk@wishluvbuildcon.com') {
+                    header("Location: kiosk_attendance.php");
+                    exit;
+                }
+
                 if (strtolower($role) === 'employee') {
                     header("Location: employee_dashboard.php");
                 } else {
