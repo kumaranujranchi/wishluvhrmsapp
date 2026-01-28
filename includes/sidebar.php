@@ -21,7 +21,7 @@ $userRole = $_SESSION['user_role'] ?? 'Super Admin';
 $userDesignation = $_SESSION['user_designation'] ?? $userRole; // Use designation for display
 $userInitials = strtoupper(substr($userName, 0, 2));
 ?>
-<?php if (!defined('IS_KIOSK')): ?>
+<?php if (!defined('IS_KIOSK') && (!isset($_SESSION['user_email']) || $_SESSION['user_email'] !== 'kiosk@wishluvbuildcon.com')): ?>
     <aside class="sidebar">
         <div class="sidebar-inner">
             <div class="sidebar-header">

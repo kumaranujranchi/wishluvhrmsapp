@@ -42,6 +42,15 @@
         exit;
     }
 
+    // Redirection for Kiosk User: If logged in as Kiosk, stay on kiosk page
+    if (isset($_SESSION['user_email']) && $_SESSION['user_email'] === 'kiosk@wishluvbuildcon.com') {
+        $current_page = basename($_SERVER['PHP_SELF']);
+        if ($current_page !== 'kiosk_attendance.php' && $current_page !== 'logout.php') {
+            header('Location: kiosk_attendance.php');
+            exit;
+        }
+    }
+
     // Prevent caching of pages with user-specific data
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
     header("Cache-Control: post-check=0, pre-check=0", false);
@@ -516,7 +525,7 @@
     </script>
 
     <!-- Mobile Sidebar Overlay -->
-    <?php if (!defined('IS_KIOSK')): ?>
+    <?php if (!defined('IS_KIOSK') && (!isset($_SESSION['user_email']) || $_SESSION['user_email'] !== 'kiosk@wishluvbuildcon.com')): ?>
         <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
     <?php endif; ?>
 </head>
@@ -528,7 +537,7 @@
 
         <div class="main-content">
             <!-- Header (Unified Responsive) -->
-            <?php if (!defined('IS_KIOSK')): ?>
+            <?php if (!defined('IS_KIOSK') && (!isset($_SESSION['user_email']) || $_SESSION['user_email'] !== 'kiosk@wishluvbuildcon.com')): ?>
                 <header class="header glass-panel">
                     <!-- Mobile: Profile Link (Left) -->
                     <!-- Mobile: Hamburger Menu (Left) -->

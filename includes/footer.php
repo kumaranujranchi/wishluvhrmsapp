@@ -1,7 +1,7 @@
 <?php include 'includes/confirm_modal.php'; ?>
 </div> <!-- End Main Content -->
 </div> <!-- End App Container -->
-<?php if (!defined('IS_KIOSK')): ?>
+<?php if (!defined('IS_KIOSK') && (!isset($_SESSION['user_email']) || $_SESSION['user_email'] !== 'kiosk@wishluvbuildcon.com')): ?>
     <?php include 'includes/mobile_nav.php'; ?>
 <?php endif; ?>
 
@@ -9,7 +9,7 @@
 <script src="assets/js/pwa.js"></script>
 
 <!-- Chatbot UI -->
-<?php if (!defined('IS_KIOSK')): ?>
+<?php if (!defined('IS_KIOSK') && (!isset($_SESSION['user_email']) || $_SESSION['user_email'] !== 'kiosk@wishluvbuildcon.com')): ?>
     <div class="chatbot-container">
         <div class="chat-bubble" id="chatBubble">
             <i data-lucide="message-circle-more" style="width: 30px; height: 30px;"></i>
@@ -52,7 +52,7 @@
 </script>
 
 <!-- Chatbot JS -->
-<?php if (!defined('IS_KIOSK')): ?>
+<?php if (!defined('IS_KIOSK') && (!isset($_SESSION['user_email']) || $_SESSION['user_email'] !== 'kiosk@wishluvbuildcon.com')): ?>
     <script src="assets/js/chatbot.js"></script>
 <?php endif; ?>
 

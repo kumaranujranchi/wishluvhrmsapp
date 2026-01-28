@@ -170,6 +170,7 @@ function drawFaceMesh(points) {
 async function processAttendance() {
     isProcessing = true;
     document.getElementById('hudStatus').textContent = 'Analyzing Biometrics...';
+    document.getElementById('scanningLine').classList.add('active'); // Start Anim
     playRoboticSound('scan'); // Blip
 
     // Capture Image
@@ -213,6 +214,7 @@ async function processAttendance() {
             document.getElementById('hudStatus').textContent = 'Connection Error';
         } finally {
             isProcessing = false;
+            document.getElementById('scanningLine').classList.remove('active'); // Stop Anim
              // Reset Status text after delay if not success
              if(document.getElementById('hudStatus').textContent !== 'Attendance Recorded') {
                  setTimeout(() => {
@@ -234,12 +236,16 @@ function showResult(data) {
     const time = document.getElementById('resultTime');
 
     name.textContent = data.employee_name;
-    time.textContent = data.message;
+    
+    // Explicit In/Out confirmation
+    const actionText = data.type === 'in' ? 'Punch-In Successful' : 'Punch-Out Successful';
+    time.textContent = data.message + ' • ' + actionText;
+    
     avatar.src = data.avatar || 'assets/logo.png'; // Fallback
     
     card.classList.add('visible');
     
-    document.getElementById('hudStatus').textContent = 'Attendance Recorded';
+    document.getElementById('hudStatus').textContent = actionText;
 
     // Hide after 3 seconds
     setTimeout(() => {

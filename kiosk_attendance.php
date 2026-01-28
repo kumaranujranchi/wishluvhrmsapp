@@ -173,16 +173,39 @@ include 'includes/header.php';
 
     @keyframes scan-vertical {
         0% {
-            clip-path: inset(0 0 100% 0);
+            transform: translateY(0);
+            opacity: 0;
         }
 
-        50% {
-            clip-path: inset(0 0 0 0);
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
         }
 
         100% {
-            clip-path: inset(100% 0 0 0);
+            transform: translateY(100vh);
+            opacity: 0;
         }
+    }
+
+    .scanning-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(to bottom, rgba(99, 102, 241, 0), #6366f1, rgba(99, 102, 241, 0));
+        z-index: 150;
+        display: none;
+        box-shadow: 0 0 15px #6366f1;
+    }
+
+    .scanning-line.active {
+        display: block;
+        animation: scan-vertical 2s linear infinite;
     }
 
     .recognition-result {
@@ -268,6 +291,7 @@ include 'includes/header.php';
 <div class="kiosk-overlay" id="kioskOverlay">
     <div class="video-container">
         <video id="kioskVideo" autoplay playsinline muted></video>
+        <div class="scanning-line" id="scanningLine"></div>
         <!-- Overlay Canvas Removed -->
 
         <!-- Visual Guide Frame -->
