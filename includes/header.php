@@ -516,7 +516,9 @@
     </script>
 
     <!-- Mobile Sidebar Overlay -->
-    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+    <?php if (!defined('IS_KIOSK')): ?>
+        <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+    <?php endif; ?>
 </head>
 
 <body>
@@ -526,55 +528,57 @@
 
         <div class="main-content">
             <!-- Header (Unified Responsive) -->
-            <header class="header glass-panel">
-                <!-- Mobile: Profile Link (Left) -->
-                <!-- Mobile: Hamburger Menu (Left) -->
-                <button class="mobile-only action-icon-btn" onclick="toggleMobileSidebar()"
-                    style="border:none; background:transparent; padding:0; margin-right:5px;">
-                    <i data-lucide="menu" style="width: 28px; height: 28px; color: #1e293b;"></i>
-                </button>
-
-                <!-- Desktop: Hamburger (Hidden on mobile) -->
-
-                <div style="flex: 1; margin-left: 10px;">
-                    <h2 class="header-greeting">
-                        <?php
-                        $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
-                        echo '<span class="mobile-only">Hello, ' . htmlspecialchars($display_name) . '!</span>';
-                        // Desktop name removed to avoid duplication
-                        ?>
-                    </h2>
-                    <div class="header-date">
-                        <i data-lucide="calendar-days" class="desktop-only"></i>
-                        <span class="desktop-only"><?= date('l, d F Y') ?></span>
-                        <span class="date-separator desktop-only"></span>
-                        <i data-lucide="clock" class="desktop-only"></i>
-                        <span class="desktop-only" id="live-time"></span>
-                    </div>
-                </div>
-
-                <div class="header-actions">
-                    <!-- Chat Toggle (Mobile Only) -->
-                    <button onclick="toggleMobileChat()" class="mobile-only action-icon-btn">
-                        <i data-lucide="message-circle"></i>
+            <?php if (!defined('IS_KIOSK')): ?>
+                <header class="header glass-panel">
+                    <!-- Mobile: Profile Link (Left) -->
+                    <!-- Mobile: Hamburger Menu (Left) -->
+                    <button class="mobile-only action-icon-btn" onclick="toggleMobileSidebar()"
+                        style="border:none; background:transparent; padding:0; margin-right:5px;">
+                        <i data-lucide="menu" style="width: 28px; height: 28px; color: #1e293b;"></i>
                     </button>
 
-                    <?php
-                    $unread_stmt = $conn->prepare("
+                    <!-- Desktop: Hamburger (Hidden on mobile) -->
+
+                    <div style="flex: 1; margin-left: 10px;">
+                        <h2 class="header-greeting">
+                            <?php
+                            $display_name = $_SESSION['first_name'] ?? explode(' ', $_SESSION['user_name'] ?? 'User')[0];
+                            echo '<span class="mobile-only">Hello, ' . htmlspecialchars($display_name) . '!</span>';
+                            // Desktop name removed to avoid duplication
+                            ?>
+                        </h2>
+                        <div class="header-date">
+                            <i data-lucide="calendar-days" class="desktop-only"></i>
+                            <span class="desktop-only"><?= date('l, d F Y') ?></span>
+                            <span class="date-separator desktop-only"></span>
+                            <i data-lucide="clock" class="desktop-only"></i>
+                            <span class="desktop-only" id="live-time"></span>
+                        </div>
+                    </div>
+
+                    <div class="header-actions">
+                        <!-- Chat Toggle (Mobile Only) -->
+                        <button onclick="toggleMobileChat()" class="mobile-only action-icon-btn">
+                            <i data-lucide="message-circle"></i>
+                        </button>
+
+                        <?php
+                        $unread_stmt = $conn->prepare("
                         SELECT COUNT(*) FROM notices n 
                         WHERE n.id NOT IN (SELECT notice_id FROM notice_reads WHERE employee_id = :uid)
                     ");
-                    $unread_stmt->execute(['uid' => $_SESSION['user_id']]);
-                    $unread_count = $unread_stmt->fetchColumn();
-                    ?>
-                    <a href="view_notices.php" class="action-icon-btn notification-bell" title="Notifications">
-                        <i data-lucide="bell"></i>
-                        <?php if ($unread_count > 0): ?>
-                            <span class="notification-badge"><?= $unread_count ?></span>
-                        <?php endif; ?>
-                    </a>
-                </div>
-            </header>
+                        $unread_stmt->execute(['uid' => $_SESSION['user_id']]);
+                        $unread_count = $unread_stmt->fetchColumn();
+                        ?>
+                        <a href="view_notices.php" class="action-icon-btn notification-bell" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="notification-badge"><?= $unread_count ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                </header>
+            <?php endif; ?>
 
             <!-- Custom Global Modal Structure -->
             <div id="customModalOverlay" class="custom-modal-overlay" style="display: none;">

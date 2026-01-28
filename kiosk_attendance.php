@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_email'] !== 'kiosk@wishluvbu
     exit;
 }
 
+define('IS_KIOSK', true); // generic flag to hide sidebar/header
 include 'includes/header.php';
 ?>
 

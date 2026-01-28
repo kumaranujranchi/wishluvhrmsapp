@@ -92,19 +92,23 @@ async function startKioskMode() {
         return;
     }
 
-    // Load Models if not loaded
+    // Load Models
     if (!modelLoaded) {
         document.getElementById('hudStatus').textContent = 'Loading AI Models...';
-        await faceapi.nets.tinyFaceDetector.loadFromUri('/assets/models'); // You might need to adjust path or use CDN
-        // Fallback to CDN if local fails (simulated here by just using CDN logic internally if needed, 
-        // but for this example we assume standard CDN loading from the script tag usage or local assets)
-        
-        // ACTUALLY: The script tag loads face-api, but models need to be fetched.
-        // We will use the CDN hosted models for simplicity in this artifactless environment
-        await faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
-        
-        modelLoaded = true;
+        const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+
+        try {
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+            ]);
+            modelLoaded = true;
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load AI models. Please check your internet connection.');
+            stopKioskMode();
+            return;
+        }
     }
 
     document.getElementById('hudStatus').textContent = 'Scanning for Lifeforms...';
