@@ -9,6 +9,11 @@ let modelLoaded = false;
 let lastProcessTime = 0;
 const PROCESS_INTERVAL = 3000; // time between server checks (ms)
 let isProcessing = false;
+let countdownInterval = null;
+let countdownValue = 3;
+let faceStableStartTime = null;
+const STABLE_THRESHOLD = 500; // ms face must be stable to start countdown
+const MODELS_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
 // --- AUDIO SYSTEM ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -93,10 +98,31 @@ async function startKioskMode() {
         return;
     }
 
-    document.getElementById('hudStatus').textContent = 'Camera Active. Tap Scan to Punch.';
-    isScanning = true;
+    document.getElementById('hudStatus').textContent = 'Loading AI Models...';
     
-    // Show manual scan button in HUD if not already there
+    // Load Models (Try-Catch with Timeout)
+    try {
+        if (!modelLoaded) {
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_URL),
+                faceapi.nets.faceLandmark68Net.loadFromUri(MODELS_URL)
+            ]);
+            modelLoaded = true;
+            console.log("AI Models Loaded");
+        }
+    } catch (err) {
+        console.error("AI Model Load Fail:", err);
+        document.getElementById('hudStatus').textContent = 'AI Model Error. Manual Mode Ready.';
+        // Fallback to manual button if models fail
+        showManualButton();
+    }
+
+    document.getElementById('hudStatus').textContent = 'Scanning... Align your face.';
+    isScanning = true;
+    detectLoop();
+}
+
+function showManualButton() {
     let scanBtn = document.getElementById('manualScanBtn');
     if (!scanBtn) {
         scanBtn = document.createElement('button');
@@ -107,7 +133,7 @@ async function startKioskMode() {
         scanBtn.style.left = '50%';
         scanBtn.style.transform = 'translateX(-50%)';
         scanBtn.style.zIndex = '1000';
-        scanBtn.innerHTML = '<i data-lucide="scan-face" style="width:24px;margin-right:8px;"></i> SCAN FACE';
+        scanBtn.innerHTML = '<i data-lucide="scan-face" style="width:24px;margin-right:8px;"></i> SCAN MANUALLY';
         scanBtn.onclick = processAttendance;
         document.querySelector('.video-container').appendChild(scanBtn);
         if(typeof lucide !== 'undefined') lucide.createIcons();
@@ -123,8 +149,87 @@ function stopKioskMode() {
     }
 }
 
-// No detection loop needed for manual scan
-async function detectLoop() { return; }
+// Auto-detection loop
+async function detectLoop() {
+    if (!isScanning || isProcessing || !modelLoaded) return;
+
+    try {
+        const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+        const detection = await faceapi.detectSingleFace(video, options);
+
+        if (detection) {
+            const box = detection.box;
+            const isCentered = isFaceCentered(box);
+            const isLargeEnough = box.width > 150;
+
+            if (isCentered && isLargeEnough) {
+                if (!faceStableStartTime) {
+                    faceStableStartTime = Date.now();
+                } else if (Date.now() - faceStableStartTime > STABLE_THRESHOLD) {
+                    if (!countdownInterval) {
+                        startCountdown();
+                    }
+                }
+            } else {
+                resetCountdown('Keep your face centered');
+            }
+        } else {
+            resetCountdown('Scanning for face...');
+        }
+    } catch (err) {
+        console.error("Detect Error:", err);
+    }
+
+    requestAnimationFrame(detectLoop);
+}
+
+function isFaceCentered(box) {
+    const videoCenterX = video.videoWidth / 2;
+    const videoCenterY = video.videoHeight / 2;
+    const faceCenterX = box.x + box.width / 2;
+    const faceCenterY = box.y + box.height / 2;
+    
+    const threshold = 100; // Allow 100px variance
+    return Math.abs(faceCenterX - videoCenterX) < threshold && 
+           Math.abs(faceCenterY - videoCenterY) < threshold;
+}
+
+function startCountdown() {
+    countdownValue = 3;
+    const overlay = document.getElementById('countdownOverlay');
+    overlay.textContent = countdownValue;
+    overlay.classList.add('visible');
+    document.getElementById('hudStatus').textContent = `STAY STILL...`;
+    playRoboticSound('scan');
+
+    countdownInterval = setInterval(() => {
+        countdownValue--;
+        if (countdownValue > 0) {
+            overlay.textContent = countdownValue;
+            playRoboticSound('scan');
+        } else {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            overlay.classList.remove('visible');
+            document.getElementById('hudStatus').textContent = 'CAPTURING...';
+            processAttendance();
+        }
+    }, 1000);
+}
+
+function resetCountdown(status) {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    const overlay = document.getElementById('countdownOverlay');
+    if(overlay) overlay.classList.remove('visible');
+    
+    faceStableStartTime = null;
+    if (!isProcessing) {
+        document.getElementById('hudStatus').textContent = status;
+    }
+}
 
 function drawFuturisticBox(box) {
     const ctx = overlayCtx;

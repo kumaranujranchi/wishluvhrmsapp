@@ -208,6 +208,24 @@ include 'includes/header.php';
         animation: scan-scoped 2s linear infinite;
     }
 
+    .countdown-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 8rem;
+        font-weight: 900;
+        color: white;
+        text-shadow: 0 0 20px rgba(99, 102, 241, 0.8);
+        z-index: 2100;
+        pointer-events: none;
+        display: none;
+    }
+
+    .countdown-text.visible {
+        display: block;
+    }
+
     @keyframes scan-scoped {
         0% {
             transform: translateY(0);
@@ -305,7 +323,7 @@ include 'includes/header.php';
     <p style="color: #94a3b8; margin-top: 1rem;">Touch the button below to mark your attendance using face verification.
     </p>
 
-    <button class="capture-btn-lg" onclick="startKioskMode()">
+    <button class="capture-btn-lg" onclick="startKioskMode()" id="startKioskBtn">
         <i data-lucide="scan-face" style="width: 32px; height: 32px;"></i>
         Capture Attendance
     </button>
@@ -322,6 +340,7 @@ include 'includes/header.php';
         <div class="face-guide-overlay" id="faceGuide"
             style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 380px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 40%; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);">
             <div class="scanning-line" id="scanningLine"></div>
+            <div class="countdown-text" id="countdownOverlay">3</div>
             <div
                 style="position: absolute; bottom: -30px; width: 100%; text-align: center; color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">
                 Align Face Here</div>
