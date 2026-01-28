@@ -64,9 +64,7 @@ async function startKioskMode() {
     
     video = document.getElementById('kioskVideo');
     canvas = document.createElement('canvas'); // hidden canvas for capture
-    overlayCanvas = document.getElementById('overlayCanvas');
-    overlayCtx = overlayCanvas.getContext('2d');
-
+    
     // Initialize Camera
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -78,11 +76,8 @@ async function startKioskMode() {
         });
         video.srcObject = stream;
         
-        // Wait for video to properly load and PLAY
         await new Promise((resolve) => {
             video.onloadedmetadata = () => {
-                overlayCanvas.width = video.videoWidth;
-                overlayCanvas.height = video.videoHeight;
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 video.play().then(resolve).catch(err => {
@@ -98,71 +93,31 @@ async function startKioskMode() {
         return;
     }
 
-    // Load Models (Check again)
-    if (!modelLoaded) {
-           // ... (existing model loading code is fine) ...
-           // Re-inserting the previous model loading block here for context if needed, 
-           // but the user's issue is AFTER loading. 
-           // I will assume the previous tool call fixed the loading part.
-    }
-    
-    // Ensure models are actually there
-    if (!faceapi.nets.tinyFaceDetector.params) {
-         document.getElementById('hudStatus').textContent = 'Model Error. Reloading...';
-         location.reload(); 
-         return;
-    }
-
-    document.getElementById('hudStatus').textContent = 'Scanning for Lifeforms...';
+    document.getElementById('hudStatus').textContent = 'Camera Active. Tap Scan to Punch.';
     isScanning = true;
-    detectLoop();
+    
+    // Show manual scan button in HUD if not already there
+    let scanBtn = document.getElementById('manualScanBtn');
+    if (!scanBtn) {
+        scanBtn = document.createElement('button');
+        scanBtn.id = 'manualScanBtn';
+        scanBtn.className = 'capture-btn-lg'; 
+        scanBtn.style.position = 'absolute';
+        scanBtn.style.bottom = '100px';
+        scanBtn.style.left = '50%';
+        scanBtn.style.transform = 'translateX(-50%)';
+        scanBtn.style.zIndex = '1000';
+        scanBtn.innerHTML = '<i data-lucide="scan-face" style="width:24px;margin-right:8px;"></i> SCAN FACE';
+        scanBtn.onclick = processAttendance;
+        document.querySelector('.video-container').appendChild(scanBtn);
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+    }
 }
 
 // ... stopKioskMode ...
 
-async function detectLoop() {
-    if (!isScanning) return;
-
-    try {
-        // Lower threshold to 0.4 for better detection in varied light
-        const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 });
-        const detection = await faceapi.detectSingleFace(video, options).withFaceLandmarks();
-
-        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-        if (detection) {
-            document.getElementById('hudStatus').textContent = 'Tracking Face...';
-            
-            const dims = faceapi.matchDimensions(overlayCanvas, video, true);
-            const resized = faceapi.resizeResults(detection, dims);
-
-            // 1. Draw "Futuristic" Box
-            const box = resized.detection.box;
-            drawFuturisticBox(box);
-
-            // 2. Draw Points
-            drawFaceMesh(resized.landmarks.positions);
-
-            // 3. Process Attendance
-            const now = Date.now();
-            if (!isProcessing && (now - lastProcessTime > PROCESS_INTERVAL)) {
-                if (box.width > 120) { // Slightly reduced size req
-                    processAttendance();
-                } else {
-                     document.getElementById('hudStatus').textContent = 'Move Closer';
-                }
-            }
-        } else {
-            // Give user feedback if we are scanning but seeing nothing
-             if(!isProcessing) document.getElementById('hudStatus').textContent = 'Scanning... No Face Detected';
-        }
-    } catch (err) {
-        console.error("Detection Error:", err);
-        document.getElementById('hudStatus').textContent = 'AI Error: ' + err.message;
-    }
-
-    requestAnimationFrame(detectLoop);
-}
+// No detection loop needed for manual scan
+async function detectLoop() { return; }
 
 function drawFuturisticBox(box) {
     const ctx = overlayCtx;

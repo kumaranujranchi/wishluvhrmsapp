@@ -268,7 +268,7 @@ include 'includes/header.php';
 <div class="kiosk-overlay" id="kioskOverlay">
     <div class="video-container">
         <video id="kioskVideo" autoplay playsinline muted></video>
-        <canvas id="overlayCanvas"></canvas>
+        <!-- Overlay Canvas Removed -->
 
         <!-- Visual Guide Frame -->
         <div class="face-guide-overlay"
