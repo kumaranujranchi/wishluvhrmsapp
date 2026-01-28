@@ -107,7 +107,13 @@ try {
         $type = "out";
     } else {
         // Already done for the day
-        echo json_encode(['success' => true, 'employee_name' => $employee['first_name'], 'avatar' => $employee['avatar'], 'message' => 'Attendance Already Complete']);
+        echo json_encode([
+            'success' => true,
+            'employee_name' => $employee['first_name'],
+            'avatar' => $employee['avatar'],
+            'message' => 'Your Punches are Complete for today.',
+            'type' => 'complete'
+        ]);
         exit;
     }
 

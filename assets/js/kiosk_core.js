@@ -114,7 +114,14 @@ async function startKioskMode() {
     }
 }
 
-// ... stopKioskMode ...
+function stopKioskMode() {
+    isScanning = false;
+    document.getElementById('kioskOverlay').classList.remove('active');
+    
+    if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+    }
+}
 
 // No detection loop needed for manual scan
 async function detectLoop() { return; }
@@ -238,8 +245,12 @@ function showResult(data) {
     name.textContent = data.employee_name;
     
     // Explicit In/Out confirmation
-    const actionText = data.type === 'in' ? 'Punch-In Successful' : 'Punch-Out Successful';
-    time.textContent = data.message + ' • ' + actionText;
+    let actionText = 'Attendance Recorded';
+    if (data.type === 'in') actionText = 'Punch-In Successful';
+    else if (data.type === 'out') actionText = 'Punch-Out Successful';
+    else if (data.type === 'complete') actionText = 'Punches Complete for Today';
+    
+    time.textContent = data.message + (data.type ? ' • ' + actionText : '');
     
     avatar.src = data.avatar || 'assets/logo.png'; // Fallback
     

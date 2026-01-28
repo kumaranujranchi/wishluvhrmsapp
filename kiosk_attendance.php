@@ -197,7 +197,7 @@ include 'includes/header.php';
         left: 0;
         width: 100%;
         height: 4px;
-        background: linear-gradient(to bottom, rgba(99, 102, 241, 0), #6366f1, rgba(99, 102, 241, 0));
+        background: linear-gradient(to right, rgba(99, 102, 241, 0), #6366f1, rgba(99, 102, 241, 0));
         z-index: 150;
         display: none;
         box-shadow: 0 0 15px #6366f1;
@@ -205,29 +205,53 @@ include 'includes/header.php';
 
     .scanning-line.active {
         display: block;
-        animation: scan-vertical 2s linear infinite;
+        animation: scan-scoped 2s linear infinite;
+    }
+
+    @keyframes scan-scoped {
+        0% {
+            transform: translateY(0);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateY(380px);
+            opacity: 0;
+        }
     }
 
     .recognition-result {
         position: absolute;
-        bottom: 10%;
+        top: 20%;
+        /* Move higher up */
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.5rem 2.5rem;
-        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 2rem 3rem;
+        border-radius: 2rem;
         text-align: center;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        z-index: 200;
-        width: 80%;
-        max-width: 500px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        /* Higher than scan button */
+        width: 85%;
+        max-width: 550px;
         opacity: 0;
-        transition: all 0.5s;
-        transform: translate(-50%, 20px);
+        visibility: hidden;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform: translate(-50%, -20px);
     }
 
     .recognition-result.visible {
         opacity: 1;
+        visibility: visible;
         transform: translate(-50%, 0);
     }
 
@@ -291,12 +315,13 @@ include 'includes/header.php';
 <div class="kiosk-overlay" id="kioskOverlay">
     <div class="video-container">
         <video id="kioskVideo" autoplay playsinline muted></video>
-        <div class="scanning-line" id="scanningLine"></div>
+        <!-- Scanning line moved inside faceGuide -->
         <!-- Overlay Canvas Removed -->
 
         <!-- Visual Guide Frame -->
-        <div class="face-guide-overlay"
+        <div class="face-guide-overlay" id="faceGuide"
             style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 380px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 40%; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);">
+            <div class="scanning-line" id="scanningLine"></div>
             <div
                 style="position: absolute; bottom: -30px; width: 100%; text-align: center; color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">
                 Align Face Here</div>
