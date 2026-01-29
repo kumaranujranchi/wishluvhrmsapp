@@ -299,7 +299,7 @@ include 'includes/header.php';
 <div class="matrix-container">
     <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; gap: 1rem; align-items: end;">
-            <form method="GET" style="display: flex; gap: 0.75rem; align-items: end;">
+            <form method="GET" style="display: flex; gap: 0.75rem;">
                 <div class="form-group">
                     <label
                         style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px;">MONTH</label>
@@ -322,10 +322,13 @@ include 'includes/header.php';
                         <?php endfor; ?>
                     </select>
                 </div>
-                <button type="submit"
-                    style="background: #6366f1; color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer; height: 36px;">
-                    Apply
-                </button>
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.7rem; margin-bottom: 4px; opacity: 0;">ACTION</label>
+                    <button type="submit"
+                        style="background: #6366f1; color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer; height: 35px; display: flex; align-items: center;">
+                        Apply
+                    </button>
+                </div>
             </form>
         </div>
         <div style="display: flex; gap: 0.5rem;">
