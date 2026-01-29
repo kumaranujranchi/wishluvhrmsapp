@@ -31,14 +31,66 @@ $stmt = $conn->prepare($sql);
 $stmt->execute(['start' => $start_date, 'end' => $end_date]);
 $logs = $stmt->fetchAll();
 
-// 4. Pivot Data: [emp_id][day] = log
+// 4. Fetch Holidays
+$holiday_map = [];
+$hol_sql = "SELECT title, start_date, end_date FROM holidays 
+            WHERE is_active = 1 
+            AND (
+                (start_date BETWEEN :start AND :end) 
+                OR (end_date BETWEEN :start AND :end)
+                OR (start_date <= :start AND end_date >= :end)
+            )";
+$hol_stmt = $conn->prepare($hol_sql);
+$hol_stmt->execute(['start' => $start_date, 'end' => $end_date]);
+$holidays = $hol_stmt->fetchAll();
+
+foreach ($holidays as $h) {
+    $curr = strtotime($h['start_date']);
+    $last = strtotime($h['end_date']);
+
+    while ($curr <= $last) {
+        $d_str = date('Y-m-d', $curr);
+        if ($d_str >= $start_date && $d_str <= $end_date) {
+            $holiday_map[$d_str] = 'H';
+        }
+        $curr = strtotime('+1 day', $curr);
+    }
+}
+
+// 5. Fetch Approved Leaves
+$leave_map = [];
+$leave_sql = "SELECT employee_id, start_date, end_date FROM leave_requests 
+              WHERE admin_status = 'Approved' 
+              AND (
+                  (start_date BETWEEN :start AND :end) 
+                  OR (end_date BETWEEN :start AND :end)
+                  OR (start_date <= :start AND end_date >= :end)
+              )";
+$leave_stmt = $conn->prepare($leave_sql);
+$leave_stmt->execute(['start' => $start_date, 'end' => $end_date]);
+$leaves = $leave_stmt->fetchAll();
+
+foreach ($leaves as $l) {
+    $curr = strtotime($l['start_date']);
+    $last = strtotime($l['end_date']);
+
+    while ($curr <= $last) {
+        $d_str = date('Y-m-d', $curr);
+        if ($d_str >= $start_date && $d_str <= $end_date) {
+            $leave_map[$l['employee_id']][$d_str] = 'L';
+        }
+        $curr = strtotime('+1 day', $curr);
+    }
+}
+
+// 6. Pivot Data: [emp_id][day] = log
 $matrix = [];
 foreach ($logs as $log) {
     $day = (int) date('j', strtotime($log['date']));
     $matrix[$log['emp_id']][$day] = $log;
 }
 
-// 5. Handle CSV Export
+// 7. Handle CSV Export
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="Monthly_Matrix_' . $month . '_' . $year . '.csv"');
@@ -64,6 +116,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
             $is_tuesday = (date('l', strtotime($current_date)) === 'Tuesday');
 
             if (isset($matrix[$emp['id']][$d])) {
+                // Present
                 $log = $matrix[$emp['id']][$d];
                 $in = $log['clock_in'] ? date('H:i', strtotime($log['clock_in'])) : '-';
                 $out = $log['clock_out'] ? date('H:i', strtotime($log['clock_out'])) : '-';
@@ -71,8 +124,18 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                 $present++;
                 if ($log['status'] === 'Late')
                     $late++;
+            } elseif (isset($holiday_map[$current_date])) {
+                // Holiday
+                $row[] = 'H';
+            } elseif (isset($leave_map[$emp['id']][$current_date])) {
+                // Leave
+                $row[] = 'L';
+            } elseif ($is_tuesday) {
+                // Weekly Off
+                $row[] = 'W/O';
             } else {
-                $row[] = $is_tuesday ? 'W/O' : 'A';
+                // Absent
+                $row[] = 'A';
             }
         }
         $row[] = $present;
@@ -199,6 +262,26 @@ include 'includes/header.php';
         padding: 4px 0;
     }
 
+    .status-h {
+        color: #7c3aed;
+        /* Violet */
+        font-weight: 800;
+        font-size: 0.8rem;
+        background: #f5f3ff;
+        display: block;
+        padding: 4px 0;
+    }
+
+    .status-l {
+        color: #ea580c;
+        /* Orange */
+        font-weight: 800;
+        font-size: 0.8rem;
+        background: #fff7ed;
+        display: block;
+        padding: 4px 0;
+    }
+
     .summary-col {
         font-weight: 700;
         background: #f8fafc;
@@ -315,6 +398,10 @@ include 'includes/header.php';
                                         <span
                                             class="time-val time-out"><?= $log['clock_out'] ? date('H:i', strtotime($log['clock_out'])) : '---' ?></span>
                                     </div>
+                                <?php elseif (isset($holiday_map[$current_date])): ?>
+                                    <span class="status-h">H</span>
+                                <?php elseif (isset($leave_map[$emp['id']][$current_date])): ?>
+                                    <span class="status-l">L</span>
                                 <?php elseif ($is_tuesday): ?>
                                     <span class="status-wo">W/O</span>
                                 <?php else: ?>
