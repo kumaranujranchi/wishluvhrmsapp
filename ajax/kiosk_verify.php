@@ -27,7 +27,7 @@ $imageData = $_POST['image_data'] ?? null;
 $lat = $_POST['latitude'] ?? null;
 $lng = $_POST['longitude'] ?? null;
 
-if (!$imageData || !$lat || !$lng) {
+if (!$imageData) {
     echo json_encode(['success' => false, 'message' => 'Missing Data']);
     exit;
 }

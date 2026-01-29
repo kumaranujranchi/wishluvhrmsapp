@@ -219,54 +219,49 @@ async function processAttendance() {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = canvas.toDataURL('image/jpeg', 0.8);
 
-    // Get Location (Mandatory per requirements)
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        
-        try {
-            const formData = new FormData();
-            formData.append('image_data', imageData);
-            formData.append('latitude', latitude);
-            formData.append('longitude', longitude);
-            formData.append('passcode', '123456'); // Simple security check if needed
+    // Get Location (Skipped for Kiosk - Always in Office)
+    // We send 0,0 to satisfy backend without waiting for GPS
+    const latitude = 0.0;
+    const longitude = 0.0;
 
-            const response = await fetch('ajax/kiosk_verify.php', {
-                method: 'POST',
-                body: formData
-            });
+    try {
+        const formData = new FormData();
+        formData.append('image_data', imageData);
+        formData.append('latitude', latitude);
+        formData.append('longitude', longitude);
+        formData.append('passcode', '123456'); // Simple security check if needed
 
-            const result = await response.json();
+        const response = await fetch('ajax/kiosk_verify.php', {
+            method: 'POST',
+            body: formData
+        });
 
-            if (result.success) {
-                playRoboticSound('success');
-                isCooldown = true; // Enable cooldown to show result
-                showResult(result);
-                lastProcessTime = Date.now(); 
-            } else {
-                document.getElementById('hudStatus').textContent = 'Face Not Recognized';
-                // Wait briefly before allowing retry
-                setTimeout(() => {
-                    if(isScanning) document.getElementById('hudStatus').textContent = 'Scanning...';
-                }, 2000);
-            }
-        } catch (e) {
-            console.error(e);
-            document.getElementById('hudStatus').textContent = 'Connection Error';
+        const result = await response.json();
+
+        if (result.success) {
+            playRoboticSound('success');
+            isCooldown = true; // Enable cooldown to show result
+            showResult(result);
+            lastProcessTime = Date.now(); 
+        } else {
+            document.getElementById('hudStatus').textContent = 'Face Not Recognized';
+            // Wait briefly before allowing retry
             setTimeout(() => {
                 if(isScanning) document.getElementById('hudStatus').textContent = 'Scanning...';
             }, 2000);
-        } finally {
-            isProcessing = false;
-            document.getElementById('scanningLine').classList.remove('active'); // Stop Anim
-            unstableFrames = 0; // Reset stability
-            faceStableStartTime = null;
         }
-
-    }, (err) => {
-        alert('Location access is mandatory.');
+    } catch (e) {
+        console.error(e);
+        document.getElementById('hudStatus').textContent = 'Connection Error';
+        setTimeout(() => {
+            if(isScanning) document.getElementById('hudStatus').textContent = 'Scanning...';
+        }, 2000);
+    } finally {
         isProcessing = false;
-        document.getElementById('scanningLine').classList.remove('active');
-    });
+        document.getElementById('scanningLine').classList.remove('active'); // Stop Anim
+        unstableFrames = 0; // Reset stability
+        faceStableStartTime = null;
+    }
 }
 
 function showResult(data) {
