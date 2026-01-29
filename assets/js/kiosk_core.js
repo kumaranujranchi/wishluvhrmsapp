@@ -163,17 +163,8 @@ function handleUnstableFrame(statusMessage) {
 }
 
 function isFaceCentered(box) {
-    const videoCenterX = video.videoWidth / 2;
-    const videoCenterY = video.videoHeight / 2;
-    const faceCenterX = box.x + box.width / 2;
-    const faceCenterY = box.y + box.height / 2;
-    
-    // Responsive Threshold: Relaxed to 25% of video dimension for better UX
-    const thresholdX = video.videoWidth * 0.25; 
-    const thresholdY = video.videoHeight * 0.25;
-
-    return Math.abs(faceCenterX - videoCenterX) < thresholdX && 
-           Math.abs(faceCenterY - videoCenterY) < thresholdY;
+    // Relaxed: Face can be anywhere on the screen now
+    return true;
 }
 
 function startCountdown() {

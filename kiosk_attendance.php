@@ -413,12 +413,9 @@ include 'includes/header.php';
 
         <!-- Visual Guide Frame -->
         <div class="face-guide-overlay" id="faceGuide"
-            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 380px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 40%; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);">
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 380px; border: 2px dashed rgba(255,255,255,0.15); border-radius: 40%; pointer-events: none;">
             <div class="scanning-line" id="scanningLine"></div>
             <div class="countdown-text" id="countdownOverlay">3</div>
-            <div
-                style="position: absolute; bottom: -30px; width: 100%; text-align: center; color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">
-                Align Face Here</div>
         </div>
 
         <div class="hud-header">
