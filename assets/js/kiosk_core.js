@@ -76,7 +76,8 @@ async function startKioskMode() {
             video: { 
                 width: { ideal: 1280 }, 
                 height: { ideal: 720 },
-                facingMode: 'user' 
+                facingMode: 'user',
+                aspectRatio: { ideal: 0.5625 } // Try for 9:16 aspect ratio on mobile
             } 
         });
         video.srcObject = stream;
@@ -160,7 +161,9 @@ async function detectLoop() {
         if (detection) {
             const box = detection.box;
             const isCentered = isFaceCentered(box);
-            const isLargeEnough = box.width > 150;
+            // Responsive Size Check: Face must be at least 15% of video width
+            const minFaceWidth = video.videoWidth * 0.15; 
+            const isLargeEnough = box.width > minFaceWidth;
 
             if (isCentered && isLargeEnough) {
                 if (!faceStableStartTime) {
@@ -189,9 +192,12 @@ function isFaceCentered(box) {
     const faceCenterX = box.x + box.width / 2;
     const faceCenterY = box.y + box.height / 2;
     
-    const threshold = 100; // Allow 100px variance
-    return Math.abs(faceCenterX - videoCenterX) < threshold && 
-           Math.abs(faceCenterY - videoCenterY) < threshold;
+    // Responsive Threshold: 15% of video dimension
+    const thresholdX = video.videoWidth * 0.15;
+    const thresholdY = video.videoHeight * 0.15;
+
+    return Math.abs(faceCenterX - videoCenterX) < thresholdX && 
+           Math.abs(faceCenterY - videoCenterY) < thresholdY;
 }
 
 function startCountdown() {

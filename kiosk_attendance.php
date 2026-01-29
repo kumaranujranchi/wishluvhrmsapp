@@ -27,14 +27,23 @@ include 'includes/header.php';
         /* Hide standard layout elements */
     }
 
-    .content-wrapper {
+    /* Override Main Content for Kiosk Centering */
+    .main-content {
         margin-left: 0 !important;
         background: #0f172a !important;
-        height: 100vh;
-        display: flex;
+        min-height: 100vh;
+        width: 100vw !important;
+        display: flex !important;
         align-items: center;
         justify-content: center;
         padding: 0 !important;
+        position: relative;
+    }
+
+    /* Ensure App Container doesn't constrain us */
+    .app-container {
+        width: 100vw !important;
+        overflow-x: hidden;
     }
 
     /* Landing Screen */
@@ -311,6 +320,72 @@ include 'includes/header.php';
 
     .close-kiosk-btn:hover {
         background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+        .kiosk-landing {
+            padding: 2rem;
+            width: 90%;
+            margin: 0 auto;
+            /* Ensure centering works even if flex fails */
+        }
+
+        /* Force override header.php mobile styles */
+        .main-content {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center !important;
+            min-height: 100vh !important;
+        }
+
+        .kiosk-logo {
+            width: 100px;
+        }
+
+        .capture-btn-lg {
+            padding: 1.2rem 2rem;
+            font-size: 1.2rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .close-kiosk-btn {
+            top: 1rem;
+            right: 1rem;
+            padding: 0.6rem;
+        }
+
+        .hud-header {
+            top: 4rem;
+            /* Below close button */
+        }
+
+        .hud-status {
+            font-size: 0.9rem;
+            padding: 0.4rem 1rem;
+        }
+
+        #faceGuide {
+            width: 70vw !important;
+            height: 90vw !important;
+            max-width: 300px;
+            max-height: 400px;
+            border-radius: 35% !important;
+        }
+
+        .countdown-text {
+            font-size: 5rem;
+        }
+
+        .recognition-result {
+            width: 90%;
+            padding: 1.5rem;
+        }
+
+        .result-name {
+            font-size: 1.2rem;
+        }
     }
 </style>
 
