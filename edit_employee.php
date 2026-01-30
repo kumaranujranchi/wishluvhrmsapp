@@ -39,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $dob = $_POST['dob'] ?: null;
     $anniversary = $_POST['marriage_anniversary'] ?: null;
     $reporting_manager_id = $_POST['reporting_manager_id'] ?: null;
+    $allow_outside_punch = isset($_POST['allow_outside_punch']) ? 1 : 0;
 
     // File Upload Logic
     $avatarPath = $employee['avatar']; // Keep existing if no new upload
@@ -70,7 +71,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 dob = :dob,
                 marriage_anniversary = :anniv,
                 reporting_manager_id = :manager,
-                avatar = :avatar
+                avatar = :avatar,
+                allow_outside_punch = :allow_outside
                 WHERE id = :id";
 
         $stmt = $conn->prepare($sql);
@@ -88,6 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'anniv' => $anniversary,
             'manager' => $reporting_manager_id,
             'avatar' => $avatarPath,
+            'allow_outside' => $allow_outside_punch,
             'id' => $emp_id
         ]);
 
@@ -197,6 +200,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+
+                <!-- Settings -->
+                <div class="form-group" style="grid-column: span 2; margin-top: 1rem;">
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                        <input type="checkbox" name="allow_outside_punch" value="1" style="width: 18px; height: 18px;"
+                            <?= ($employee['allow_outside_punch'] ?? 0) ? 'checked' : '' ?>>
+                        <div>
+                            <span style="display: block; font-weight: 500; color: #1e293b;">Allow Outside Punch</span>
+                            <span style="display: block; font-size: 0.75rem; color: #64748b;">If enabled, employee can
+                                mark attendance from anywhere (reason required).</span>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="form-group">

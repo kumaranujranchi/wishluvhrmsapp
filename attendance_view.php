@@ -27,7 +27,13 @@ $loc_stmt = $conn->prepare("
     WHERE el.employee_id = :uid AND al.is_active = 1
 ");
 $loc_stmt->execute(['uid' => $user_id]);
+$loc_stmt->execute(['uid' => $user_id]);
 $assigned_locations = $loc_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch Permissions
+$perm_stmt = $conn->prepare("SELECT allow_outside_punch FROM employees WHERE id = :uid");
+$perm_stmt->execute(['uid' => $user_id]);
+$allow_outside_punch = $perm_stmt->fetchColumn();
 
 // 1. Handle POST Requests (Check In / Check Out)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -40,47 +46,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reason = $_POST['reason'] ?? null;
 
     if ($action === 'clock_in') {
-        // Check if already checked in
-        $check = $conn->prepare("SELECT * FROM attendance WHERE employee_id = :uid AND date = :date");
-        $check->execute(['uid' => $user_id, 'date' => $date]);
+        // Permission Check for Outside Punch
+        if ($out_of_range && !$allow_outside_punch) {
+            $message = "<div class='alert error'>Permission Denied: You are not allowed to mark attendance from outside the office location.</div>";
+        } else {
+            // Check if already checked in
+            $check = $conn->prepare("SELECT * FROM attendance WHERE employee_id = :uid AND date = :date");
+            $check->execute(['uid' => $user_id, 'date' => $date]);
 
-        if ($check->rowCount() == 0) {
-            $current_time = date('H:i:s');
-            // Determine Status (Late if after 10:00 AM)
-            // Fetch employee specific shift if available, else default
-            $emp_q = $conn->prepare("SELECT shift_start_time FROM employees WHERE id = :uid");
-            $emp_q->execute(['uid' => $user_id]);
-            $shift_start = $emp_q->fetchColumn() ?: '10:00:00';
+            if ($check->rowCount() == 0) {
+                $current_time = date('H:i:s');
+                // Determine Status (Late if after 10:00 AM)
+                // Fetch employee specific shift if available, else default
+                $emp_q = $conn->prepare("SELECT shift_start_time FROM employees WHERE id = :uid");
+                $emp_q->execute(['uid' => $user_id]);
+                $shift_start = $emp_q->fetchColumn() ?: '10:00:00';
 
-            $status = (strtotime($current_time) > strtotime($shift_start)) ? 'Late' : 'On Time';
+                $status = (strtotime($current_time) > strtotime($shift_start)) ? 'Late' : 'On Time';
 
-            $sql = "INSERT INTO attendance (employee_id, date, clock_in, status, clock_in_lat, clock_in_lng, clock_in_address, location_id, out_of_range, out_of_range_reason) 
+                $sql = "INSERT INTO attendance (employee_id, date, clock_in, status, clock_in_lat, clock_in_lng, clock_in_address, location_id, out_of_range, out_of_range_reason) 
                     VALUES (:uid, :date, :time, :status, :lat, :lng, :addr, :loc_id, :oor, :reason)";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([
-                'uid' => $user_id,
-                'date' => $date,
-                'time' => $current_time,
-                'status' => $status,
-                'lat' => $lat,
-                'lng' => $lng,
-                'addr' => $address,
-                'loc_id' => $location_id,
-                'oor' => $out_of_range,
-                'reason' => $reason
-            ]);
-            $message = "<div class='alert success-glass'>Checked In Successfully at " . date('h:i A', strtotime($current_time)) . "</div>";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    'uid' => $user_id,
+                    'date' => $date,
+                    'time' => $current_time,
+                    'status' => $status,
+                    'lat' => $lat,
+                    'lng' => $lng,
+                    'addr' => $address,
+                    'loc_id' => $location_id,
+                    'oor' => $out_of_range,
+                    'reason' => $reason
+                ]);
+                $message = "<div class='alert success-glass'>Checked In Successfully at " . date('h:i A', strtotime($current_time)) . "</div>";
 
-            // --- SEND EMAIL NOTIFICATION ---
-            require_once 'config/email.php';
-            // Fetch Employee Email
-            $empStmt = $conn->prepare("SELECT first_name, last_name, email FROM employees WHERE id = :uid");
-            $empStmt->execute(['uid' => $user_id]);
-            $emp = $empStmt->fetch();
+                // --- SEND EMAIL NOTIFICATION ---
+                require_once 'config/email.php';
+                // Fetch Employee Email
+                $empStmt = $conn->prepare("SELECT first_name, last_name, email FROM employees WHERE id = :uid");
+                $empStmt->execute(['uid' => $user_id]);
+                $emp = $empStmt->fetch();
 
-            if ($emp && !empty($emp['email'])) {
-                $subject = "Attendance Confirmed: " . date('d M Y');
-                $content = "
+                if ($emp && !empty($emp['email'])) {
+                    $subject = "Attendance Confirmed: " . date('d M Y');
+                    $content = "
                     <p>Hello <strong>{$emp['first_name']}</strong>,</p>
                     <p>Your attendance for today has been successfully marked.</p>
                     <ul>
@@ -91,30 +101,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </ul>
                     <p>Have a productive day!</p>
                 ";
+                    $body = getHtmlEmailTemplate("Punch In Confirmation", $content);
+                    sendEmail($emp['email'], $subject, $body);
+                }
                 $body = getHtmlEmailTemplate("Punch In Confirmation", $content);
                 sendEmail($emp['email'], $subject, $body);
             }
         }
     } elseif ($action === 'clock_out') {
-        // Find today's record
-        $current_time = date('H:i:s');
+        // Permission Check for Outside Punch
+        if ($out_of_range && !$allow_outside_punch) {
+            $message = "<div class='alert error'>Permission Denied: You are not allowed to mark attendance from outside the office location.</div>";
+        } else {
+            // Find today's record
+            $current_time = date('H:i:s');
 
-        // Calculate total hours
-        // First get clock_in time
-        $q = $conn->prepare("SELECT clock_in FROM attendance WHERE employee_id = :uid AND date = :date");
-        $q->execute(['uid' => $user_id, 'date' => $date]);
-        $row = $q->fetch();
+            // Calculate total hours
+            // First get clock_in time
+            $q = $conn->prepare("SELECT clock_in FROM attendance WHERE employee_id = :uid AND date = :date");
+            $q->execute(['uid' => $user_id, 'date' => $date]);
+            $row = $q->fetch();
 
-        if ($row) {
-            $clock_in_time = strtotime($row['clock_in']);
-            $clock_out_time = strtotime($current_time);
-            // Calculate total minutes instead of decimal hours
-            $total_minutes = round(abs($clock_out_time - $clock_in_time) / 60);
-            $hours = floor($total_minutes / 60);
-            $minutes = $total_minutes % 60;
-            $hours_display = sprintf('%d:%02d', $hours, $minutes);
+            if ($row) {
+                $clock_in_time = strtotime($row['clock_in']);
+                $clock_out_time = strtotime($current_time);
+                // Calculate total minutes instead of decimal hours
+                $total_minutes = round(abs($clock_out_time - $clock_in_time) / 60);
+                $hours = floor($total_minutes / 60);
+                $minutes = $total_minutes % 60;
+                $hours_display = sprintf('%d:%02d', $hours, $minutes);
 
-            $sql = "UPDATE attendance SET 
+                $sql = "UPDATE attendance SET 
                     clock_out = :time, 
                     total_hours = :total_minutes,
                     clock_out_lat = :lat,
@@ -128,20 +145,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ELSE :reason 
                     END
                     WHERE employee_id = :uid AND date = :date";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([
-                'time' => $current_time,
-                'total_minutes' => $total_minutes,
-                'lat' => $lat,
-                'lng' => $lng,
-                'addr' => $address,
-                'loc_id' => $location_id ?: null,
-                'oor' => $out_of_range,
-                'reason' => $reason,
-                'uid' => $user_id,
-                'date' => $date
-            ]);
-            $message = "<div class='alert success-glass'>Checked Out Successfully at " . date('h:i A', strtotime($current_time)) . ". Total Hours: $hours_display</div>";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    'time' => $current_time,
+                    'total_minutes' => $total_minutes,
+                    'lat' => $lat,
+                    'lng' => $lng,
+                    'addr' => $address,
+                    'loc_id' => $location_id ?: null,
+                    'oor' => $out_of_range,
+                    'reason' => $reason,
+                    'uid' => $user_id,
+                    'date' => $date
+                ]);
+                $message = "<div class='alert success-glass'>Checked Out Successfully at " . date('h:i A', strtotime($current_time)) . ". Total Hours: $hours_display</div>";
+            }
         }
     }
 }
@@ -1428,6 +1446,7 @@ function formatDuration($total_minutes)
 
     // Geolocation Logic
     const assignedLocations = <?= json_encode($assigned_locations) ?> || [];
+    const allowOutsidePunch = <?= $allow_outside_punch ? 'true' : 'false' ?>;
     console.log("Assigned Locations:", assignedLocations);
 
     // Update UI status if geofencing is active
@@ -1492,6 +1511,14 @@ function formatDuration($total_minutes)
 
                     if (!matchedLocation) {
                         isOutOfRange = true;
+
+                        // Check Permission
+                        if (!allowOutsidePunch) {
+                            statusDiv.innerHTML = '<span style="color:#ef4444;">🚫 Permission Denied: Outside Office Location</span>';
+                            alert("Permission Denied: You are not allowed to mark attendance from outside the office location.");
+                            return;
+                        }
+
                         const actionText = (type === 'clock_in') ? 'Punch In' : 'Punch Out';
 
                         // Show custom warning modal instead of browser prompt

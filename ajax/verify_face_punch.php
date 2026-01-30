@@ -62,6 +62,21 @@ try {
         exit;
     }
 
+    // Permission Check: Check if user is allowed to punch from outside if marked as out_of_range
+    if ($outOfRange) {
+        $permStmt = $conn->prepare("SELECT allow_outside_punch FROM employees WHERE id = :uid");
+        $permStmt->execute(['uid' => $verificationResult['employee_id']]); // Use matched ID or Session ID (should match)
+        $allowOutside = $permStmt->fetchColumn();
+
+        if (!$allowOutside) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Permission Denied: You are not allowed to mark attendance from outside the permitted location.'
+            ]);
+            exit;
+        }
+    }
+
     // Check if matched employee is the logged-in user
     if ($verificationResult['employee_id'] != $userId) {
         // Log failed verification

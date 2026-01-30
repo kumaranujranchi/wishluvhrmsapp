@@ -25,6 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $dob = $_POST['dob'] ?: null;
     $anniversary = $_POST['marriage_anniversary'] ?: null;
     $reporting_manager_id = $_POST['reporting_manager_id'] ?: null;
+    $allow_outside_punch = isset($_POST['allow_outside_punch']) ? 1 : 0;
 
     // File Upload Logic
     $avatarPath = null;
@@ -48,9 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         try {
             $stmt = $conn->prepare("INSERT INTO employees 
-                (employee_code, first_name, last_name, email, phone, department_id, designation_id, joining_date, salary, password, role, dob, marriage_anniversary, reporting_manager_id, avatar) 
+                (employee_code, first_name, last_name, email, phone, department_id, designation_id, joining_date, salary, password, role, dob, marriage_anniversary, reporting_manager_id, avatar, allow_outside_punch) 
                 VALUES 
-                (:code, :fname, :lname, :email, :phone, :dept, :desig, :jdate, :salary, :pass, 'Employee', :dob, :anniv, :manager, :avatar)");
+                (:code, :fname, :lname, :email, :phone, :dept, :desig, :jdate, :salary, :pass, 'Employee', :dob, :anniv, :manager, :avatar, :allow_outside)");
 
             $stmt->execute([
                 'code' => $emp_code,
@@ -66,7 +67,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'dob' => $dob,
                 'anniv' => $anniversary,
                 'manager' => $reporting_manager_id,
-                'avatar' => $avatarPath
+                'avatar' => $avatarPath,
+                'allow_outside' => $allow_outside_punch
             ]);
 
             $message = "<div class='alert success'>Employee <strong>$first_name $last_name</strong> onboarded successfully!</div>";
@@ -196,6 +198,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     <small style="color:hsl(220, 10%, 45%); font-size: 0.8rem;">Employee will use email & this password
                         to login.</small>
+                </div>
+
+                <!-- Settings -->
+                <div class="form-group" style="grid-column: span 2; margin-top: 1rem;">
+                    <label
+                        style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                        <input type="checkbox" name="allow_outside_punch" value="1" style="width: 18px; height: 18px;">
+                        <div>
+                            <span style="display: block; font-weight: 500; color: #1e293b;">Allow Outside Punch</span>
+                            <span style="display: block; font-size: 0.75rem; color: #64748b;">If enabled, employee can
+                                mark attendance from anywhere (reason required).</span>
+                        </div>
+                    </label>
                 </div>
 
             </div>
