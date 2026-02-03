@@ -1446,7 +1446,9 @@ function formatDuration($total_minutes)
 
     // --- APP ENFORCEMENT & SECURITY CHECK ---
     document.addEventListener("DOMContentLoaded", function () {
-        const isMobileApp = navigator.userAgent.includes("WishluvMobileApp");
+        // Check for User Agent OR Native Bridge (Fallback)
+        const isMobileApp = navigator.userAgent.includes("WishluvMobileApp") ||
+            (window.Capacitor && window.Capacitor.isNativePlatform());
 
         if (!isMobileApp) {
             // Not running inside the Native App
