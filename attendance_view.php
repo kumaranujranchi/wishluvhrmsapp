@@ -1444,6 +1444,26 @@ function formatDuration($total_minutes)
     setInterval(updateClock, 1000);
     updateClock();
 
+    // --- APP ENFORCEMENT & SECURITY CHECK ---
+    document.addEventListener("DOMContentLoaded", function () {
+        const isMobileApp = navigator.userAgent.includes("WishluvMobileApp");
+
+        if (!isMobileApp) {
+            // Not running inside the Native App
+            const form = document.getElementById('attendanceForm');
+            if (form) {
+                form.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; background: #fff1f2; border-radius: 1rem; border: 1px solid #fecaca;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+                        <h3 style="color: #991b1b; margin-bottom: 0.5rem; font-weight: 800;">App Required</h3>
+                        <p style="color: #7f1d1d; font-size: 0.9rem; margin-bottom: 0;">To ensure security, please mark attendance using the official <br><b>Wishluv Employee App</b>.</p>
+                    </div>
+                `;
+            }
+        }
+    });
+
+
     // Geolocation Logic
     const assignedLocations = <?= json_encode($assigned_locations) ?> || [];
     const allowOutsidePunch = <?= $allow_outside_punch ? 'true' : 'false' ?>;
@@ -1737,6 +1757,22 @@ function formatDuration($total_minutes)
     }
 
     async function captureFaceAndVerify() {
+        // --- NATIVE SECURITY CHECK ---
+        if (typeof window.Android !== 'undefined') {
+            const isMock = window.Android.isMockLocationActive();
+            const isUsb = window.Android.isUsbDebuggingActive();
+
+            if (isMock) {
+                alert('❌ Fake GPS Detected! Please disable Mock Locations to mark attendance.');
+                return;
+            }
+            if (isUsb) {
+                alert('⚠️ USB Debugging Detected! Please disable Developer Options.');
+                return;
+            }
+        }
+        // -----------------------------
+
         const video = document.getElementById('faceVideo');
         const canvas = document.getElementById('faceCanvas');
         const scanLine = document.getElementById('faceScanLine');
