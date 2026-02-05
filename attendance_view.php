@@ -210,19 +210,21 @@ $holiday_stmt->execute(['m' => $filter_month, 'y' => $filter_year]);
 $monthly_holidays = $holiday_stmt->fetchAll(PDO::FETCH_KEY_PAIR); // Date => Title
 
 // Helper function to format duration from minutes to hours:minutes
-function formatDuration($total_minutes)
-{
-    if (!$total_minutes || $total_minutes == 0)
-        return '-';
-    $hours = floor($total_minutes / 60);
-    $minutes = $total_minutes % 60;
+if (!function_exists('formatDuration')) {
+    function formatDuration($total_minutes)
+    {
+        if (!$total_minutes || $total_minutes == 0)
+            return '-';
+        $hours = floor($total_minutes / 60);
+        $minutes = $total_minutes % 60;
 
-    if ($hours > 0 && $minutes > 0) {
-        return $hours . ' hr ' . $minutes . ' min';
-    } elseif ($hours > 0) {
-        return $hours . ' hr';
-    } else {
-        return $minutes . ' min';
+        if ($hours > 0 && $minutes > 0) {
+            return $hours . ' hr ' . $minutes . ' min';
+        } elseif ($hours > 0) {
+            return $hours . ' hr';
+        } else {
+            return $minutes . ' min';
+        }
     }
 }
 
