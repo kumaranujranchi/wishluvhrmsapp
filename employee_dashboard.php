@@ -34,9 +34,38 @@ $stats['present_days'] = $stats['present_days'] ?? 0;
 $stats['late_count'] = $stats['late_count'] ?? 0;
 $total_hrs = $stats['total_hours'] ?? 0;
 
-// Calculate Average Hours
-if ($stats['present_days'] > 0) {
-    $stats['avg_hours'] = $total_hrs / $stats['present_days'];
+// Calculate working days (excluding weekly offs and holidays)
+$days_in_month = cal_days_in_month(CAL_GREGORIAN, $current_month, $current_year);
+$working_days = 0;
+
+// Fetch holidays for current month
+$holiday_q = $conn->prepare("SELECT DATE(start_date) as holiday_date FROM holidays 
+    WHERE MONTH(start_date) = :m AND YEAR(start_date) = :y");
+$holiday_q->execute(['m' => $current_month, 'y' => $current_year]);
+$holidays = $holiday_q->fetchAll(PDO::FETCH_COLUMN);
+
+// Count working days (exclude Tuesdays and holidays)
+for ($day = 1; $day <= $days_in_month; $day++) {
+    $date = sprintf('%04d-%02d-%02d', $current_year, $current_month, $day);
+
+    // Skip future dates
+    if (strtotime($date) > time()) {
+        break;
+    }
+
+    $day_of_week = date('l', strtotime($date));
+    $is_weekly_off = ($day_of_week === 'Tuesday');
+    $is_holiday = in_array($date, $holidays);
+
+    // Count only if not weekly off and not holiday
+    if (!$is_weekly_off && !$is_holiday) {
+        $working_days++;
+    }
+}
+
+// Calculate Average Hours based on working days
+if ($working_days > 0) {
+    $stats['avg_hours'] = $total_hrs / $working_days;
 } else {
     $stats['avg_hours'] = 0.0;
 }
