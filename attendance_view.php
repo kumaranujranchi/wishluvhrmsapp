@@ -228,7 +228,7 @@ function formatDuration($total_minutes)
     /* Layout & Hero Card */
     .dashboard-container {
         display: grid;
-        grid-template-columns: 1fr 350px;
+        grid-template-columns: 1fr;
         gap: 2rem;
         align-items: start;
     }
