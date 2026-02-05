@@ -856,9 +856,36 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const minutes = context.parsed.y;
+                                const hours = Math.floor(minutes / 60);
+                                const mins = Math.round(minutes % 60);
+                                if (hours > 0 && mins > 0) {
+                                    return hours + ' hr ' + mins + ' min';
+                                } else if (hours > 0) {
+                                    return hours + ' hr';
+                                } else {
+                                    return mins + ' min';
+                                }
+                            }
+                        }
+                    }
+                },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            callback: function(value) {
+                                const hours = Math.floor(value / 60);
+                                return hours + ' hr';
+                            }
+                        }
+                    },
                     x: { grid: { display: false } }
                 }
             }
