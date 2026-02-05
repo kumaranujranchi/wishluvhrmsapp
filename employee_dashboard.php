@@ -124,13 +124,15 @@ $birthday_q = $conn->prepare("
 $birthday_q->execute();
 $next_birthday = $birthday_q->fetch();
 
-// 6. Fetch Chart Data
+// 6. Fetch Chart Data - Current Month (all days)
 $chart_labels = [];
 $chart_data = [];
-// Last 7 days including today
-for ($i = 6; $i >= 0; $i--) {
-    $d = date('Y-m-d', strtotime("-$i days"));
-    $chart_labels[] = date('D', strtotime($d)); // Mon, Tue...
+
+// Get all days of current month
+for ($day = 1; $day <= $days_in_month; $day++) {
+    $d = sprintf('%04d-%02d-%02d', $current_year, $current_month, $day);
+    $chart_labels[] = $day; // Show day number (1, 2, 3...)
+    
     $cq = $conn->prepare("SELECT total_hours FROM attendance WHERE employee_id = :uid AND date = :d");
     $cq->execute(['uid' => $user_id, 'd' => $d]);
     $hrs = floatval($cq->fetchColumn() ?: 0);
