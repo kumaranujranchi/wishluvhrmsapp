@@ -27,7 +27,7 @@ $loc_stmt = $conn->prepare("
     WHERE el.employee_id = :uid AND al.is_active = 1
 ");
 $loc_stmt->execute(['uid' => $user_id]);
-
+$loc_stmt->execute(['uid' => $user_id]);
 $assigned_locations = $loc_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Permissions
@@ -197,34 +197,27 @@ $late_days = 0;
 $total_work_hours = 0;
 
 foreach ($history as $h) {
-    if (in_array($h['status'], ['Present', 'Late', 'On Time', 'Half Day']))
+    if ($h['status'] == 'Present' || $h['status'] == 'Late')
         $present_days++;
     if ($h['status'] == 'Late')
         $late_days++;
     $total_work_hours += $h['total_hours'];
 }
 
-// 4. Fetch Holidays for this month (for calendar view)
-$holiday_stmt = $conn->prepare("SELECT date, title FROM holidays WHERE MONTH(start_date) = :m AND YEAR(start_date) = :y");
-$holiday_stmt->execute(['m' => $filter_month, 'y' => $filter_year]);
-$monthly_holidays = $holiday_stmt->fetchAll(PDO::FETCH_KEY_PAIR); // Date => Title
-
 // Helper function to format duration from minutes to hours:minutes
-if (!function_exists('formatDuration')) {
-    function formatDuration($total_minutes)
-    {
-        if (!$total_minutes || $total_minutes == 0)
-            return '-';
-        $hours = floor($total_minutes / 60);
-        $minutes = $total_minutes % 60;
+function formatDuration($total_minutes)
+{
+    if (!$total_minutes || $total_minutes == 0)
+        return '-';
+    $hours = floor($total_minutes / 60);
+    $minutes = $total_minutes % 60;
 
-        if ($hours > 0 && $minutes > 0) {
-            return $hours . ' hr ' . $minutes . ' min';
-        } elseif ($hours > 0) {
-            return $hours . ' hr';
-        } else {
-            return $minutes . ' min';
-        }
+    if ($hours > 0 && $minutes > 0) {
+        return $hours . ' hr ' . $minutes . ' min';
+    } elseif ($hours > 0) {
+        return $hours . ' hr';
+    } else {
+        return $minutes . ' min';
     }
 }
 
@@ -1306,6 +1299,34 @@ if (!function_exists('formatDuration')) {
                 <i data-lucide="map-pin" style="width:14px; vertical-align:middle;"></i> Ready to capture location
             </div>
         </div>
+
+        <!-- RIGHT/BOTTOM: Mini Stats (Compact Grid on Mobile) -->
+        <div class="mobile-stats-grid" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="mini-stat-card" style="background: #5246E2;">
+                <div style="position: relative; z-index: 10;">
+                    <p class="stat-label">Attendance</p>
+                    <p class="stat-value"><?= $present_days ?></p>
+                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">Days Present</p>
+                </div>
+                <i data-lucide="calendar" class="stat-icon"></i>
+            </div>
+            <div class="mini-stat-card" style="background: #FFA000;">
+                <div style="position: relative; z-index: 10;">
+                    <p class="stat-label">Late Marks</p>
+                    <p class="stat-value"><?= $late_days ?></p>
+                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">Arrivals</p>
+                </div>
+                <i data-lucide="clock" class="stat-icon"></i>
+            </div>
+            <div class="mini-stat-card" style="background: #00BFA5;">
+                <div style="position: relative; z-index: 10;">
+                    <p class="stat-label">Total Hours</p>
+                    <p class="stat-value"><?= formatDuration($total_work_hours) ?></p>
+                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">This Month</p>
+                </div>
+                <i data-lucide="timer" class="stat-icon"></i>
+            </div>
+        </div>
     </div>
 
     <!-- History Timeline Section -->
@@ -1329,163 +1350,83 @@ if (!function_exists('formatDuration')) {
             </form>
         </div>
         <div style="padding: 0 1.5rem 1rem;">
-            <?php
-            // PREPARE DATA FOR RENDERING
-            // Index history by date for easy lookup
-            $history_by_date = [];
-            foreach ($history as $h) {
-                $history_by_date[$h['date']] = $h;
-            }
+            <?php foreach ($history as $row): ?>
+                <div class="timeline-item history-item-mobile" onclick="this.classList.toggle('expanded')">
+                    <i data-lucide="chevron-down" class="expand-icon mobile-only" style="width: 16px;"></i>
+                    <div class="timeline-date">
+                        <?= date('d', strtotime($row['date'])) ?>
+                        <span><?= date('M', strtotime($row['date'])) ?></span>
+                    </div>
 
-            // Generate full date range for selected month
-            $days_in_month = (int) date('t', mktime(0, 0, 0, $filter_month, 1, $filter_year));
-
-            // Reverse order loop (Newest first)
-            for ($day = $days_in_month; $day >= 1; $day--) {
-                $current_date = sprintf('%04d-%02d-%02d', $filter_year, $filter_month, $day);
-
-                // Skip future dates
-                if (strtotime($current_date) > time()) {
-                    continue;
-                }
-
-                $row = $history_by_date[$current_date] ?? null;
-                $day_of_week = date('l', strtotime($current_date));
-                $is_weekly_off = ($day_of_week === 'Tuesday');
-                $is_holiday = isset($monthly_holidays[$current_date]); // Simple check if you fetch holidays mapping
-            
-                if ($row):
-                    ?>
-                    <!-- PRESENT / RECORDED ATTENDANCE -->
-                    <div class="timeline-item history-item-mobile" onclick="this.classList.toggle('expanded')">
-                        <i data-lucide="chevron-down" class="expand-icon mobile-only" style="width: 16px;"></i>
-                        <div class="timeline-date">
-                            <?= date('d', strtotime($current_date)) ?>
-                            <span><?= date('M', strtotime($current_date)) ?></span>
+                    <div class="timeline-content">
+                        <!-- Group 1: Day & Status -->
+                        <div class="att-header-group">
+                            <span class="att-day"><?= date('l', strtotime($row['date'])) ?></span>
+                            <?php
+                            $badgeStyle = match ($row['status']) {
+                                'On Time' => 'background:#dcfce7; color:#166534;',
+                                'Late' => 'background:#fef9c3; color:#854d0e;',
+                                'Present' => 'background:#dbeafe; color:#1e40af;',
+                                default => 'background:#f1f5f9; color:#64748b;'
+                            };
+                            ?>
+                            <span class="badge att-badge" style="<?= $badgeStyle ?>"><?= $row['status'] ?></span>
                         </div>
 
-                        <div class="timeline-content">
-                            <!-- Group 1: Day & Status -->
-                            <div class="att-header-group">
-                                <span class="att-day"><?= $day_of_week ?></span>
-                                <?php
-                                $status = $row['status'] ?? '';
-                                $badgeStyle = 'background:#f1f5f9; color:#64748b;'; // default
-                        
-                                switch ($status) {
-                                    case 'On Time':
-                                        $badgeStyle = 'background:#dcfce7; color:#166534;';
-                                        break;
-                                    case 'Late':
-                                        $badgeStyle = 'background:#fef9c3; color:#854d0e;';
-                                        break;
-                                    case 'Present':
-                                        $badgeStyle = 'background:#dbeafe; color:#1e40af;';
-                                        break;
-                                    case 'Half Day':
-                                        $badgeStyle = 'background:#ffedd5; color:#9a3412;';
-                                        break;
-                                }
-                                ?>
-                                <span class="badge att-badge" style="<?= $badgeStyle ?>"><?= $row['status'] ?></span>
+                        <!-- Group 2: Times -->
+                        <div class="att-time-group">
+                            <div class="att-time">
+                                <i data-lucide="log-in" style="width:14px; color:#10b981;"></i>
+                                <?= date('h:i A', strtotime($row['clock_in'])) ?>
                             </div>
-
-                            <!-- Group 2: Times -->
-                            <div class="att-time-group">
-                                <div class="att-time">
-                                    <i data-lucide="log-in" style="width:14px; color:#10b981;"></i>
-                                    <?= date('h:i A', strtotime($row['clock_in'])) ?>
-                                </div>
-                                <div class="att-time">
-                                    <i data-lucide="log-out" style="width:14px; color:#f43f5e;"></i>
-                                    <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working...' ?>
-                                </div>
+                            <div class="att-time">
+                                <i data-lucide="log-out" style="width:14px; color:#f43f5e;"></i>
+                                <?= $row['clock_out'] ? date('h:i A', strtotime($row['clock_out'])) : 'Working...' ?>
                             </div>
+                        </div>
 
-                            <!-- Group 3: Locations (Collapsible on Mobile, Inline on Desktop) -->
-                            <div class="details-collapse">
-                                <div class="att-loc-container">
-                                    <div class="att-loc-item" style="flex: 1; min-width: 0;">
-                                        <div class="att-loc-label">In Location</div>
-                                        <div class="att-loc-text">
-                                            <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
-                                        </div>
-                                        <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
-                                            <div
-                                                style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
-                                                ⚠️ Out of Range: <?= htmlspecialchars($row['out_of_range_reason']) ?>
-                                            </div>
-                                        <?php endif; ?>
+                        <!-- Group 3: Locations (Collapsible on Mobile, Inline on Desktop) -->
+                        <div class="details-collapse">
+                            <div class="att-loc-container">
+                                <div class="att-loc-item" style="flex: 1; min-width: 0;">
+                                    <div class="att-loc-label">In Location</div>
+                                    <div class="att-loc-text">
+                                        <?= htmlspecialchars($row['clock_in_address'] ?: 'Not recorded') ?>
                                     </div>
-                                    <?php if ($row['clock_out']): ?>
-                                        <div class="att-loc-item" style="flex: 1; min-width: 0;">
-                                            <div class="att-loc-label">Out Location</div>
-                                            <div class="att-loc-text">
-                                                <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
-                                            </div>
-                                            <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
-                                                <div
-                                                    style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
-                                                    ⚠️ Exit Range:
-                                                    <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
-                                                </div>
-                                            <?php endif; ?>
+                                    <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') === false): ?>
+                                        <div
+                                            style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
+                                            ⚠️ Out of Range: <?= htmlspecialchars($row['out_of_range_reason']) ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Right: Hours -->
-                        <div style="text-align:right; min-width:50px;">
-                            <span class="att-hours"><?= formatDuration($row['total_hours']) ?></span>
-                            <span class="att-hours-label">Hours</span>
-                        </div>
-                    </div>
-
-                <?php elseif ($is_weekly_off): ?>
-                    <!-- WEEKLY OFF (TUESDAY) -->
-                    <div class="timeline-item" style="cursor: default; opacity: 0.8;">
-                        <div class="timeline-date" style="color: #94a3b8;">
-                            <?= date('d', strtotime($current_date)) ?>
-                            <span><?= date('M', strtotime($current_date)) ?></span>
-                        </div>
-                        <div class="timeline-content" style="display:flex; align-items:center;">
-                            <div class="att-header-group" style="width: auto; flex: 1;">
-                                <span class="att-day" style="color: #94a3b8;"><?= $day_of_week ?></span>
-                                <span class="badge att-badge"
-                                    style="background:#f1f5f9; color:#64748b; width: fit-content;">Weekly Off</span>
-                            </div>
-                            <div style="color: #cbd5e1; font-size: 0.9rem; font-style: italic;">
-                                Rest Day
+                                <?php if ($row['clock_out']): ?>
+                                    <div class="att-loc-item" style="flex: 1; min-width: 0;">
+                                        <div class="att-loc-label">Out Location</div>
+                                        <div class="att-loc-text">
+                                            <?= htmlspecialchars($row['clock_out_address'] ?: 'Not recorded') ?>
+                                        </div>
+                                        <?php if ($row['out_of_range'] && strpos($row['out_of_range_reason'], 'Out on Exit') !== false): ?>
+                                            <div
+                                                style="font-size: 0.65rem; color: #dc2626; font-weight: 700; margin-top: 4px; background: #fff1f2; padding: 3px 6px; border-radius: 4px; display: inline-block;">
+                                                ⚠️ Exit Range:
+                                                <?= htmlspecialchars(str_replace('Out on Exit: ', '', $row['out_of_range_reason'])) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
 
-                <?php elseif (isset($monthly_holidays) && isset($monthly_holidays[$current_date])): ?>
-                    <!-- HOLIDAY -->
-                    <div class="timeline-item" style="cursor: default; opacity: 0.9;">
-                        <div class="timeline-date" style="color: #d946ef;">
-                            <?= date('d', strtotime($current_date)) ?>
-                            <span><?= date('M', strtotime($current_date)) ?></span>
-                        </div>
-                        <div class="timeline-content" style="display:flex; align-items:center;">
-                            <div class="att-header-group" style="width: auto; flex: 1;">
-                                <span class="att-day" style="color: #64748b;"><?= $day_of_week ?></span>
-                                <span class="badge att-badge"
-                                    style="background:#fae8ff; color:#a21caf; width: fit-content;">Holiday</span>
-                            </div>
-                            <div style="color: #701a75; font-size: 0.9rem; font-weight: 500;">
-                                <?= htmlspecialchars($monthly_holidays[$current_date]) ?>
-                            </div>
-                        </div>
+                    <!-- Right: Hours -->
+                    <div style="text-align:right; min-width:50px;">
+                        <span class="att-hours"><?= formatDuration($row['total_hours']) ?></span>
+                        <span class="att-hours-label">Hours</span>
                     </div>
-                <?php endif; ?>
-
-            <?php } // End Date Loop ?>
-
-            <?php if (count($history) == 0 && $days_in_month == 0): ?>
-                <!-- Fallback if loop didn't run (unlikely) or strict empty filtering -->
+                </div>
+            <?php endforeach; ?>
+            <?php if (empty($history)): ?>
                 <div style="text-align:center; padding:3rem; color:#94a3b8;">
                     No attendance records found for this period.
                 </div>
