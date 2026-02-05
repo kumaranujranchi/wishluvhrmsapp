@@ -1306,34 +1306,6 @@ if (!function_exists('formatDuration')) {
                 <i data-lucide="map-pin" style="width:14px; vertical-align:middle;"></i> Ready to capture location
             </div>
         </div>
-
-        <!-- RIGHT/BOTTOM: Mini Stats (Compact Grid on Mobile) -->
-        <div class="mobile-stats-grid" style="display: flex; flex-direction: column; gap: 1rem;">
-            <div class="mini-stat-card" style="background: #5246E2;">
-                <div style="position: relative; z-index: 10;">
-                    <p class="stat-label">Attendance</p>
-                    <p class="stat-value"><?= $present_days ?></p>
-                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">Days Present</p>
-                </div>
-                <i data-lucide="calendar" class="stat-icon"></i>
-            </div>
-            <div class="mini-stat-card" style="background: #FFA000;">
-                <div style="position: relative; z-index: 10;">
-                    <p class="stat-label">Late Marks</p>
-                    <p class="stat-value"><?= $late_days ?></p>
-                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">Arrivals</p>
-                </div>
-                <i data-lucide="clock" class="stat-icon"></i>
-            </div>
-            <div class="mini-stat-card" style="background: #00BFA5;">
-                <div style="position: relative; z-index: 10;">
-                    <p class="stat-label">Total Hours</p>
-                    <p class="stat-value"><?= formatDuration($total_work_hours) ?></p>
-                    <p style="font-size: 10px; opacity: 0.9; margin: 0;">This Month</p>
-                </div>
-                <i data-lucide="timer" class="stat-icon"></i>
-            </div>
-        </div>
     </div>
 
     <!-- History Timeline Section -->
