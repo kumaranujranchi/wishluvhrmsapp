@@ -99,19 +99,33 @@ $birthday_q = $conn->prepare("
 $birthday_q->execute();
 $next_birthday = $birthday_q->fetch();
 
-// 6. Fetch Chart Data - Current Month (all days)
-$chart_labels = [];
-$chart_data = [];
+// 6. Fetch Chart Data - DESKTOP: Current Month (all days)
+$chart_labels_desktop = [];
+$chart_data_desktop = [];
 
-// Get all days of current month
+// Get all days of current month for DESKTOP
 for ($day = 1; $day <= $days_in_month; $day++) {
     $d = sprintf('%04d-%02d-%02d', $current_year, $current_month, $day);
-    $chart_labels[] = $day; // Show day number (1, 2, 3...)
-    
+    $chart_labels_desktop[] = $day; // Show day number (1, 2, 3...)
+
     $cq = $conn->prepare("SELECT total_hours FROM attendance WHERE employee_id = :uid AND date = :d");
     $cq->execute(['uid' => $user_id, 'd' => $d]);
     $hrs = floatval($cq->fetchColumn() ?: 0);
-    $chart_data[] = $hrs;
+    $chart_data_desktop[] = $hrs;
+}
+
+// 7. Fetch Chart Data - MOBILE: Last 7 days
+$chart_labels_mobile = [];
+$chart_data_mobile = [];
+
+// Last 7 days including today for MOBILE
+for ($i = 6; $i >= 0; $i--) {
+    $d = date('Y-m-d', strtotime("-$i days"));
+    $chart_labels_mobile[] = date('D', strtotime($d)); // Mon, Tue...
+    $cq = $conn->prepare("SELECT total_hours FROM attendance WHERE employee_id = :uid AND date = :d");
+    $cq->execute(['uid' => $user_id, 'd' => $d]);
+    $hrs = floatval($cq->fetchColumn() ?: 0);
+    $chart_data_mobile[] = $hrs;
 }
 
 // 7. Fetch Notices
@@ -573,15 +587,15 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
             <div class="m-chart-card">
                 <div class="chart-bars">
                     <?php
-                    // Render 7 bars
-                    foreach ($chart_data as $i => $val):
+                    // Render 7 bars for MOBILE (last 7 days)
+                    foreach ($chart_data_mobile as $i => $val):
                         $height = min(100, ($val / 12) * 100); // Scale 12hrs = 100%
                         ?>
                         <div class="bar-col">
                             <div class="bar-bg">
                                 <div class="bar-fill" style="height: <?= $height ?>%;"></div>
                             </div>
-                            <span class="bar-label"><?= $chart_labels[$i] ?></span>
+                            <span class="bar-label"><?= $chart_labels_mobile[$i] ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -814,16 +828,16 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Employee Performance Chart (Desktop Only)
+    // Employee Performance Chart (Desktop Only - Full Month)
     const ctx = document.getElementById('employeeWaveChart');
     if (ctx) {
         new Chart(ctx.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: <?= json_encode($chart_labels) ?>,
+                labels: <?= json_encode($chart_labels_desktop) ?>,
                 datasets: [{
                     label: 'Work Hours',
-                    data: <?= json_encode($chart_data) ?>,
+                    data: <?= json_encode($chart_data_desktop) ?>,
                     backgroundColor: 'rgba(99, 102, 241, 0.8)',
                     borderRadius: 5,
                     barThickness: 'flex',
@@ -833,11 +847,11 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
+                plugins: {
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 const minutes = context.parsed.y;
                                 const hours = Math.floor(minutes / 60);
                                 const mins = Math.round(minutes % 60);
@@ -853,11 +867,11 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
                     }
                 },
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
+                    y: {
+                        beginAtZero: true,
                         grid: { color: '#f1f5f9' },
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 const hours = Math.floor(value / 60);
                                 return hours + ' hr';
                             }
