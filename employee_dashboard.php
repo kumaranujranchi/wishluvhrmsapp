@@ -13,7 +13,7 @@ $current_year = date('Y');
 
 // 1. Fetch Monthly Attendance Stats
 $attr_q = $conn->prepare("SELECT 
-    COUNT(CASE WHEN status = 'Present' THEN 1 END) as present_days,
+    COUNT(CASE WHEN status IN ('Present', 'On Time', 'Late', 'Half Day') THEN 1 END) as present_days,
     COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_count,
     SUM(total_hours) as total_hours
     FROM attendance 
@@ -725,16 +725,22 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
                 </div>
                 <div class="card-value-name">
                     <?php
-                    if (!empty($upcoming_birthday)) {
-                        echo htmlspecialchars($upcoming_birthday['name']);
+                    if (!empty($next_birthday)) {
+                        echo htmlspecialchars($next_birthday['first_name'] . ' ' . $next_birthday['last_name']);
                     } else {
                         echo 'No upcoming';
                     }
                     ?>
                 </div>
                 <div class="card-subtitle">
-                    <?php if (!empty($upcoming_birthday)): ?>
-                        <?php echo date('d M', strtotime($upcoming_birthday['date'])); ?>
+                    <?php if (!empty($next_birthday)): ?>
+                        <?php
+                        // Calculate next occurrence date for display
+                        $dob_day_month = date('-m-d', strtotime($next_birthday['dob']));
+                        $this_year_bday = date('Y') . $dob_day_month;
+                        $next_bday_date = (strtotime($this_year_bday) >= time()) ? $this_year_bday : (date('Y') + 1) . $dob_day_month;
+                        echo date('d M', strtotime($next_bday_date));
+                        ?>
                     <?php else: ?>
                         birthdays this month
                     <?php endif; ?>
@@ -777,8 +783,8 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
                 <div class="announcements-section">
                     <h3>Announcements</h3>
                     <div class="announcements-list">
-                        <?php if (!empty($recent_notices)): ?>
-                            <?php foreach (array_slice($recent_notices, 0, 3) as $notice): ?>
+                        <?php if (!empty($latest_notices)): ?>
+                            <?php foreach (array_slice($latest_notices, 0, 3) as $notice): ?>
                                 <div class="announcement-item">
                                     <div class="announcement-dot"></div>
                                     <div class="announcement-content">
