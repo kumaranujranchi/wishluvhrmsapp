@@ -27,7 +27,7 @@ $loc_stmt = $conn->prepare("
     WHERE el.employee_id = :uid AND al.is_active = 1
 ");
 $loc_stmt->execute(['uid' => $user_id]);
-$loc_stmt->execute(['uid' => $user_id]);
+
 $assigned_locations = $loc_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Permissions
@@ -1364,7 +1364,8 @@ function formatDuration($total_minutes)
             }
 
             // Generate full date range for selected month
-            $days_in_month = cal_days_in_month(CAL_GREGORIAN, $filter_month, $filter_year);
+            $days_in_month = (int) date('t', mktime(0, 0, 0, $filter_month, 1, $filter_year));
+
             // Reverse order loop (Newest first)
             for ($day = $days_in_month; $day >= 1; $day--) {
                 $current_date = sprintf('%04d-%02d-%02d', $filter_year, $filter_month, $day);
@@ -1394,13 +1395,23 @@ function formatDuration($total_minutes)
                             <div class="att-header-group">
                                 <span class="att-day"><?= $day_of_week ?></span>
                                 <?php
-                                $badgeStyle = match ($row['status']) {
-                                    'On Time' => 'background:#dcfce7; color:#166534;',
-                                    'Late' => 'background:#fef9c3; color:#854d0e;',
-                                    'Present' => 'background:#dbeafe; color:#1e40af;',
-                                    'Half Day' => 'background:#ffedd5; color:#9a3412;',
-                                    default => 'background:#f1f5f9; color:#64748b;'
-                                };
+                                $status = $row['status'] ?? '';
+                                $badgeStyle = 'background:#f1f5f9; color:#64748b;'; // default
+                        
+                                switch ($status) {
+                                    case 'On Time':
+                                        $badgeStyle = 'background:#dcfce7; color:#166534;';
+                                        break;
+                                    case 'Late':
+                                        $badgeStyle = 'background:#fef9c3; color:#854d0e;';
+                                        break;
+                                    case 'Present':
+                                        $badgeStyle = 'background:#dbeafe; color:#1e40af;';
+                                        break;
+                                    case 'Half Day':
+                                        $badgeStyle = 'background:#ffedd5; color:#9a3412;';
+                                        break;
+                                }
                                 ?>
                                 <span class="badge att-badge" style="<?= $badgeStyle ?>"><?= $row['status'] ?></span>
                             </div>
