@@ -44,19 +44,19 @@ $holiday_q = $conn->prepare("SELECT DATE(start_date) as holiday_date FROM holida
 $holiday_q->execute(['m' => $current_month, 'y' => $current_year]);
 $holidays = $holiday_q->fetchAll(PDO::FETCH_COLUMN);
 
-// Count working days (exclude Tuesdays and holidays)
+// Count working days (exclude Tuesdays and holidays) - ONLY DAYS PASSED
 for ($day = 1; $day <= $days_in_month; $day++) {
     $date = sprintf('%04d-%02d-%02d', $current_year, $current_month, $day);
-
-    // Skip future dates
+    
+    // Skip future dates - IMPORTANT: Only count till today
     if (strtotime($date) > time()) {
         break;
     }
-
+    
     $day_of_week = date('l', strtotime($date));
     $is_weekly_off = ($day_of_week === 'Tuesday');
     $is_holiday = in_array($date, $holidays);
-
+    
     // Count only if not weekly off and not holiday
     if (!$is_weekly_off && !$is_holiday) {
         $working_days++;
