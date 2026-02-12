@@ -120,7 +120,9 @@ try {
         $empStmt->execute(['uid' => $userId]);
         $shiftStart = $empStmt->fetchColumn() ?: '10:00:00';
         // Compare only hours and minutes to allow the 10:00 AM minute to be "On Time"
-        $status = (date('H:i', strtotime($currentTime)) > date('H:i', strtotime($shiftStart))) ? 'Late' : 'On Time';
+        // Grace period: Allowed until 10:05:59 (so < 10:06:00)
+        $grace_time = date('H:i:s', strtotime($shiftStart . ' + 6 minutes'));
+        $status = ($currentTime < $grace_time) ? 'On Time' : 'Late';
 
         // Insert attendance record
         $stmt = $conn->prepare("

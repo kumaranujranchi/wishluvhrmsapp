@@ -68,7 +68,9 @@ try {
 
     if (!$attendance) {
         // CLOCK IN
-        $status = ($time > ($employee['shift_start_time'] ?? '10:00:00')) ? 'Late' : 'On Time';
+        $shift_time = $employee['shift_start_time'] ?? '10:00:00';
+        $grace_time = date('H:i:s', strtotime($shift_time . ' + 6 minutes'));
+        $status = ($time < $grace_time) ? 'On Time' : 'Late';
 
         $ins = $conn->prepare("INSERT INTO attendance (employee_id, date, clock_in, status, face_verified, face_confidence, clock_in_lat, clock_in_lng, verification_method) VALUES (:uid, :date, :time, :status, TRUE, :conf, :lat, :lng, 'kiosk')");
         $ins->execute([
