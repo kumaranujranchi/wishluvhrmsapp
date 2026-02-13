@@ -93,11 +93,104 @@ $requests = $stmt->fetchAll();
 
     @media (max-width: 768px) {
         .requests-table {
-            overflow-x: auto;
+            display: none;
+            /* Hide table on mobile */
         }
 
-        table {
-            min-width: 800px;
+        .desktop-view-only {
+            display: none !important;
+        }
+
+        .mobile-list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .m-req-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
+        }
+
+        .m-req-summary {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            curso: pointer;
+            list-style: none;
+            /* Hide default arrow */
+        }
+
+        .m-req-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .m-req-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .m-req-date {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+
+        .m-req-type {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .m-req-details {
+            padding: 0 1rem 1rem 1rem;
+            border-top: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+
+        .m-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .m-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .m-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .m-value {
+            color: #334155;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .toggle-icon {
+            color: #cbd5e1;
+            transition: transform 0.2s;
+        }
+
+        details[open] .toggle-icon {
+            transform: rotate(180deg);
+        }
+    }
+
+    @media (min-width: 769px) {
+        .mobile-list-view {
+            display: none;
+            /* Hide cards on desktop */
         }
     }
 </style>
@@ -118,7 +211,8 @@ $requests = $stmt->fetchAll();
 
     <div class="requests-table-wrap">
         <?php if (count($requests) > 0): ?>
-            <table>
+            <!-- DESKTOP TABLE VIEW -->
+            <table class="requests-table desktop-view-only">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -172,6 +266,59 @@ $requests = $stmt->fetchAll();
                     <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <!-- MOBILE LIST VIEW -->
+            <div class="mobile-list-view">
+                <?php foreach ($requests as $req): ?>
+                    <details class="m-req-card">
+                        <summary class="m-req-summary">
+                            <div class="m-req-header-left">
+                                <span class="m-req-date">
+                                    <?php echo date('d M Y', strtotime($req['attendance_date'])); ?>
+                                </span>
+                                <span class="m-req-type">
+                                    <?php echo ucwords(str_replace('_', ' ', $req['request_type'])); ?>
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="status-badge status-<?php echo $req['status']; ?>" style="font-size: 0.75rem;">
+                                    <?php echo ucfirst($req['status']); ?>
+                                </span>
+                                <i data-lucide="chevron-down" class="toggle-icon" style="width: 16px; height: 16px;"></i>
+                            </div>
+                        </summary>
+                        <div class="m-req-details">
+                            <div class="m-detail-row">
+                                <span class="m-label">Clock In</span>
+                                <span class="m-value"><?php echo $req['requested_clock_in']; ?></span>
+                            </div>
+                            <div class="m-detail-row">
+                                <span class="m-label">Clock Out</span>
+                                <span class="m-value"><?php echo $req['requested_clock_out'] ?: '-'; ?></span>
+                            </div>
+                            <div class="m-detail-row">
+                                <span class="m-label">Requested On</span>
+                                <span class="m-value"><?php echo date('d M, h:i A', strtotime($req['requested_at'])); ?></span>
+                            </div>
+                            <?php if ($req['reviewed_by']): ?>
+                            <div class="m-detail-row">
+                                <span class="m-label">Reviewed By</span>
+                                <span class="m-value"><?php echo $req['reviewer_fname'] . ' ' . $req['reviewer_lname']; ?></span>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ($req['admin_remarks']): ?>
+                            <div class="m-detail-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                                <span class="m-label">Admin Remarks</span>
+                                <span class="m-value" style="text-align: left; font-weight: normal; font-size: 0.85rem;">
+                                    <?php echo $req['admin_remarks']; ?>
+                                </span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </details>
+                <?php endforeach; ?>
+            </div>
+
         <?php else: ?>
             <div class="empty-state">
                 <i data-lucide="inbox" style="width: 64px; height: 64px; color: #ccc;"></i>
