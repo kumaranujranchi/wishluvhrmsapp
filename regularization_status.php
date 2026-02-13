@@ -92,6 +92,28 @@ $requests = $stmt->fetchAll();
     }
 
     @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .page-header h2 {
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .btn-new-request {
+            padding: 0.5rem 1rem;
+            /* Smaller padding */
+            font-size: 0.9rem;
+            /* Smaller font */
+            width: auto;
+            /* Ensure it's not full width if it was */
+            margin-bottom: 1rem;
+        }
+
         .requests-table {
             display: none;
             /* Hide table on mobile */
@@ -301,18 +323,19 @@ $requests = $stmt->fetchAll();
                                 <span class="m-value"><?php echo date('d M, h:i A', strtotime($req['requested_at'])); ?></span>
                             </div>
                             <?php if ($req['reviewed_by']): ?>
-                            <div class="m-detail-row">
-                                <span class="m-label">Reviewed By</span>
-                                <span class="m-value"><?php echo $req['reviewer_fname'] . ' ' . $req['reviewer_lname']; ?></span>
-                            </div>
+                                <div class="m-detail-row">
+                                    <span class="m-label">Reviewed By</span>
+                                    <span
+                                        class="m-value"><?php echo $req['reviewer_fname'] . ' ' . $req['reviewer_lname']; ?></span>
+                                </div>
                             <?php endif; ?>
                             <?php if ($req['admin_remarks']): ?>
-                            <div class="m-detail-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-                                <span class="m-label">Admin Remarks</span>
-                                <span class="m-value" style="text-align: left; font-weight: normal; font-size: 0.85rem;">
-                                    <?php echo $req['admin_remarks']; ?>
-                                </span>
-                            </div>
+                                <div class="m-detail-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                                    <span class="m-label">Admin Remarks</span>
+                                    <span class="m-value" style="text-align: left; font-weight: normal; font-size: 0.85rem;">
+                                        <?php echo $req['admin_remarks']; ?>
+                                    </span>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </details>
