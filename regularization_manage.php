@@ -327,6 +327,16 @@ $employees = $stmt->fetchAll();
         .form-grid {
             grid-template-columns: 1fr;
         }
+
+        .request-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .badge-pending {
+            margin-left: 0 !important;
+        }
     }
 </style>
 

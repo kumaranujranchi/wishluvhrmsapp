@@ -576,6 +576,39 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
                 </div>
                 <i data-lucide="palmtree" class="m-bg-icon"></i>
             </div>
+
+            <!-- Upcoming Birthday -->
+            <div class="m-card" style="background: #8E24AA;">
+                <div class="m-card-content">
+                    <p class="m-label">Upcoming Birthday</p>
+                    <p class="m-value"
+                        style="font-size: 1.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <?php
+                        if ($next_birthday) {
+                            echo htmlspecialchars($next_birthday['first_name']);
+                        } else {
+                            echo 'No Data';
+                        }
+                        ?>
+                    </p>
+                    <p class="m-desc">
+                        <?php
+                        if ($next_birthday) {
+                            $dob_day_month = date('-m-d', strtotime($next_birthday['dob']));
+                            $this_year_bday = date('Y') . $dob_day_month;
+                            $next_bday_date = (strtotime($this_year_bday) >= time()) ? $this_year_bday : (date('Y') + 1) . $dob_day_month;
+                            echo date('d M', strtotime($next_bday_date));
+                        } else {
+                            echo '-';
+                        }
+                        ?>
+                    </p>
+                    <div class="m-footer">
+                        <i data-lucide="cake" style="width: 14px;"></i> Celebration
+                    </div>
+                </div>
+                <i data-lucide="gift" class="m-bg-icon"></i>
+            </div>
         </div>
 
         <!-- Performance Analytics -->

@@ -45,13 +45,14 @@ try {
         $total_minutes = ($interval->h * 60) + $interval->i;
     }
 
-    // Determine status
-    $status = 'On Time';
-    $in_time_val = strtotime($clock_in);
-    // Late threshold 10:00 AM
-    if (date('H:i', $in_time_val) > '10:00') {
-        $status = 'Late';
-    }
+    // Fetch Employee Shift Start Time
+    $stmt = $conn->prepare("SELECT shift_start_time FROM employees WHERE id = :id");
+    $stmt->execute(['id' => $employee_id]);
+    $shift_start = $stmt->fetchColumn() ?: '10:00:00';
+
+    // Determine status with grace period logic
+    $grace_time = date('H:i:s', strtotime($shift_start . ' + 6 minutes'));
+    $status = ($clock_in < $grace_time) ? 'On Time' : 'Late';
 
     // Check if attendance record exists
     $stmt = $conn->prepare("SELECT id FROM attendance WHERE employee_id = :emp_id AND date = :date");

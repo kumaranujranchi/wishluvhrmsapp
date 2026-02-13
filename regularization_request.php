@@ -246,6 +246,11 @@ include 'includes/header.php';
             padding: 1rem;
         }
 
+        .form-card {
+            padding: 1.25rem;
+            /* Reduced from default */
+        }
+
         .time-inputs {
             grid-template-columns: 1fr;
         }

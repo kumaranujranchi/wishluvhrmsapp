@@ -27,8 +27,8 @@ if (!in_array($action, ['approved', 'rejected'])) {
 try {
     $conn->beginTransaction();
 
-    // Fetch the regularization request
-    $stmt = $conn->prepare("SELECT * FROM attendance_regularization WHERE id = :id AND status = 'pending'");
+    // Fetch the regularization request with employee shift info
+    $stmt = $conn->prepare("SELECT r.*, e.shift_start_time FROM attendance_regularization r JOIN employees e ON r.employee_id = e.id WHERE r.id = :id AND r.status = 'pending'");
     $stmt->execute(['id' => $request_id]);
     $request = $stmt->fetch();
 
@@ -55,18 +55,19 @@ try {
         $clock_out = $request['requested_clock_out'];
 
         // Calculate total minutes
-        $in_time = new DateTime($clock_in);
-        $out_time = new DateTime($clock_out);
-        $interval = $in_time->diff($out_time);
-        $total_minutes = ($interval->h * 60) + $interval->i;
-
-
-        // Determine status based on clock-in time
-        $status = 'On Time';
-        $in_time_val = strtotime($clock_in);
-        if (date('H:i', $in_time_val) > '10:00') {
-            $status = 'Late';
+        $total_minutes = 0;
+        if ($clock_in && $clock_out) {
+            $in_time = new DateTime($clock_in);
+            $out_time = new DateTime($clock_out);
+            $interval = $in_time->diff($out_time);
+            $total_minutes = ($interval->h * 60) + $interval->i;
         }
+
+
+        // Determine status based on clock-in time and grace period
+        $shift_start = $request['shift_start_time'] ?: '10:00:00';
+        $grace_time = date('H:i:s', strtotime($shift_start . ' + 6 minutes'));
+        $status = ($clock_in < $grace_time) ? 'On Time' : 'Late';
 
         // Check if attendance record exists
         $stmt = $conn->prepare("SELECT id FROM attendance WHERE employee_id = :emp_id AND date = :date");
