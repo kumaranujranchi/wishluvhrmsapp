@@ -578,7 +578,7 @@ $latest_apk_version = $apk_settings['latest_apk_version'] ?? '';
             </div>
 
             <!-- Upcoming Birthday -->
-            <div class="m-card" style="background: #8E24AA;">
+            <div class="m-card" style="background: #8E24AA; grid-column: span 2;">
                 <div class="m-card-content">
                     <p class="m-label">Upcoming Birthday</p>
                     <p class="m-value"
