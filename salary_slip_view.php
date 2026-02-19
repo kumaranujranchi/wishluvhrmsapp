@@ -333,6 +333,117 @@ try {
             box-shadow: 0 15px 30px rgba(30, 58, 138, 0.5);
         }
 
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .a4-page {
+                border-top-width: 5px;
+            }
+            .content-padding {
+                padding: 20px 16px;
+            }
+
+            /* Header: Stack logo + company info */
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .company-info {
+                text-align: left;
+            }
+            .company-name {
+                font-size: 18px;
+            }
+            .company-address {
+                margin-left: 0;
+                max-width: 100%;
+            }
+
+            /* Employee grid: single column */
+            .grid-container {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .col-left {
+                margin-bottom: 8px;
+            }
+            .info-label {
+                font-size: 11px;
+            }
+            .info-value {
+                font-size: 12px;
+            }
+
+            /* Salary table: Split into two stacked blocks */
+            .salary-table {
+                font-size: 12px;
+            }
+            .salary-table thead th:nth-child(3),
+            .salary-table thead th:nth-child(4),
+            .salary-table tbody td:nth-child(3),
+            .salary-table tbody td:nth-child(4) {
+                display: none;
+            }
+            /* Add a Deductions section after */
+            .mobile-deductions-table {
+                display: table;
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .mobile-deductions-table th {
+                background: #dc2626;
+                color: white;
+                text-transform: uppercase;
+                font-size: 11px;
+                font-weight: 700;
+                padding: 10px 12px;
+                text-align: left;
+            }
+            .mobile-deductions-table td {
+                border-bottom: 1px solid #e2e8f0;
+                padding: 10px 12px;
+                color: #334155;
+            }
+            .mobile-deductions-table tr:nth-child(even) {
+                background: #f8fafc;
+            }
+            .mobile-deductions-table .amount-col {
+                text-align: right;
+                font-weight: 600;
+            }
+            .mobile-deductions-table .total-row td {
+                background: #f1f5f9;
+                font-weight: 800;
+                color: #dc2626;
+                border-top: 2px solid #cbd5e1;
+            }
+
+            /* Net pay card: Stack on mobile */
+            .net-pay-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .net-amount-box {
+                text-align: left;
+            }
+            .net-value {
+                font-size: 22px;
+            }
+
+            /* Print button: Full width */
+            .print-btn {
+                bottom: 15px;
+                right: 15px;
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+
         @media print {
             body {
                 background: white;
@@ -340,22 +451,25 @@ try {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-
             .a4-page {
                 box-shadow: none;
                 margin: 0;
                 width: 100%;
                 max-width: 100%;
-                border-top: none;
-                /* Optional: remove colored border for simpler print */
             }
-
             .print-btn {
                 display: none;
             }
-
             .content-padding {
                 padding: 20px 40px;
+            }
+            /* Show all table columns when printing */
+            .salary-table thead th,
+            .salary-table tbody td {
+                display: table-cell !important;
+            }
+            .mobile-deductions-table {
+                display: none !important;
             }
         }
     </style>
@@ -500,7 +614,46 @@ try {
                 </tbody>
             </table>
 
-            <!-- NET PAY CARD -->
+            <!-- MOBILE-ONLY: Deductions Table (hidden on desktop via CSS) -->
+            <table class="mobile-deductions-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Deductions</th>
+                        <th class="amount-col">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Provident Fund (PF)</td>
+                        <td class="amount-col"><?= number_format($data['pf_deduction'], 2) ?></td>
+                    </tr>
+                    <tr>
+                        <td>ESI</td>
+                        <td class="amount-col"><?= number_format($data['esi_deduction'], 2) ?></td>
+                    </tr>
+                    <tr>
+                        <td>Other Deductions</td>
+                        <td class="amount-col"><?= number_format($data['other_deductions'], 2) ?></td>
+                    </tr>
+                    <?php if ($lop_days > 0): ?>
+                    <tr>
+                        <td style="color:#ef4444; font-weight:600;">LOP Deduction (<?= $lop_days ?> Days)</td>
+                        <td class="amount-col" style="color:#ef4444;">- <?= number_format($lop_amount, 2) ?></td>
+                    </tr>
+                    <?php else: ?>
+                    <tr>
+                        <td>LOP Days (<?= $lop_days ?>)</td>
+                        <td class="amount-col">—</td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr class="total-row">
+                        <td>Total Deductions</td>
+                        <td class="amount-col"><?= number_format($data['pf_deduction'] + $data['esi_deduction'] + $data['other_deductions'] + $lop_amount, 2) ?></td>
+                    </tr>
+                </tbody>
+            </table>
+
+
             <div class="net-pay-section">
                 <div class="words-section">
                     <div class="words-label">Amount in Words</div>
