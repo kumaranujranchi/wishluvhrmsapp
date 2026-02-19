@@ -120,6 +120,33 @@ try {
         ];
     }
 
+    // 3.1 Fetch Approved Leaves
+    $leave_sql = "SELECT employee_id, leave_type, start_date, end_date FROM leave_requests 
+                  WHERE admin_status = 'Approved' 
+                  AND (
+                      (start_date BETWEEN :start AND :end) 
+                      OR (end_date BETWEEN :start AND :end)
+                      OR (start_date <= :start AND end_date >= :end)
+                  )";
+    $leave_stmt = $conn->prepare($leave_sql);
+    $leave_stmt->execute(['start' => $start_date, 'end' => $end_date]);
+    $leaves_data = $leave_stmt->fetchAll();
+
+    $leaves_map = [];
+    foreach ($leaves_data as $leave) {
+        $curr = strtotime($leave['start_date']);
+        $last = strtotime($leave['end_date']);
+        while ($curr <= $last) {
+            $d_str = date('Y-m-d', $curr);
+            // Only map if within current month
+            if ($d_str >= $start_date && $d_str <= $end_date) {
+                $day = (int) date('j', $curr);
+                $leaves_map[$leave['employee_id']][$day] = $leave['leave_type'];
+            }
+            $curr = strtotime('+1 day', $curr);
+        }
+    }
+
     // 4. Calculate
     $tuesdays_list = [];
     for ($d = 1; $d <= $num_days; $d++) {
@@ -133,39 +160,49 @@ try {
     $payroll_preview = [];
     foreach ($employees as $emp) {
         $present_regular_count = 0;
+        $total_display_present = 0;
+
         for ($d = 1; $d <= $num_days; $d++) {
             $current_date = "$year-$month-" . sprintf('%02d', $d);
             $is_wo_or_holiday = (date('l', strtotime($current_date)) === 'Tuesday' || in_array($current_date, $holidays_list));
             
+            $status = 'Absent';
+            $has_clock_in = false;
+            $leave_type = $leaves_map[$emp['id']][$d] ?? null;
+
             if (isset($attendance_map[$emp['id']][$d])) {
                 $att_data = $attendance_map[$emp['id']][$d];
                 $status = $att_data['status'];
                 $has_clock_in = !empty($att_data['clock_in']);
+            }
 
-                if (!$is_wo_or_holiday) {
-                    if (in_array($status, ['Present', 'On Time', 'Late', 'Leave']) || $has_clock_in) {
-                        $present_regular_count += 1;
-                    } elseif ($status === 'Half Day') {
+            // Calculation Logic for Payment
+            if (!$is_wo_or_holiday) {
+                if (in_array($status, ['Present', 'On Time', 'Late', 'Leave']) || $has_clock_in) {
+                    $present_regular_count += 1;
+                } elseif ($status === 'Half Day') {
+                    $present_regular_count += 0.5;
+                } elseif ($leave_type) {
+                    // Check Leave Type from Request if not in Attendance
+                    if ($leave_type === 'Half Day') {
                         $present_regular_count += 0.5;
+                    } else {
+                        $present_regular_count += 1;
                     }
                 }
             }
-        }
 
-        $paid_days = $present_regular_count + $total_wo_in_month + $total_holidays_in_month;
-        if ($emp['first_name'] === 'Anuj' && $emp['last_name'] === 'Kumar') {
-            $paid_days = $num_days;
-        }
-
-        $total_display_present = 0;
-        if (isset($attendance_map[$emp['id']])) {
-            foreach ($attendance_map[$emp['id']] as $att_item) {
-                $st = $att_item['status'];
-                $has_in = !empty($att_item['clock_in']);
-                if (in_array($st, ['Present', 'On Time', 'Late', 'Leave']) || $has_in) {
-                    $total_display_present += 1;
-                } elseif ($st === 'Half Day') {
+            // Display Count Logic
+            // Priority: Attendance Record -> Approved Leave -> Absent
+            if (in_array($status, ['Present', 'On Time', 'Late', 'Leave']) || $has_clock_in) {
+                $total_display_present += 1;
+            } elseif ($status === 'Half Day') {
+                $total_display_present += 0.5;
+            } elseif ($leave_type) {
+                if ($leave_type === 'Half Day') {
                     $total_display_present += 0.5;
+                } else {
+                    $total_display_present += 1;
                 }
             }
         }
