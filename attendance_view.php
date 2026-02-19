@@ -197,10 +197,15 @@ $late_days = 0;
 $total_work_hours = 0;
 
 foreach ($history as $h) {
-    if ($h['status'] == 'Present' || $h['status'] == 'Late')
+    if (in_array($h['status'], ['Present', 'On Time', 'Late', 'Leave'])) {
         $present_days++;
-    if ($h['status'] == 'Late')
+    } elseif ($h['status'] == 'Half Day') {
+        $present_days += 0.5;
+    }
+
+    if ($h['status'] == 'Late') {
         $late_days++;
+    }
     $total_work_hours += $h['total_hours'];
 }
 

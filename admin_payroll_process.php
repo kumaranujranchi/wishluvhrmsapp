@@ -133,9 +133,15 @@ try {
         for ($d = 1; $d <= $num_days; $d++) {
             $current_date = "$year-$month-" . sprintf('%02d', $d);
             $is_wo_or_holiday = (date('l', strtotime($current_date)) === 'Tuesday' || in_array($current_date, $holidays_list));
+            
             if (isset($attendance_map[$emp['id']][$d])) {
-                if ($attendance_map[$emp['id']][$d] !== 'Absent' && !$is_wo_or_holiday) {
-                    $present_regular_count++;
+                $status = $attendance_map[$emp['id']][$d];
+                if (!$is_wo_or_holiday) {
+                    if (in_array($status, ['Present', 'On Time', 'Late', 'Leave'])) {
+                        $present_regular_count += 1;
+                    } elseif ($status === 'Half Day') {
+                        $present_regular_count += 0.5;
+                    }
                 }
             }
         }
@@ -145,10 +151,14 @@ try {
             $paid_days = $num_days;
         }
 
-        $total_punches = 0;
+        $total_display_present = 0;
         if (isset($attendance_map[$emp['id']])) {
             foreach ($attendance_map[$emp['id']] as $st) {
-                if ($st !== 'Absent') $total_punches++;
+                if (in_array($st, ['Present', 'On Time', 'Late', 'Leave'])) {
+                    $total_display_present += 1;
+                } elseif ($st === 'Half Day') {
+                    $total_display_present += 0.5;
+                }
             }
         }
 
@@ -161,7 +171,7 @@ try {
             'name' => $emp['first_name'] . ' ' . $emp['last_name'],
             'code' => $emp['employee_code'],
             'base_salary' => $base_salary,
-            'present_days' => $total_punches,
+            'present_days' => $total_display_present,
             'wo_days' => $total_wo_in_month,
             'holiday_days' => $total_holidays_in_month,
             'paid_days' => $paid_days,

@@ -121,7 +121,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                 $in = $log['clock_in'] ? date('H:i', strtotime($log['clock_in'])) : '-';
                 $out = $log['clock_out'] ? date('H:i', strtotime($log['clock_out'])) : '-';
                 $row[] = "$in\n$out";
-                $present++;
+
+                if ($log['status'] === 'Half Day') {
+                    $present += 0.5;
+                } else {
+                    $present++;
+                }
+
                 if ($log['status'] === 'Late')
                     $late++;
             } elseif (isset($holiday_map[$current_date])) {
@@ -391,7 +397,12 @@ include 'includes/header.php';
                                 <?php if (isset($matrix[$emp['id']][$d])): ?>
                                     <?php
                                     $log = $matrix[$emp['id']][$d];
-                                    $present_count++;
+                                    if ($log['status'] === 'Half Day') {
+                                        $present_count += 0.5;
+                                    } else {
+                                        $present_count++;
+                                    }
+
                                     if ($log['status'] === 'Late')
                                         $late_count++;
                                     ?>
@@ -404,6 +415,7 @@ include 'includes/header.php';
                                 <?php elseif (isset($holiday_map[$current_date])): ?>
                                     <span class="status-h">H</span>
                                 <?php elseif (isset($leave_map[$emp['id']][$current_date])): ?>
+                                    <?php $present_count++; // Count Leave as present/paid for summary ?>
                                     <span class="status-l">L</span>
                                 <?php elseif ($is_tuesday): ?>
                                     <span class="status-wo">W/O</span>
