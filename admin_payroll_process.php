@@ -106,7 +106,7 @@ try {
     $emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code, salary FROM employees ORDER BY first_name ASC");
     $employees = $emp_stmt->fetchAll();
 
-    $att_sql = "SELECT employee_id, date, status FROM attendance WHERE date BETWEEN :start AND :end";
+    $att_sql = "SELECT employee_id, date, status, clock_in FROM attendance WHERE date BETWEEN :start AND :end";
     $att_stmt = $conn->prepare($att_sql);
     $att_stmt->execute(['start' => $start_date, 'end' => $end_date]);
     $logs = $att_stmt->fetchAll();
@@ -114,7 +114,10 @@ try {
     $attendance_map = [];
     foreach ($logs as $log) {
         $day = (int) date('j', strtotime($log['date']));
-        $attendance_map[$log['employee_id']][$day] = $log['status'];
+        $attendance_map[$log['employee_id']][$day] = [
+            'status' => $log['status'],
+            'clock_in' => $log['clock_in']
+        ];
     }
 
     // 4. Calculate
@@ -135,9 +138,12 @@ try {
             $is_wo_or_holiday = (date('l', strtotime($current_date)) === 'Tuesday' || in_array($current_date, $holidays_list));
             
             if (isset($attendance_map[$emp['id']][$d])) {
-                $status = $attendance_map[$emp['id']][$d];
+                $att_data = $attendance_map[$emp['id']][$d];
+                $status = $att_data['status'];
+                $has_clock_in = !empty($att_data['clock_in']);
+
                 if (!$is_wo_or_holiday) {
-                    if (in_array($status, ['Present', 'On Time', 'Late', 'Leave'])) {
+                    if (in_array($status, ['Present', 'On Time', 'Late', 'Leave']) || $has_clock_in) {
                         $present_regular_count += 1;
                     } elseif ($status === 'Half Day') {
                         $present_regular_count += 0.5;
@@ -153,8 +159,10 @@ try {
 
         $total_display_present = 0;
         if (isset($attendance_map[$emp['id']])) {
-            foreach ($attendance_map[$emp['id']] as $st) {
-                if (in_array($st, ['Present', 'On Time', 'Late', 'Leave'])) {
+            foreach ($attendance_map[$emp['id']] as $att_item) {
+                $st = $att_item['status'];
+                $has_in = !empty($att_item['clock_in']);
+                if (in_array($st, ['Present', 'On Time', 'Late', 'Leave']) || $has_in) {
                     $total_display_present += 1;
                 } elseif ($st === 'Half Day') {
                     $total_display_present += 0.5;
