@@ -70,20 +70,33 @@ foreach ($employees as $emp) {
     if (isset($attendance_data[$emp_id])) {
         $att = $attendance_data[$emp_id];
         $status = $att['status'];
-        $in_time = $att['clock_in'] ? date('H:i', strtotime($att['clock_in'])) : '---';
-        $out_time = $att['clock_out'] ? date('H:i', strtotime($att['clock_out'])) : '---';
-        $work_hrs = formatDuration($att['total_hours']);
+        $has_clock_in = !empty($att['clock_in']);
 
-        $stats['present']++;
-        if ($status === 'Late') {
-            $stats['late']++;
-            // Calculate late minutes for the label
-            $late_min = round((strtotime($att['clock_in']) - strtotime('10:00:00')) / 60);
-            $status_label = "LATE " . ($late_min > 0 ? $late_min . " MIN" : "");
-            $status_class = 'status-late';
+        // If status is Absent and NO clock in, it's truly Absent
+        if ($status === 'Absent' && !$has_clock_in) {
+            $stats['absent']++;
+            $status_label = 'ABSENT';
+            $status_class = 'status-absent';
         } else {
-            $status_label = 'ON TIME';
-            $status_class = 'status-ontime';
+            // It's Present (either marked present or has clock in)
+            $stats['present']++;
+            $in_time = $att['clock_in'] ? date('H:i', strtotime($att['clock_in'])) : '---';
+            $out_time = $att['clock_out'] ? date('H:i', strtotime($att['clock_out'])) : '---';
+            $work_hrs = formatDuration($att['total_hours']);
+
+            if ($status === 'Late') {
+                $stats['late']++;
+                // Calculate late minutes for the label
+                $late_min = (!empty($att['clock_in'])) ? round((strtotime($att['clock_in']) - strtotime('10:00:00')) / 60) : 0;
+                $status_label = "LATE " . ($late_min > 0 ? $late_min . " MIN" : "");
+                $status_class = 'status-late';
+            } elseif ($status === 'Half Day') {
+                $status_label = 'HALF DAY';
+                $status_class = 'status-late'; // Orange color for Half Day
+            } else {
+                $status_label = 'ON TIME';
+                $status_class = 'status-ontime';
+            }
         }
     } elseif (isset($leave_data[$emp_id])) {
         $status = 'Leave';

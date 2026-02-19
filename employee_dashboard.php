@@ -13,7 +13,11 @@ $current_year = date('Y');
 
 // 1. Fetch Monthly Attendance Stats
 $attr_q = $conn->prepare("SELECT 
-    COUNT(CASE WHEN status IN ('Present', 'On Time', 'Late', 'Half Day') AND clock_out IS NOT NULL THEN 1 END) as present_days,
+    SUM((CASE 
+        WHEN status = 'Half Day' THEN 0.5 
+        WHEN status IN ('Present', 'On Time', 'Late', 'Leave') OR clock_in IS NOT NULL THEN 1 
+        ELSE 0 
+    END)) as present_days,
     COUNT(CASE WHEN status = 'Late' THEN 1 END) as late_count,
     SUM(total_hours) as total_hours
     FROM attendance 

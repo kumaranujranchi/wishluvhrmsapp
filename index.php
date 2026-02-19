@@ -18,7 +18,7 @@ $total_employees = $stmt->fetchColumn();
 
 // 2. Present Today
 $today = date('Y-m-d');
-$stmt = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :date AND status IN ('Present', 'Late', 'Half Day')");
+$stmt = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :date AND (status IN ('Present', 'On Time', 'Late', 'Half Day') OR clock_in IS NOT NULL)");
 $stmt->execute(['date' => $today]);
 $present_today = $stmt->fetchColumn();
 
@@ -43,7 +43,7 @@ for ($i = 6; $i >= 0; $i--) {
     $d = date('Y-m-d', strtotime("-$i days"));
     $chart_days[] = date('D', strtotime($d)); // Mon, Tue...
 
-    $s = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND status IN ('Present', 'Late', 'Half Day')");
+    $s = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE date = :d AND (status IN ('Present', 'On Time', 'Late', 'Half Day') OR clock_in IS NOT NULL)");
     $s->execute(['d' => $d]);
     $count = $s->fetchColumn();
     // Normalize height for CSS (max 100%) - assuming max employees is total_employees
