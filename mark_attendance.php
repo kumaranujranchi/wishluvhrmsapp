@@ -2,6 +2,11 @@
 header('Content-Type: application/json');
 require_once '../config/db.php';
 require_once '../config/aws_config.php'; // For S3 upload/Rekognition if needed later, or just simple file save
+// App-level configuration (contains flag to allow browser attendance)
+$appConfig = [];
+if (file_exists(__DIR__ . '/../config/app.php')) {
+    $appConfig = include __DIR__ . '/../config/app.php';
+}
 
 // Allow CORS
 header("Access-Control-Allow-Origin: *");
@@ -12,13 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// 0. Enforce Mobile App Usage via User-Agent Check
+// 0. Enforce Mobile App Usage via User-Agent Check (optional)
 $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
-// Check if User-Agent contains our custom string "WishluvMobileApp"
-if (strpos($user_agent, 'WishluvMobileApp') === false) {
-    echo json_encode(['success' => false, 'message' => 'Attendance can only be marked from the official Mobile App.']);
-    exit;
+// Allow browser attendance if enabled in config
+$allow_browser = $appConfig['allow_browser_attendance'] ?? false;
+if (!$allow_browser) {
+    // Check if User-Agent contains our custom string "WishluvMobileApp"
+    if (strpos($user_agent, 'WishluvMobileApp') === false) {
+        echo json_encode(['success' => false, 'message' => 'Attendance can only be marked from the official Mobile App.']);
+        exit;
+    }
 }
 
 // Get JSON Input
