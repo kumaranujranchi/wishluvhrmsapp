@@ -1412,6 +1412,15 @@ function formatDuration($total_minutes)
     </div>
 </div>
 
+<?php
+// Read app-level config to determine if browser attendance should be allowed
+$appConfig = [];
+if (file_exists(__DIR__ . '/config/app.php')) {
+    $appConfig = include __DIR__ . '/config/app.php';
+}
+$allow_browser_attendance = $appConfig['allow_browser_attendance'] ?? false;
+?>
+
 <script>
     // Live Clock
     function updateClock() {
@@ -1427,7 +1436,10 @@ function formatDuration($total_minutes)
         const isMobileApp = navigator.userAgent.includes("WishluvMobileApp") ||
             (window.Capacitor && window.Capacitor.isNativePlatform());
 
-        if (!isMobileApp) {
+        // Allow browser attendance when enabled from server config
+        const allowBrowserAttendance = <?= $allow_browser_attendance ? 'true' : 'false' ?>;
+
+        if (!isMobileApp && !allowBrowserAttendance) {
             // Not running inside the Native App
             const form = document.getElementById('attendanceForm');
             if (form) {
