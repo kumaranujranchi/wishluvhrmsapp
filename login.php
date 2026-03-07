@@ -4,6 +4,10 @@ require_once 'config/db.php';
 
 $error = '';
 
+if (isset($_GET['error']) && $_GET['error'] === 'account_deactivated') {
+    $error = "Your account has been deactivated. Please contact the administrator.";
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -20,34 +24,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($password, $user['password'])) {
-                // Login Success - Regenerate session ID for security
-                session_regenerate_id(true);
+                // Check if account is active
+                if (($user['status'] ?? 'Active') === 'Deactivated') {
+                    $error = "Your account is deactivated. Please contact admin.";
+                } else {
+                    // Login Success - Regenerate session ID for security
+                    session_regenerate_id(true);
 
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
-                $_SESSION['first_name'] = $user['first_name'];
-                $_SESSION['user_role'] = $user['role'];
-                $_SESSION['user_email'] = $user['email'];
-                // Store designation if available, else fallback to Role
-                $_SESSION['user_designation'] = !empty($user['designation_name']) ? $user['designation_name'] : $user['role'];
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
+                    $_SESSION['first_name'] = $user['first_name'];
+                    $_SESSION['user_role'] = $user['role'];
+                    $_SESSION['user_email'] = $user['email'];
+                    // Store designation if available, else fallback to Role
+                    $_SESSION['user_designation'] = !empty($user['designation_name']) ? $user['designation_name'] : $user['role'];
 
-                // Explicitly set cache-control headers to prevent stale dashboards
-                header("Pragma: no-cache");
+                    // Explicitly set cache-control headers to prevent stale dashboards
+                    header("Pragma: no-cache");
 
-                $role = trim($user['role']); // Ensure no whitespace issues
+                    $role = trim($user['role']); // Ensure no whitespace issues
 
-                // Kiosk Mode Redirection
-                if ($user['email'] === 'kiosk@wishluvbuildcon.com') {
-                    header("Location: kiosk_attendance.php");
+                    // Kiosk Mode Redirection
+                    if ($user['email'] === 'kiosk@wishluvbuildcon.com') {
+                        header("Location: kiosk_attendance.php");
+                        exit;
+                    }
+
+                    if (strtolower($role) === 'employee') {
+                        header("Location: employee_dashboard.php");
+                    } else {
+                        header("Location: index.php");
+                    }
                     exit;
                 }
-
-                if (strtolower($role) === 'employee') {
-                    header("Location: employee_dashboard.php");
-                } else {
-                    header("Location: index.php");
-                }
-                exit;
             } else {
                 $error = "Invalid email or password.";
             }
