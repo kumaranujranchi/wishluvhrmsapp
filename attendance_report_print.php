@@ -14,11 +14,11 @@ $filter_date = $_GET['date'] ?? date('Y-m-d');
 $company_name = "WISHLUV BUILDCON PVT LTD";
 $location = "PATNA";
 
-// 2. Fetch All Employees
+// 2. Fetch All Active Employees
 $sql_employees = "SELECT e.id, e.employee_code, e.first_name, e.last_name, d.name as dept_name 
                   FROM employees e 
                   LEFT JOIN departments d ON e.department_id = d.id 
-                  WHERE e.role != 'Admin'
+                  WHERE e.role != 'Admin' AND e.status = 'Active'
                   ORDER BY e.first_name ASC";
 $employees = $conn->query($sql_employees)->fetchAll();
 

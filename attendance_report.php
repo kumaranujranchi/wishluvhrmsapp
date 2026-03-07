@@ -16,8 +16,8 @@ $start_date = $_GET['start_date'] ?? date('Y-m-01'); // Default to 1st of curren
 $end_date = $_GET['end_date'] ?? date('Y-m-d');
 $emp_id = $_GET['employee_id'] ?? '';
 
-// 2. Fetch Employees for filter dropdown - Removed is_active as it might not exist
-$emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code FROM employees ORDER BY first_name ASC");
+// 2. Fetch Employees for filter dropdown (Only Active)
+$emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code FROM employees WHERE status = 'Active' ORDER BY first_name ASC");
 $employees = $emp_stmt->fetchAll();
 
 // 3. Build Query
@@ -25,7 +25,7 @@ $query = "SELECT a.*, e.first_name, e.last_name, e.employee_code, d.name as dept
           FROM attendance a 
           JOIN employees e ON a.employee_id = e.id 
           LEFT JOIN departments d ON e.department_id = d.id 
-          WHERE a.date BETWEEN :start AND :end";
+          WHERE e.status = 'Active' AND a.date BETWEEN :start AND :end";
 
 $params = [':start' => $start_date, ':end' => $end_date];
 
@@ -188,9 +188,11 @@ include 'includes/header.php';
                                 </td>
                                 <td style="padding: 1rem;">
                                     <div style="font-weight: 600; font-size: 0.9rem; color: #1e293b;">
-                                        <?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></div>
+                                        <?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?>
+                                    </div>
                                     <div style="font-size: 0.75rem; color: #64748b;"><?= $row['employee_code'] ?> &bull;
-                                        <?= $row['dept_name'] ?></div>
+                                        <?= $row['dept_name'] ?>
+                                    </div>
                                 </td>
                                 <td style="padding: 1rem;">
                                     <?php
