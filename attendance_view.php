@@ -30,10 +30,18 @@ $loc_stmt->execute(['uid' => $user_id]);
 $loc_stmt->execute(['uid' => $user_id]);
 $assigned_locations = $loc_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch Permissions
-$perm_stmt = $conn->prepare("SELECT allow_outside_punch FROM employees WHERE id = :uid");
+// Fetch Permissions & Status
+$perm_stmt = $conn->prepare("SELECT allow_outside_punch, status FROM employees WHERE id = :uid");
 $perm_stmt->execute(['uid' => $user_id]);
-$allow_outside_punch = $perm_stmt->fetchColumn();
+$emp_data = $perm_stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$emp_data || $emp_data['status'] === 'Deactivated') {
+    session_destroy();
+    header("Location: login.php?error=account_deactivated");
+    exit;
+}
+
+$allow_outside_punch = $emp_data['allow_outside_punch'];
 
 // 1. Handle POST Requests (Check In / Check Out)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

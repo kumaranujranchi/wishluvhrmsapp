@@ -4,6 +4,19 @@ include 'includes/header.php';
 
 $message = "";
 
+// Handle Status Toggle
+if (isset($_GET['toggle_status'])) {
+    $emp_id = $_GET['toggle_status'];
+    $new_status = $_GET['status'] === 'Active' ? 'Deactivated' : 'Active';
+    try {
+        $stmt = $conn->prepare("UPDATE employees SET status = :status WHERE id = :id");
+        $stmt->execute(['status' => $new_status, 'id' => $emp_id]);
+        $message = "<div class='alert success' style='background: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;'>Employee status updated to $new_status!</div>";
+    } catch (PDOException $e) {
+        $message = "<div class='alert error' style='background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;'>Error: " . $e->getMessage() . "</div>";
+    }
+}
+
 // Handle Delete
 if (isset($_GET['delete'])) {
     $delete_id = $_GET['delete'];
@@ -22,7 +35,7 @@ $sql = "SELECT e.*, d.name as dept_name, deg.name as desig_name
         FROM employees e 
         LEFT JOIN departments d ON e.department_id = d.id 
         LEFT JOIN designations deg ON e.designation_id = deg.id 
-        ORDER BY e.id DESC";
+        ORDER BY e.status ASC, e.id DESC";
 $employees = $conn->query($sql)->fetchAll();
 ?>
 
@@ -60,6 +73,7 @@ $employees = $conn->query($sql)->fetchAll();
                             <th>Department</th>
                             <th>Designation</th>
                             <th>Contact</th>
+                            <th>Status</th>
                             <th>Joining Date</th>
                             <th>Actions</th>
                         </tr>
@@ -98,6 +112,15 @@ $employees = $conn->query($sql)->fetchAll();
                                     <?= htmlspecialchars($emp['desig_name'] ?? '-') ?>
                                 </td>
                                 <td>
+                                    <?php if (($emp['status'] ?? 'Active') === 'Active'): ?>
+                                        <span class="badge"
+                                            style="background:#f0fdf4; color:#166534; border: 1px solid #bbf7d0;">Active</span>
+                                    <?php else: ?>
+                                        <span class="badge"
+                                            style="background:#fef2f2; color:#991b1b; border: 1px solid #fecaca;">Deactivated</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
                                     <div style="font-size:0.9rem;">
                                         <?= htmlspecialchars($emp['email']) ?>
                                     </div>
@@ -118,6 +141,14 @@ $employees = $conn->query($sql)->fetchAll();
                                         <a href="edit_employee.php?id=<?= $emp['id'] ?>" class="btn-icon" title="Edit"
                                             style="color:#059669; text-decoration:none; display:flex; align-items:center; justify-content:center;">
                                             <i data-lucide="edit-2" style="width:16px;"></i>
+                                        </a>
+                                        <a href="?toggle_status=<?= $emp['id'] ?>&status=<?= $emp['status'] ?? 'Active' ?>"
+                                            class="btn-icon"
+                                            title="<?= ($emp['status'] ?? 'Active') === 'Active' ? 'Deactivate' : 'Activate' ?>"
+                                            style="color:<?= ($emp['status'] ?? 'Active') === 'Active' ? '#f59e0b' : '#6366f1' ?>; text-decoration:none; display:flex; align-items:center; justify-content:center;"
+                                            onclick="return confirm('Are you sure you want to <?= ($emp['status'] ?? 'Active') === 'Active' ? 'deactivate' : 'activate' ?> this employee?')">
+                                            <i data-lucide="<?= ($emp['status'] ?? 'Active') === 'Active' ? 'user-minus' : 'user-check' ?>"
+                                                style="width:16px;"></i>
                                         </a>
                                         <a href="?delete=<?= $emp['id'] ?>" class="btn-icon" style="color:#ef4444;"
                                             title="Delete"
@@ -153,8 +184,13 @@ $employees = $conn->query($sql)->fetchAll();
                                     <?php endif; ?>
                                 </div>
                                 <div style="display: flex; flex-direction: column;">
-                                    <div style="font-weight: 600; color: #1e293b;">
+                                    <div
+                                        style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
                                         <?= htmlspecialchars($emp['first_name'] . ' ' . $emp['last_name']) ?>
+                                        <?php if (($emp['status'] ?? 'Active') === 'Deactivated'): ?>
+                                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"
+                                                title="Deactivated"></span>
+                                        <?php endif; ?>
                                     </div>
                                     <div style="font-size: 0.75rem; color: #64748b; font-family: monospace;">
                                         <?= $emp['employee_code'] ?>
@@ -180,13 +216,31 @@ $employees = $conn->query($sql)->fetchAll();
                                 <span class="mobile-label">Joining Date</span>
                                 <span class="mobile-value"><?= date('d M Y', strtotime($emp['joining_date'])) ?></span>
                             </div>
-                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <div class="mobile-field">
+                                <span class="mobile-label">Status</span>
+                                <span class="mobile-value">
+                                    <?php if (($emp['status'] ?? 'Active') === 'Active'): ?>
+                                        <span class="badge"
+                                            style="background:#f0fdf4; color:#166534; border: 1px solid #bbf7d0; font-size: 0.7rem;">Active</span>
+                                    <?php else: ?>
+                                        <span class="badge"
+                                            style="background:#fef2f2; color:#991b1b; border: 1px solid #fecaca; font-size: 0.7rem;">Deactivated</span>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
                                 <a href="view_employee.php?id=<?= $emp['id'] ?>" class="btn-primary"
-                                    style="flex: 1; justify-content: center; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; text-decoration: none;">View</a>
+                                    style="flex: 1; min-width: 80px; justify-content: center; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; text-decoration: none; padding: 0.5rem; font-size: 0.8rem;">View</a>
                                 <a href="edit_employee.php?id=<?= $emp['id'] ?>" class="btn-primary"
-                                    style="flex: 1; justify-content: center; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; text-decoration: none;">Edit</a>
+                                    style="flex: 1; min-width: 80px; justify-content: center; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; text-decoration: none; padding: 0.5rem; font-size: 0.8rem;">Edit</a>
+                                <a href="?toggle_status=<?= $emp['id'] ?>&status=<?= $emp['status'] ?? 'Active' ?>"
+                                    class="btn-primary"
+                                    style="flex: 1; min-width: 80px; justify-content: center; background: <?= ($emp['status'] ?? 'Active') === 'Active' ? '#fffbeb' : '#eef2ff' ?>; color: <?= ($emp['status'] ?? 'Active') === 'Active' ? '#92400e' : '#3730a3' ?>; border: 1px solid <?= ($emp['status'] ?? 'Active') === 'Active' ? '#fde68a' : '#c7d2fe' ?>; text-decoration: none; padding: 0.5rem; font-size: 0.8rem;"
+                                    onclick="return confirm('Are you sure you want to <?= ($emp['status'] ?? 'Active') === 'Active' ? 'deactivate' : 'activate' ?> this employee?')">
+                                    <?= ($emp['status'] ?? 'Active') === 'Active' ? 'Deactivate' : 'Activate' ?>
+                                </a>
                                 <a href="?delete=<?= $emp['id'] ?>" class="btn-primary"
-                                    style="flex: 1; justify-content: center; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; text-decoration: none;"
+                                    style="flex: 1; min-width: 80px; justify-content: center; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; text-decoration: none; padding: 0.5rem; font-size: 0.8rem;"
                                     onclick="handleAsyncConfirm(event, 'Delete this employee?')">Delete</a>
                             </div>
                         </div>

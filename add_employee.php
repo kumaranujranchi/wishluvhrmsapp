@@ -49,9 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         try {
             $stmt = $conn->prepare("INSERT INTO employees 
-                (employee_code, first_name, last_name, email, phone, department_id, designation_id, joining_date, salary, password, role, dob, marriage_anniversary, reporting_manager_id, avatar, allow_outside_punch) 
+                (employee_code, first_name, last_name, email, phone, department_id, designation_id, joining_date, salary, password, role, dob, marriage_anniversary, reporting_manager_id, avatar, allow_outside_punch, status) 
                 VALUES 
-                (:code, :fname, :lname, :email, :phone, :dept, :desig, :jdate, :salary, :pass, 'Employee', :dob, :anniv, :manager, :avatar, :allow_outside)");
+                (:code, :fname, :lname, :email, :phone, :dept, :desig, :jdate, :salary, :pass, 'Employee', :dob, :anniv, :manager, :avatar, :allow_outside, :status)");
 
             $stmt->execute([
                 'code' => $emp_code,
@@ -68,7 +68,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'anniv' => $anniversary,
                 'manager' => $reporting_manager_id,
                 'avatar' => $avatarPath,
-                'allow_outside' => $allow_outside_punch
+                'allow_outside' => $allow_outside_punch,
+                'status' => $_POST['status'] ?? 'Active'
             ]);
 
             $message = "<div class='alert success'>Employee <strong>$first_name $last_name</strong> onboarded successfully!</div>";
@@ -183,6 +184,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="form-group">
                     <label>Salary (Monthly)</label>
                     <input type="number" step="0.01" name="salary" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Account Status</label>
+                    <select name="status" class="form-control">
+                        <option value="Active" selected>Active</option>
+                        <option value="Deactivated">Deactivated</option>
+                    </select>
                 </div>
 
                 <!-- Login Credentials -->

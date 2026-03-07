@@ -53,10 +53,22 @@ try {
     $loc_stmt->execute(['uid' => $user_id]);
     $assigned_locations = $loc_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 3. Permission Check (Outside Punch)
-    $perm_stmt = $conn->prepare("SELECT allow_outside_punch FROM employees WHERE id = :uid");
+    // 3. Permission Check (Outside Punch & Active Status)
+    $perm_stmt = $conn->prepare("SELECT allow_outside_punch, status FROM employees WHERE id = :uid");
     $perm_stmt->execute(['uid' => $user_id]);
-    $allow_outside_punch = $perm_stmt->fetchColumn();
+    $emp_perm = $perm_stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$emp_perm) {
+        echo json_encode(['success' => false, 'message' => 'Employee record not found.']);
+        exit;
+    }
+
+    if ($emp_perm['status'] === 'Deactivated') {
+        echo json_encode(['success' => false, 'message' => 'Your account is deactivated. Please contact admin.']);
+        exit;
+    }
+
+    $allow_outside_punch = $emp_perm['allow_outside_punch'];
 
     // 4. Calculate Distance
     $matched_location_id = null;

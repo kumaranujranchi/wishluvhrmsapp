@@ -18,8 +18,8 @@ $start_date = "$year-$month-01";
 $end_date = date('Y-m-t', strtotime($start_date));
 $num_days = date('t', strtotime($start_date));
 
-// 2. Fetch Employees
-$emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code, department_id FROM employees ORDER BY first_name ASC");
+// 2. Fetch Employees (Only Active)
+$emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code, department_id FROM employees WHERE status = 'Active' ORDER BY first_name ASC");
 $employees = $emp_stmt->fetchAll();
 
 // 3. Fetch Attendance Logs for the month

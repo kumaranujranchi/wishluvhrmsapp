@@ -40,6 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $anniversary = $_POST['marriage_anniversary'] ?: null;
     $reporting_manager_id = $_POST['reporting_manager_id'] ?: null;
     $allow_outside_punch = isset($_POST['allow_outside_punch']) ? 1 : 0;
+    $status = $_POST['status'] ?? 'Active';
 
     // File Upload Logic
     $avatarPath = $employee['avatar']; // Keep existing if no new upload
@@ -72,7 +73,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 marriage_anniversary = :anniv,
                 reporting_manager_id = :manager,
                 avatar = :avatar,
-                allow_outside_punch = :allow_outside
+                allow_outside_punch = :allow_outside,
+                status = :status
                 WHERE id = :id";
 
         $stmt = $conn->prepare($sql);
@@ -91,6 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'manager' => $reporting_manager_id,
             'avatar' => $avatarPath,
             'allow_outside' => $allow_outside_punch,
+            'status' => $status,
             'id' => $emp_id
         ]);
 
@@ -231,9 +234,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="form-group">
-                    <label>Salary (Monthly)</label>
                     <input type="number" step="0.01" name="salary" class="form-control"
                         value="<?= $employee['salary'] ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Account Status</label>
+                    <select name="status" class="form-control"
+                        style="<?= ($employee['status'] ?? 'Active') === 'Deactivated' ? 'border-color: #ef4444; color: #ef4444;' : 'border-color: #10b981; color: #10b981;' ?>">
+                        <option value="Active" <?= ($employee['status'] ?? 'Active') === 'Active' ? 'selected' : '' ?>>
+                            Active</option>
+                        <option value="Deactivated" <?= ($employee['status'] ?? 'Active') === 'Deactivated' ? 'selected' : '' ?>>Deactivated</option>
+                    </select>
+                    <small style="color: #64748b;">Deactivated employees cannot mark attendance and are hidden from most
+                        reports.</small>
                 </div>
 
             </div>
