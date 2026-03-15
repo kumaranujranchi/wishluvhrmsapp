@@ -1,12 +1,52 @@
 <?php
 require_once 'config/db.php';
-include 'includes/header.php';
-
 // Ensure user is Admin
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'Admin') {
     echo "<script>window.location.href='index.php';</script>";
     exit;
 }
+
+// Export Report Logic
+if (isset($_GET['export']) && $_GET['export'] == 'csv') {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="leave_report_' . date('Y-m-d') . '.csv"');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Employee', 'Type', 'From', 'To', 'Days', 'Reason', 'Manager Status', 'Manager Remarks', 'Admin Status', 'Admin Remarks', 'Applied On']);
+
+    // Fetch all for export (respect filters if needed, but here dumping all relevant)
+    $csv_sql = "SELECT l.*, e.first_name, e.last_name 
+                FROM leave_requests l 
+                JOIN employees e ON l.employee_id = e.id 
+                ORDER BY l.created_at DESC";
+    $rows = $conn->query($csv_sql)->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($rows as $row) {
+        $d1 = new DateTime($row['start_date']);
+        $d2 = new DateTime($row['end_date']);
+        $days = $d2->diff($d1)->format("%a") + 1;
+
+        fputcsv($output, [
+            $row['first_name'] . ' ' . $row['last_name'],
+            $row['leave_type'],
+            $row['start_date'],
+            $row['end_date'],
+            $days,
+            $row['reason'],
+            $row['manager_status'],
+            $row['manager_remarks'],
+            $row['admin_status'],
+            $row['admin_remarks'],
+            $row['created_at']
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
+include 'includes/header.php';
 
 // Handle Admin Actions (Approve/Reject/Clarify)
 $action_message = "";
@@ -57,42 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Export Report Logic
-if (isset($_GET['export']) && $_GET['export'] == 'csv') {
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="leave_report_' . date('Y-m-d') . '.csv"');
-    $output = fopen('php://output', 'w');
-    fputcsv($output, ['Employee', 'Type', 'From', 'To', 'Days', 'Reason', 'Manager Status', 'Manager Remarks', 'Admin Status', 'Admin Remarks', 'Applied On']);
-
-    // Fetch all for export (respect filters if needed, but here dumping all relevant)
-    $csv_sql = "SELECT l.*, e.first_name, e.last_name 
-                FROM leave_requests l 
-                JOIN employees e ON l.employee_id = e.id 
-                ORDER BY l.created_at DESC";
-    $rows = $conn->query($csv_sql)->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($rows as $row) {
-        $d1 = new DateTime($row['start_date']);
-        $d2 = new DateTime($row['end_date']);
-        $days = $d2->diff($d1)->format("%a") + 1;
-
-        fputcsv($output, [
-            $row['first_name'] . ' ' . $row['last_name'],
-            $row['leave_type'],
-            $row['start_date'],
-            $row['end_date'],
-            $days,
-            $row['reason'],
-            $row['manager_status'],
-            $row['manager_remarks'],
-            $row['admin_status'],
-            $row['admin_remarks'],
-            $row['created_at']
-        ]);
-    }
-    fclose($output);
-    exit;
-}
 
 // Filters
 $month = $_GET['month'] ?? date('m');
