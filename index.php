@@ -60,6 +60,28 @@ $sql_dept = "SELECT d.name, COUNT(e.id) as emp_count
              ORDER BY emp_count DESC LIMIT 5";
 $dept_stats = $conn->query($sql_dept)->fetchAll();
 
+// --- UPCOMING EVENTS (Next 30 Days) ---
+// Upcoming Birthdays
+$sql_bday = "SELECT COUNT(*) FROM employees 
+             WHERE status = 'Active' AND dob IS NOT NULL AND 
+             DATE_ADD(dob, INTERVAL YEAR(CURDATE()) - YEAR(dob) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(dob), 1, 0) YEAR) 
+             BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)";
+$upcoming_birthdays = $conn->query($sql_bday)->fetchColumn();
+
+// Upcoming Marriage Anniversaries
+$sql_anniv = "SELECT COUNT(*) FROM employees 
+              WHERE status = 'Active' AND marriage_anniversary IS NOT NULL AND 
+              DATE_ADD(marriage_anniversary, INTERVAL YEAR(CURDATE()) - YEAR(marriage_anniversary) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(marriage_anniversary), 1, 0) YEAR) 
+              BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)";
+$upcoming_anniversaries = $conn->query($sql_anniv)->fetchColumn();
+
+// Upcoming Work Anniversaries (Joining Date)
+$sql_work = "SELECT COUNT(*) FROM employees 
+             WHERE status = 'Active' AND joining_date IS NOT NULL AND 
+             DATE_ADD(joining_date, INTERVAL YEAR(CURDATE()) - YEAR(joining_date) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(joining_date), 1, 0) YEAR) 
+             BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)";
+$upcoming_work_anniversaries = $conn->query($sql_work)->fetchColumn();
+
 ?>
 
 <style>
@@ -182,7 +204,7 @@ $dept_stats = $conn->query($sql_dept)->fetchAll();
             </div>
         </div>
 
-        <!-- Card 4: Late Today (Replaced Revenue) -->
+        <!-- Card 4: Late Today -->
         <div class="card stats-card" style="border-left: 4px solid #f59e0b;">
             <div class="stats-icon-wrapper">
                 <i data-lucide="alert-circle" class="icon"
@@ -192,6 +214,48 @@ $dept_stats = $conn->query($sql_dept)->fetchAll();
                 <span class="stats-title">Late Arrivals</span>
                 <div class="stats-value-row">
                     <h3 class="stats-value"><?= $late_today ?></h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 5: Upcoming Birthdays -->
+        <div class="card stats-card" style="border-left: 4px solid #ec4899;">
+            <div class="stats-icon-wrapper">
+                <i data-lucide="cake" class="icon" style="color: #ec4899; width:24px; height:24px;"></i>
+            </div>
+            <div class="stats-info">
+                <span class="stats-title">Upcoming Birthdays</span>
+                <div class="stats-value-row">
+                    <h3 class="stats-value"><?= $upcoming_birthdays ?></h3>
+                    <span class="stats-trend" style="font-size:0.8rem; color:#64748b;">Next 30 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 6: Upcoming Marriage Anniv. -->
+        <div class="card stats-card" style="border-left: 4px solid #ef4444;">
+            <div class="stats-icon-wrapper">
+                <i data-lucide="heart" class="icon" style="color: #ef4444; width:24px; height:24px;"></i>
+            </div>
+            <div class="stats-info">
+                <span class="stats-title">Marriage Anniv.</span>
+                <div class="stats-value-row">
+                    <h3 class="stats-value"><?= $upcoming_anniversaries ?></h3>
+                    <span class="stats-trend" style="font-size:0.8rem; color:#64748b;">Next 30 days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 7: Upcoming Work Anniv. -->
+        <div class="card stats-card" style="border-left: 4px solid #10b981;">
+            <div class="stats-icon-wrapper">
+                <i data-lucide="award" class="icon" style="color: #10b981; width:24px; height:24px;"></i>
+            </div>
+            <div class="stats-info">
+                <span class="stats-title">Work Anniversaries</span>
+                <div class="stats-value-row">
+                    <h3 class="stats-value"><?= $upcoming_work_anniversaries ?></h3>
+                    <span class="stats-trend" style="font-size:0.8rem; color:#64748b;">Next 30 days</span>
                 </div>
             </div>
         </div>
