@@ -16,6 +16,19 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Ensure logs directory exists
+$logDir = '../logs';
+if (!file_exists($logDir)) {
+    mkdir($logDir, 0777, true);
+}
+
+function logFaceError($message) {
+    $logFile = '../logs/face_verify_error.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $logEntry = "[$timestamp] $message\n";
+    file_put_contents($logFile, $logEntry, FILE_APPEND);
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit;
@@ -58,6 +71,7 @@ try {
             'ua' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
         ]);
 
+        logFaceError("User " . $userId . " - Face Recognition Failed: " . $verificationResult['message']);
         echo json_encode($verificationResult);
         exit;
     }
@@ -248,5 +262,6 @@ try {
         'success' => false,
         'message' => 'Error: ' . $e->getMessage()
     ]);
+    logFaceError("User " . ($userId ?? 'Unknown') . " - System Error: " . $e->getMessage());
 }
 ?>

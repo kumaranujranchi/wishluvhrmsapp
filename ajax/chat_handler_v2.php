@@ -208,7 +208,7 @@ try {
     APP FEATURES & CAPABILITIES (YOU MUST KNOW THESE):
     
     1. FACE RECOGNITION ATTENDANCE:
-       - System uses Microsoft Azure Face Recognition for secure attendance
+       - System uses AWS Rekognition for secure attendance
        - Employees need to enroll their face first (Admin does this)
        - During punch in/out, face verification happens automatically
        - High accuracy and prevents proxy attendance

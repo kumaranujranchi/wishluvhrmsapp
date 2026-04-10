@@ -1884,7 +1884,7 @@ $allow_browser_attendance = $appConfig['allow_browser_attendance'] ?? false;
                 }
 
                 // Verify face with backend
-                updateProcessingModal('Verifying Face', 'Verifying your face with Azure Face Recognition...');
+                updateProcessingModal('Verifying Face', 'Verifying your face with AWS Rekognition...');
 
                 const formData = new URLSearchParams();
                 formData.append('image_data', imageData);
@@ -1909,8 +1909,8 @@ $allow_browser_attendance = $appConfig['allow_browser_attendance'] ?? false;
                         showSuccessModal('Success!', result.message);
                         setTimeout(() => location.reload(), 2500);
                     } else {
-                        showErrorModal('Verification Failed', result.message);
-                        setTimeout(() => hideProcessingModal(), 3000);
+                        showErrorModal('Verification Failed', result.message || 'Face not recognized.');
+                        setTimeout(() => hideProcessingModal(), 5000);
                     }
                 } catch (error) {
                     showErrorModal('System Error', 'An error occurred during verification. Please try again.');

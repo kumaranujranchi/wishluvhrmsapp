@@ -16,6 +16,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Admin') {
     exit;
 }
 
+// Ensure logs directory exists
+$logDir = '../logs';
+if (!file_exists($logDir)) {
+    mkdir($logDir, 0777, true);
+}
+
+function logEnrollError($message) {
+    $logFile = '../logs/face_enroll_error.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $logEntry = "[$timestamp] $message\n";
+    file_put_contents($logFile, $logEntry, FILE_APPEND);
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit;
@@ -67,6 +80,7 @@ try {
     $result = indexFace($imageData, $employeeId);
 
     if (!$result['success']) {
+        logEnrollError("Employee " . $employeeId . " - Enrollment Failed: " . $result['message']);
         echo json_encode($result);
         exit;
     }
@@ -116,5 +130,6 @@ try {
         'success' => false,
         'message' => 'Error: ' . $e->getMessage()
     ]);
+    logEnrollError("Employee " . ($employeeId ?? 'Unknown') . " - System Error: " . $e->getMessage());
 }
 ?>

@@ -49,6 +49,10 @@ function getRekognitionClient()
                 'key' => getenv('AWS_ACCESS_KEY_ID'),
                 'secret' => getenv('AWS_SECRET_ACCESS_KEY'),
                 'token' => null // Explicitly disable session token
+            ],
+            'http' => [
+                'connect_timeout' => 5, // 5 seconds connection timeout
+                'timeout'         => 15  // 15 seconds total request timeout
             ]
         ]);
     }

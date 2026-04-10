@@ -605,7 +605,7 @@ $employees = $stmt->fetchAll();
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0);
 
-        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+        const imageData = canvas.toDataURL('image/jpeg', 0.7);
 
         // Wait a bit for the "scan" feel
         await new Promise(r => setTimeout(r, 800));
