@@ -51,8 +51,8 @@ function getRekognitionClient()
                 'token' => null // Explicitly disable session token
             ],
             'http' => [
-                'connect_timeout' => 5, // 5 seconds connection timeout
-                'timeout'         => 15  // 15 seconds total request timeout
+                'connect_timeout' => 10, // Increased to 10 seconds
+                'timeout'         => 30  // Increased to 30 seconds
             ]
         ]);
     }
