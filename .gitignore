@@ -6,6 +6,11 @@ composer.lock
 uploads/
 config/email_credentials.php
 .env
+config/db.php
+config/ai_config.php
+config/ai_config_v2.php
+config/email.php
+config/app.php
 
 # Mobile App Files (Capacitor) - Don't deploy to Hostinger
 node_modules/
