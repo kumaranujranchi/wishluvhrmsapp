@@ -39,10 +39,25 @@ try {
     foreach ($records as $rec) {
         $total_net += $rec['net_salary'];
     }
+
+    // 3.1 Fetch Active Employees missing from this period
+    $missing_sql = "SELECT e.id, e.first_name, e.last_name, e.employee_code 
+                    FROM employees e
+                    WHERE e.status = 'Active' 
+                    AND e.id NOT IN (
+                        SELECT employee_id FROM monthly_payroll 
+                        WHERE month = :month AND year = :year
+                    )
+                    ORDER BY e.first_name ASC";
+    $missing_stmt = $conn->prepare($missing_sql);
+    $missing_stmt->execute(['month' => (int) $month, 'year' => (int) $year]);
+    $missing_employees = $missing_stmt->fetchAll();
+
 } catch (PDOException $e) {
     // If table doesn't exist, records will be empty
     $records = [];
     $total_net = 0;
+    $missing_employees = [];
     $db_error = $e->getMessage();
 }
 ?>
@@ -128,6 +143,31 @@ try {
                 </div>
             </div>
         </div>
+
+        <!-- Add Missing Employee Card -->
+        <?php if (!empty($missing_employees)): ?>
+        <div class="card" style="padding: 1.5rem; border: 1px dashed #6366f1; background: #f5f3ff;">
+            <label
+                style="display: block; font-size: 0.75rem; font-weight: 700; color: #6366f1; margin-bottom: 12px; text-transform: uppercase;">Add Missing Employee</label>
+            <form action="admin_payroll_process.php" method="GET" style="display: flex; gap: 10px;">
+                <input type="hidden" name="month" value="<?= htmlspecialchars($month) ?>">
+                <input type="hidden" name="year" value="<?= htmlspecialchars($year) ?>">
+                <select name="employee_id" class="form-control" required
+                    style="flex: 2; padding: 0.6rem; border-radius: 8px; border: 1px solid #c084fc;">
+                    <option value="">Select Employee...</option>
+                    <?php foreach ($missing_employees as $me): ?>
+                        <option value="<?= $me['id'] ?>">
+                            <?= htmlspecialchars($me['first_name'] . ' ' . $me['last_name']) ?> (<?= htmlspecialchars($me['employee_code']) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn-primary"
+                    style="padding: 0 1.25rem; border: none; border-radius: 8px; background: #6366f1; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <i data-lucide="plus" style="width: 16px;"></i> Add
+                </button>
+            </form>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- Data Table -->

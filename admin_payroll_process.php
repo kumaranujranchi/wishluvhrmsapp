@@ -102,7 +102,15 @@ try {
     }
 
     // 3. Fetch Data for Preview
-    $emp_stmt = $conn->query("SELECT id, first_name, last_name, employee_code, salary FROM employees ORDER BY first_name ASC");
+    $emp_query = "SELECT id, first_name, last_name, employee_code, salary FROM employees";
+    $emp_params = [];
+    if (isset($_GET['employee_id'])) {
+        $emp_query .= " WHERE id = :emp_id";
+        $emp_params['emp_id'] = (int)$_GET['employee_id'];
+    }
+    $emp_query .= " ORDER BY first_name ASC";
+    $emp_stmt = $conn->prepare($emp_query);
+    $emp_stmt->execute($emp_params);
     $employees = $emp_stmt->fetchAll();
 
     $att_sql = "SELECT employee_id, date, status, clock_in FROM attendance WHERE date BETWEEN :start AND :end";
@@ -237,7 +245,13 @@ try {
 <div class="page-content">
     <div class="page-header" style="margin-bottom: 2rem;">
         <h2 style="margin: 0; font-size: 1.5rem; color: #1e293b; font-weight: 700;">Payroll Preview v3: <?= date('F Y', strtotime($start_date)) ?></h2>
-        <p style="color: #64748b; margin-top: 4px;">Review calculated salaries before confirming generation.</p>
+        <p style="color: #64748b; margin-top: 4px;">
+            <?php if (isset($_GET['employee_id']) && !empty($employees)): ?>
+                Review calculated salary for <strong><?= htmlspecialchars($employees[0]['first_name'] . ' ' . $employees[0]['last_name']) ?></strong> before confirming.
+            <?php else: ?>
+                Review calculated salaries before confirming generation.
+            <?php endif; ?>
+        </p>
     </div>
 
     <?php if (isset($error_msg)): ?>
